@@ -1,0 +1,19 @@
+import gamst
+	
+mst = gamst.snapshot.read("lj.mst")
+app = gamst.application.dynamics(info=mst, dt=0.001)
+
+fn = gamst.force.nonbonded(info=mst, rcut=3.0, func='lj')
+fn.setParams(type_i="a", type_j="a", param=[1.0, 1.0, 1.0, 3.0])
+app.add(fn)
+
+inn = gamst.integration.nvt(info=mst, group=['a'], method="nh", tau=1.0, temperature=1.0)
+app.add(inn)
+
+dd = gamst.dump.data(info=mst, group=['a'], file='data.log', period=100)
+app.add(dd)
+
+dm = gamst.dump.mst(info=mst, group=['a'], file='p.mst', period=10000)
+app.add(dm)
+
+app.run(20000)

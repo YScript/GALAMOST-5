@@ -1,0 +1,573 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>galaTackle &mdash; GALAMOST 5.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="License" href="license.html" />
+    <link rel="prev" title="molgen" href="molgen.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GALAMOST
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">General introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functionalities.html">Functionalities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Methods and modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="application.html">Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forcefield.html">Force field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integration.html">Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Modules</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Plug-Ins</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="molgen.html">molgen</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">galaTackle</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rg-2">1  Rg^2:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ed-2">2  Ed^2:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rdf">3  RDF:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bond-distri">4  bond_distri:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#angle-distri">5  angle_distri:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dihedral-distri">6  dihedral_distri:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stress-tensor">7  stress tensor:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#density">8  density:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unwrapping">9  unwrapping:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#msd">10 MSD:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rdf-cm">11 RDF-CM:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#msd-cm">12 MSD-CM:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ents">13 ents:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#strfac">14 strfac:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#domain-size">15 domain size:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dynamic-strfac">16 dynamic strfac:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#config-check">17 config check:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rdf-between-types">18 RDF between types:</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#xml-conversion">19 XML conversion:</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Announcement</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.html">Referenced Codes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GALAMOST</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>galaTackle</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/galatackle.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="galatackle">
+<h1>galaTackle<a class="headerlink" href="#galatackle" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>The <strong>galaTackle</strong> is a plugin of GALAMOST to analyze some important properties by reading the generated configuration files.
+The <strong>galaTackle</strong> can be compiled and installed by “sh compile.sh”. You can use this tool to analyze one or more files at a time.</p>
+<blockquote>
+<div><p>Examples for running:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">galaTackle</span> <span class="n">particle</span><span class="o">.</span><span class="n">mst</span>
+<span class="n">galaTackle</span> <span class="n">particle0</span><span class="o">.</span><span class="n">mst</span> <span class="n">particle1</span><span class="o">.</span><span class="n">mst</span>
+<span class="n">galaTackle</span> <span class="o">*.</span><span class="n">mst</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>After pressing enter, a menu of function options will be listed. You can choose one or more functions by
+the number indexes separated by blank. The parameters for a function can be input after “:” and seperated by “|”.</p>
+<blockquote>
+<div><p>Such as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">4</span><span class="p">:</span><span class="n">npot</span><span class="o">=</span><span class="mi">1000</span> <span class="mi">3</span><span class="p">:</span><span class="n">gpu</span><span class="o">=</span><span class="mi">0</span><span class="o">|</span><span class="n">rmax</span><span class="o">=</span><span class="mf">2.0</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The <strong>galaTackle</strong> also can be called and passed parameters in a Shell script.</p>
+<blockquote>
+<div><p>Such as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;18:gpu=1|rmax=3.0&quot;</span> <span class="o">|</span> <span class="n">galaTackle</span> <span class="n">particles</span><span class="o">.*.</span><span class="n">mst</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The <strong>galaTackle</strong> plugin supports the configuration files with MST and DCD formats.
+The MST files can be tackled independently. However, a DCD trajectory file has to be tackled along with
+a MST file for particles attributes and topological information.</p>
+<blockquote>
+<div><p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">galaTackle</span> <span class="n">particle</span><span class="o">.</span><span class="n">mst</span> <span class="n">trajectory</span><span class="o">.</span><span class="n">dcd</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>For the help about the parameters, you could input “function number:h” after the function list shown.</p>
+<blockquote>
+<div><p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">14</span><span class="p">:</span><span class="n">h</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Function list:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-------------------------------------------------------------</span>
+<span class="mi">1</span>  <span class="n">Rg</span><span class="o">^</span><span class="mi">2</span>              <span class="mi">2</span>  <span class="n">Ed</span><span class="o">^</span><span class="mi">2</span>             <span class="mi">3</span>  <span class="n">RDF</span>
+<span class="mi">4</span>  <span class="n">bond_distri</span>       <span class="mi">5</span>  <span class="n">angle_distri</span>     <span class="mi">6</span>  <span class="n">dihedral_distri</span>
+<span class="mi">7</span>  <span class="n">stress</span> <span class="n">tensor</span>     <span class="mi">8</span>  <span class="n">density</span>          <span class="mi">9</span>  <span class="n">unwrapping</span>
+<span class="mi">10</span> <span class="n">MSD</span>               <span class="mi">11</span> <span class="n">RDF</span><span class="o">-</span><span class="n">CM</span>           <span class="mi">12</span> <span class="n">MSD</span><span class="o">-</span><span class="n">CM</span>
+<span class="mi">13</span> <span class="n">ents</span>              <span class="mi">14</span> <span class="n">strfac</span>           <span class="mi">15</span> <span class="n">domain</span> <span class="n">size</span>
+<span class="mi">16</span> <span class="n">dynamic</span> <span class="n">strfac</span>    <span class="mi">17</span> <span class="n">config</span> <span class="n">check</span>     <span class="mi">18</span> <span class="n">RDF</span> <span class="n">between</span> <span class="n">types</span>
+<span class="mi">19</span> <span class="n">MST</span> <span class="n">conversion</span>
+<span class="o">-------------------------------------------------------------</span>
+</pre></div>
+</div>
+</div></blockquote>
+<div class="section" id="rg-2">
+<h3>1  Rg^2:<a class="headerlink" href="#rg-2" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl>
+<dt>Description:</dt><dd><blockquote>
+<div><p>To calculate the mean square of gyration radius and output result to <code class="docutils literal notranslate"><span class="pre">rg2.log</span></code>.</p>
+</div></blockquote>
+<div class="math notranslate nohighlight">
+\begin{eqnarray*}
+        R{_{g}^{2}}&amp;=&amp;\frac{1}{N}\sum\limits_{i=1}^{N}{{{({{{\vec{R}}}_{i}}-{{{\vec{R}}}_{cm}})}^{2}}} \\
+        {{\vec{R}}_{cm}}&amp;=&amp;\frac{1}{N}\sum\limits_{i=1}^{N}{{{{\vec{R}}}_{i}}}
+\end{eqnarray*}</div><p>Coefficients:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\({\vec{R}}_{i}\)</span> - monomer position vector</p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="ed-2">
+<h3>2  Ed^2:<a class="headerlink" href="#ed-2" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl>
+<dt>Description:</dt><dd><blockquote>
+<div><p>To calculate the mean square of end to end distance and output result to <code class="docutils literal notranslate"><span class="pre">ed2.log</span></code>.</p>
+</div></blockquote>
+<div class="math notranslate nohighlight">
+\begin{eqnarray*}
+        E{_{d}^{2}}={( {{{\vec{R}}}_{0}}-{{{\vec{R}}}_{N-1}} )}^{2}
+\end{eqnarray*}</div><p>Coefficients:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\({\vec{R}}_{i}\)</span> - monomer position vector</p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="rdf">
+<h3>3  RDF:<a class="headerlink" href="#rdf" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Description:</dt><dd><p>To calculate the radial distribution function of all particles and output result to <code class="docutils literal notranslate"><span class="pre">*.rdf</span></code> and <code class="docutils literal notranslate"><span class="pre">rdf.log</span></code>.</p>
+</dd>
+<dt>Parameters:</dt><dd><p>:maxbin=100|gpu=0|rmax=Lx/2|bondex=false|angleex=false|molex=false</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="bond-distri">
+<h3>4  bond_distri:<a class="headerlink" href="#bond-distri" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl>
+<dt>Description:</dt><dd><blockquote>
+<div><p>To calculate the distribution of bond lengths and output result to <code class="docutils literal notranslate"><span class="pre">bond_distr.log</span></code>.</p>
+</div></blockquote>
+<div class="math notranslate nohighlight">
+\begin{eqnarray*}
+        bond\_distri(i \cdot dr)=N(i)/(N \cdot dr)
+\end{eqnarray*}</div><p>Coefficients:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(dr\)</span> - the space of bond length <cite>L/(2npot)</cite>, where <cite>L</cite> is the box size</p></li>
+<li><p><span class="math notranslate nohighlight">\(N(i)\)</span> - the number of bonds in the range of <cite>idr &lt; r &lt; (i+1)dr</cite>, where <cite>i</cite> is an integer</p></li>
+<li><p><span class="math notranslate nohighlight">\(N\)</span> - the total number of bonds</p></li>
+</ul>
+</dd>
+<dt>Parameters:</dt><dd><p>:npot=2001</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="angle-distri">
+<h3>5  angle_distri:<a class="headerlink" href="#angle-distri" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl>
+<dt>Description:</dt><dd><blockquote>
+<div><p>To calculate the distribution of angle degrees and output result to <code class="docutils literal notranslate"><span class="pre">angle_distr.log</span></code>.</p>
+</div></blockquote>
+<div class="math notranslate nohighlight">
+\begin{eqnarray*}
+        angle\_distri(i \cdot da)=N(i)/(N \cdot da)
+\end{eqnarray*}</div><p>Coefficients:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(da\)</span> - the space of angle radian <cite>pi/npot</cite></p></li>
+<li><p><span class="math notranslate nohighlight">\(N(i)\)</span> - the number of angles in the range of <cite>ida &lt; angle &lt; (i+1)da</cite>, where <cite>i</cite> is an integer</p></li>
+<li><p><span class="math notranslate nohighlight">\(N\)</span> - the total number of angles</p></li>
+</ul>
+</dd>
+<dt>Parameters:</dt><dd><p>:npot=2001</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="dihedral-distri">
+<h3>6  dihedral_distri:<a class="headerlink" href="#dihedral-distri" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl>
+<dt>Description:</dt><dd><blockquote>
+<div><p>To calculate the distribution of dihedral degrees and output result to <code class="docutils literal notranslate"><span class="pre">dihedral_distr.log</span></code>.</p>
+</div></blockquote>
+<div class="math notranslate nohighlight">
+\begin{eqnarray*}
+        dihedral\_distri(i \cdot da)=N(i)/(N \cdot da)
+\end{eqnarray*}</div><p>Coefficients:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(da\)</span> - the space of dihedral angle radian <cite>2pi/npot</cite></p></li>
+<li><p><span class="math notranslate nohighlight">\(N(i)\)</span> - the number of dihedrals in the range of <cite>ida &lt; dihedral angle &lt; (i+1)da</cite>, where <cite>i</cite> is an integer</p></li>
+<li><p><span class="math notranslate nohighlight">\(N\)</span> - the total number of dihedrals</p></li>
+</ul>
+</dd>
+<dt>Parameters:</dt><dd><p>:npot=2001</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="stress-tensor">
+<h3>7  stress tensor:<a class="headerlink" href="#stress-tensor" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Description:</dt><dd><p>To calculate the stress tensor by inputing the parameters of force calculation and output result to <code class="docutils literal notranslate"><span class="pre">stress_tensor.log</span></code>.</p>
+</dd>
+<dt>Parameters:</dt><dd><p>:bondex=true|bodyex=true|diameter=true</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="density">
+<h3>8  density:<a class="headerlink" href="#density" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Description:</dt><dd><p>To calculate the real density (g/cm^3) with basic units [amu] and [nm] and output result to <code class="docutils literal notranslate"><span class="pre">density.log</span></code>.</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="unwrapping">
+<h3>9  unwrapping:<a class="headerlink" href="#unwrapping" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Description:</dt><dd><p>To unwrap or shift molecules by changing the image information</p>
+</dd>
+<dt>Parameters:</dt><dd><p>:unwrap_molecule=true|label_free_particle=particle type|molecule_center_in_box=false| shiftx=0.0|shifty=0.0|shiftz=0.0|remove_image=false|convert_constraint_to_bond=false| remove_bond_cross_box=false</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="msd">
+<h3>10 MSD:<a class="headerlink" href="#msd" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Description:</dt><dd><p>To compute mean square displacement of all particles and output result to <code class="docutils literal notranslate"><span class="pre">msd.log</span></code>.</p>
+</dd>
+<dt>Parameters:</dt><dd><p>:direction=XYZ (candidates are X,Y,Z,XY,YZ,XZ,XYZ)</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="rdf-cm">
+<h3>11 RDF-CM:<a class="headerlink" href="#rdf-cm" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Description:</dt><dd><p>To calculate the radial distribution function of the mass center of molecules and output result to <code class="docutils literal notranslate"><span class="pre">rdf_cm.log</span></code>.</p>
+</dd>
+<dt>Parameters:</dt><dd><p>:maxbin=100|gpu=0|rmax=Lx/2</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="msd-cm">
+<h3>12 MSD-CM:<a class="headerlink" href="#msd-cm" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Description:</dt><dd><p>To compute mean square displacement of the mass center of molecules and output result to <code class="docutils literal notranslate"><span class="pre">msd_cm.log</span></code>.</p>
+</dd>
+<dt>Parameters:</dt><dd><p>:direction=XYZ (candidates are X,Y,Z,XY,YZ,XZ,XYZ)</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="ents">
+<h3>13 ents:<a class="headerlink" href="#ents" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Description:</dt><dd><p>To analyze the entanglements of polymers and output result to <code class="docutils literal notranslate"><span class="pre">ents.log</span></code>.</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="strfac">
+<h3>14 strfac:<a class="headerlink" href="#strfac" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Description:</dt><dd><p>To calculate the structure factor of particles and output result to <code class="docutils literal notranslate"><span class="pre">*.strf</span></code> and <code class="docutils literal notranslate"><span class="pre">strf.log</span></code>.</p>
+</dd>
+<dt>Parameters:</dt><dd><p>:qmax=160pi/Lmin|gpu=0|deltaq=2pi/Lmin|direction=XYZ|2D=false</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="domain-size">
+<h3>15 domain size:<a class="headerlink" href="#domain-size" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Description:</dt><dd><p>To calculate the domain size of components in mixtures and output result to <code class="docutils literal notranslate"><span class="pre">domsize.log</span></code>.</p>
+</dd>
+<dt>Parameters:</dt><dd><p>:kmax=20|qc=0.4690|gpu=0</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="dynamic-strfac">
+<h3>16 dynamic strfac:<a class="headerlink" href="#dynamic-strfac" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl>
+<dt>Description:</dt><dd><p>Dynamic structure factor (incoherent intermediate) measures the decorrelation of the positions
+of individual monomers with the time on length scale <span class="math notranslate nohighlight">\(1/q\)</span>, where <span class="math notranslate nohighlight">\(q=2\pi\sqrt{x^2+y^2+z^2}/L\)</span>, and <span class="math notranslate nohighlight">\(L\)</span> is cubic box length.
+<span class="math notranslate nohighlight">\(\mbox{kmax}\)</span> limits the space in which the <span class="math notranslate nohighlight">\(q\)</span> with possible combinations of x, y, z will be generated.</p>
+<p>The results will be output to <code class="docutils literal notranslate"><span class="pre">dstrf.log</span></code>.</p>
+</dd>
+<dt>Parameters:</dt><dd><p>:kmax=int(L)|q=7.0</p>
+</dd>
+</dl>
+<p><cite>Maintainer</cite>: Shu-Jia Li</p>
+</div></blockquote>
+</div>
+<div class="section" id="config-check">
+<h3>17 config check:<a class="headerlink" href="#config-check" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Description:</dt><dd><p>To check the configuration including the minimum distance of particles, and the Maximum and minimum length of bonds, etc. and output result to <code class="docutils literal notranslate"><span class="pre">config_check.log</span></code>.</p>
+</dd>
+<dt>Parameters:</dt><dd><p>:bondex=true|angleex=true|dihedralex=true|bodyex=true|rcut=2.0</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="rdf-between-types">
+<h3>18 RDF between types:<a class="headerlink" href="#rdf-between-types" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Description:</dt><dd><p>To compute the radial distribution function between types and output result to <code class="docutils literal notranslate"><span class="pre">*.type.rdf</span></code> and <code class="docutils literal notranslate"><span class="pre">rdf_by_type.log</span></code>.</p>
+</dd>
+<dt>Parameters:</dt><dd><p>:maxbin=100|gpu=0|rmax=Lx/2|bondex=false|angleex=false|molex=false</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="xml-conversion">
+<h3>19 XML conversion:<a class="headerlink" href="#xml-conversion" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><dl class="simple">
+<dt>Description:</dt><dd><p>To convert XML files into other formats</p>
+</dd>
+<dt>Parameters:</dt><dd><p>:lammps=false|gromacs=false</p>
+</dd>
+</dl>
+</div></blockquote>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="license.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="molgen.html" class="btn btn-neutral float-left" title="molgen" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, You-Liang Zhu, ylzhu@galamost.com
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

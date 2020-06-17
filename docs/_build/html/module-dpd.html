@@ -1,0 +1,371 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Dissipative particle dynamics &mdash; GALAMOST 5.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="molgen" href="molgen.html" />
+    <link rel="prev" title="Modules" href="module.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GALAMOST
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">General introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functionalities.html">Functionalities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Methods and modules</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="application.html">Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forcefield.html">Force field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integration.html">Integration</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="module.html">Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Dissipative particle dynamics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dpd-force">DPD force</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gwvv-integration">GWVV integration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Plug-Ins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="molgen.html">molgen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="galatackle.html">galaTackle</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Announcement</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.html">Referenced Codes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GALAMOST</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="module.html">Modules</a> &raquo;</li>
+        
+      <li>Dissipative particle dynamics</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/module-dpd.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="dissipative-particle-dynamics">
+<h1>Dissipative particle dynamics<a class="headerlink" href="#dissipative-particle-dynamics" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="dpd-force">
+<h2>DPD force<a class="headerlink" href="#dpd-force" title="Permalink to this headline">¶</a></h2>
+<p>Description:</p>
+<blockquote>
+<div><p>The DPD force consists of pair‐wise conservative, dissipative and random terms.</p>
+<div class="math notranslate nohighlight">
+\begin{eqnarray*}
+ \vec{F}_{ij}^{C}&amp;=&amp;\alpha\left(1-\frac{r_{ij}}{r_{cut}}\right)\vec{e}_{ij} \\
+ \vec{F}_{ij}^{D}&amp;=&amp;-\gamma\omega^{D}(r_{ij})(\vec{e}_{ij} \cdot \vec{v}_{ij} )\vec{e}_{ij}  \\
+ \vec{F}_{ij}^{R}&amp;=&amp;T\sigma\omega^{R}(r_{ij})\xi_{ij}\vec{e}_{ij} \\
+\end{eqnarray*}</div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\gamma=\sigma^{2}/2k_{B}T\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\omega^{D}(r_{ij})=[\omega^{R}(r_{ij})]^2=(1-r_{ij}/r_{cut})^2\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\xi_{ij}\)</span> - a random number with zero mean and unit variance</p></li>
+<li><p><span class="math notranslate nohighlight">\(T\)</span> - <cite>temperature</cite>
+- <em>optional</em>: defaults to 1.0</p></li>
+<li><p><span class="math notranslate nohighlight">\(r_{cut}\)</span> - <em>r_cut</em> (in distance units)
+- <em>optional</em>: defaults to 1.0</p></li>
+</ul>
+<p>The following coefficients must be set per unique pair of particle types:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\alpha\)</span> - <em>alpha</em> (in energy units)</p></li>
+<li><p><span class="math notranslate nohighlight">\(\sigma\)</span> - <em>sigma</em> (unitless)</p></li>
+</ul>
+</div></blockquote>
+<dl class="class">
+<dt id="DpdForce">
+<em class="property">class </em><code class="sig-name descname">DpdForce</code><span class="sig-paren">(</span><em class="sig-param">all_info</em>, <em class="sig-param">nlist</em>, <em class="sig-param">r_cut</em>, <em class="sig-param">temperature</em>, <em class="sig-param">rand_num</em><span class="sig-paren">)</span><a class="headerlink" href="#DpdForce" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor of a DPD interaction object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>all_info</strong> (<em>AllInfo</em>) – The system information.</p></li>
+<li><p><strong>nlist</strong> (<em>NeighborList</em>) – The neighbor list.</p></li>
+<li><p><strong>r_cut</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The cut-off radius.</p></li>
+<li><p><strong>temperature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The temperature.</p></li>
+<li><p><strong>rand_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The seed of random number generator.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="sig-name descname">DpdForce</code><span class="sig-paren">(</span><em class="sig-param">all_info</em>, <em class="sig-param">nlist</em>, <em class="sig-param">r_cut</em>, <em class="sig-param">rand_num</em><span class="sig-paren">)</span></dt>
+<dd><p>The constructor of a DPD interaction object. The default temperature is 1.0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>all_info</strong> (<em>AllInfo</em>) – The system information.</p></li>
+<li><p><strong>nlist</strong> (<em>NeighborList</em>) – The neighbor list.</p></li>
+<li><p><strong>r_cut</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The cut-off radius.</p></li>
+<li><p><strong>rand_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The seed of random number generator.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="DpdForce.setParams">
+<code class="sig-name descname">setParams</code><span class="sig-paren">(</span><em class="sig-param">string typei</em>, <em class="sig-param">string typej</em>, <em class="sig-param">float alpha</em>, <em class="sig-param">float sigma</em><span class="sig-paren">)</span><a class="headerlink" href="#DpdForce.setParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the DPD interaction parameters per unique pair of particle types.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DpdForce.setT">
+<code class="sig-name descname">setT</code><span class="sig-paren">(</span><em class="sig-param">float T</em><span class="sig-paren">)</span><a class="headerlink" href="#DpdForce.setT" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the temperature with a constant value.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setT</code><span class="sig-paren">(</span><em class="sig-param">Variant vT</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the temperature with a varying value by time step.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="DpdForce.setDPDVV">
+<code class="sig-name descname">setDPDVV</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#DpdForce.setDPDVV" title="Permalink to this definition">¶</a></dt>
+<dd><p>calls the function to enable DPDVV method (the default is GWVV).</p>
+</dd></dl>
+
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dpd</span> <span class="o">=</span> <span class="n">galamost</span><span class="o">.</span><span class="n">DpdForce</span><span class="p">(</span><span class="n">all_info</span><span class="p">,</span> <span class="n">neighbor_list</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
+<span class="n">dpd</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dpd</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="gwvv-integration">
+<h2>GWVV integration<a class="headerlink" href="#gwvv-integration" title="Permalink to this headline">¶</a></h2>
+<p>Description:</p>
+<blockquote>
+<div><p>Integration algorithm.</p>
+<div class="math notranslate nohighlight">
+\begin{eqnarray*}
+ &amp;v_i^0&amp;\leftarrow v_i+ \lambda\frac{1}{m}(F_i^c \Delta t + F_i^d \Delta t + F_i^r \sqrt{\Delta t})\\
+ &amp;v_i&amp;\leftarrow v_i+ \frac{1}{2}\frac{1}{m}(F_i^c \Delta t + F_i^d \Delta t + F_i^r \sqrt{\Delta t})\\
+ &amp;r_i&amp;\leftarrow r_i+ v_i \Delta t\\
+ &amp;&amp;Calculate \quad F_i^c\{r_j\}, F_i^d\{r_j, v_j^0\}, F_i^r\{r_j\}\\
+ &amp;v_i&amp;\leftarrow v_i+ \frac{1}{2}\frac{1}{m}(F_i^c \Delta t + F_i^d \Delta t + F_i^r \sqrt{\Delta t})
+\end{eqnarray*}</div><ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\lambda\)</span> - <em>lambda</em> (unitless)
+- <em>optional</em>: defaults to 0.65</p></li>
+</ul>
+</div></blockquote>
+<dl class="class">
+<dt id="DpdGwvv">
+<em class="property">class </em><code class="sig-name descname">DpdGwvv</code><span class="sig-paren">(</span><em class="sig-param">AllInfo all_info</em>, <em class="sig-param">ParticleSet group</em><span class="sig-paren">)</span><a class="headerlink" href="#DpdGwvv" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor of a GWVV NVT thermostat for a group of DPD particles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>all_info</strong> (<em>AllInfo</em>) – The system information.</p></li>
+<li><p><strong>group</strong> (<em>ParticleSet</em>) – The group of particles.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="DpdGwvv.setLambda">
+<code class="sig-name descname">setLambda</code><span class="sig-paren">(</span><em class="sig-param">float lambda</em><span class="sig-paren">)</span><a class="headerlink" href="#DpdGwvv.setLambda" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies lambda.</p>
+</dd></dl>
+
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gwvv</span> <span class="o">=</span> <span class="n">galamost</span><span class="o">.</span><span class="n">DpdGwvv</span><span class="p">(</span><span class="n">all_info</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gwvv</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="molgen.html" class="btn btn-neutral float-right" title="molgen" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="module.html" class="btn btn-neutral float-left" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, You-Liang Zhu, ylzhu@galamost.com
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,745 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>molgen &mdash; GALAMOST 5.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="galaTackle" href="galatackle.html" />
+    <link rel="prev" title="Dissipative particle dynamics" href="module-dpd.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GALAMOST
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">General introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functionalities.html">Functionalities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Methods and modules</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="application.html">Application</a></li>
+<li class="toctree-l1"><a class="reference internal" href="forcefield.html">Force field</a></li>
+<li class="toctree-l1"><a class="reference internal" href="integration.html">Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Modules</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Plug-Ins</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">molgen</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#description-of-molgen">Description of molgen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#molecule-definition">Molecule definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#objects-definition">Objects definition</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generator-definition">Generator definition</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="galatackle.html">galaTackle</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Announcement</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.html">Referenced Codes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GALAMOST</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>molgen</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/molgen.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="molgen">
+<span id="id1"></span><h1>molgen<a class="headerlink" href="#molgen" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="description-of-molgen">
+<h2>Description of molgen<a class="headerlink" href="#description-of-molgen" title="Permalink to this headline">¶</a></h2>
+<p>The initial configuration of simulation systems could be generated by employing a plugin of GALAMOST (named <strong>molgen</strong>, the abbreviation of “molecule generator”).
+The format of output files could be MST, Mol2 or XML.</p>
+<p>The <strong>molgen</strong> need be compiled by GCC (GNU Compiler Collection).</p>
+<blockquote>
+<div><p>Installation instructions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">build</span>
+<span class="n">python3</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The <strong>molgen</strong> is composed of two parts:</p>
+<ol class="arabic simple">
+<li><p>Defination of molecules and objects where the molecules describe flexible chains and the objects describe rigid objects with fixed shapes.</p></li>
+<li><p>Generator of system with box size and the number of defined molecules and objects.</p></li>
+</ol>
+<p>A molecule is defined by “Molecule” class with the number of particles, particle types, topology, and so on.
+An object is defined by “Object” class with the number of particles and shape. One or multiple molecules or objects can be defined in this way.</p>
+<blockquote>
+<div><p>Head of script:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">molgen</span>
+<span class="c1"># imports an extended Python module of molgen.</span>
+</pre></div>
+</div>
+<p>Example for molecule:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mol1</span><span class="o">=</span><span class="n">molgen</span><span class="o">.</span><span class="n">Molecule</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">mol1</span><span class="o">.</span><span class="n">setParticleTypes</span><span class="p">(</span><span class="s2">&quot;A,A,A,A&quot;</span><span class="p">)</span>
+<span class="n">mol1</span><span class="o">.</span><span class="n">setTopology</span><span class="p">(</span><span class="s2">&quot;0-1,1-2,2-3&quot;</span><span class="p">)</span>
+<span class="n">mol1</span><span class="o">.</span><span class="n">setBondLength</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
+<span class="n">mol1</span><span class="o">.</span><span class="n">setMass</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">mol1</span><span class="o">.</span><span class="n">setAngleDegree</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="mf">90.0</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>“Generators” class could specify box size and the number of defined molecule.</p>
+<blockquote>
+<div><p>Example for generator:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gen</span><span class="o">=</span><span class="n">molgen</span><span class="o">.</span><span class="n">Generators</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">addMolecule</span><span class="p">(</span><span class="n">mol1</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">setMinimumDistance</span><span class="p">(</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">outPutMST</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The configuration of a molecule can be partially read from a MST file and
+partially defined in the script.</p>
+<blockquote>
+<div><p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mol0</span><span class="o">=</span><span class="n">molgen</span><span class="o">.</span><span class="n">Molecule</span><span class="p">(</span><span class="s2">&quot;sphere.mst&quot;</span><span class="p">,</span><span class="mi">65</span><span class="p">)</span>
+<span class="c1"># total 65 particles with 60 read from &quot;sphere.mst&quot;.</span>
+<span class="n">mol0</span><span class="o">.</span><span class="n">setParticleTypes</span><span class="p">(</span><span class="s2">&quot;B*5&quot;</span><span class="p">)</span>
+<span class="c1"># define the types of the particles which will be generated.</span>
+<span class="n">mol0</span><span class="o">.</span><span class="n">setTopology</span><span class="p">(</span><span class="s2">&quot;59-60,60-61,61-62,62-63,63-64&quot;</span><span class="p">)</span>
+<span class="c1"># add the bonds.</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>If the configuration of a molecule (including particle positions, types, topology and so on)
+has been completely given in a MST file, we could generate the system by employing “object” to randomaly
+place and rotate the molecule.</p>
+<blockquote>
+<div><p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mol1</span> <span class="o">=</span> <span class="n">molgen</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="s2">&quot;mol1.mst&quot;</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="n">molgen</span><span class="o">.</span><span class="n">Object</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">none</span><span class="p">)</span>
+<span class="n">gen</span><span class="o">=</span><span class="n">molgen</span><span class="o">.</span><span class="n">Generators</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">addMolecule</span><span class="p">(</span><span class="n">mol1</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">outPutMST</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="molecule-definition">
+<h2>Molecule definition<a class="headerlink" href="#molecule-definition" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Molecule">
+<em class="property">class </em><code class="sig-name descname">Molecule</code><span class="sig-paren">(</span><em class="sig-param">np</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor of a molecule with the number of particles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>np</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of particles.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="sig-name descname">Molecule</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">np</em><span class="sig-paren">)</span></dt>
+<dd><p>The constructor of a molecule and reads particles data from the MST file with file name and the number of particles.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of inputting file.</p></li>
+<li><p><strong>np</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of particles.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="Molecule.setParticleTypes">
+<code class="sig-name descname">setParticleTypes</code><span class="sig-paren">(</span><em class="sig-param">string type</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setParticleTypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the particle types separated by comma according to particle index form 0 to N-1 in sequence.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setTopology">
+<code class="sig-name descname">setTopology</code><span class="sig-paren">(</span><em class="sig-param">string topo</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setTopology" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the bonds separated by comma which connect two particles separated by crossband.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setIsotactic">
+<code class="sig-name descname">setIsotactic</code><span class="sig-paren">(</span><em class="sig-param">bool switch</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setIsotactic" title="Permalink to this definition">¶</a></dt>
+<dd><p>switches the isotactic configuration of molecule.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setBondLength">
+<code class="sig-name descname">setBondLength</code><span class="sig-paren">(</span><em class="sig-param">double bl</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setBondLength" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the bond length of all bonds.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setBondLength</code><span class="sig-paren">(</span><em class="sig-param">string type1</em>, <em class="sig-param">string type2</em>, <em class="sig-param">double bl</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the bond length of the bond which connect two kind particles with particle type1, type2, and bond length.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setAngleDegree">
+<code class="sig-name descname">setAngleDegree</code><span class="sig-paren">(</span><em class="sig-param">string type1</em>, <em class="sig-param">sstring type2</em>, <em class="sig-param">string type2</em>, <em class="sig-param">double degree</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setAngleDegree" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the angle with particle type 1, type2, type3, and degree. When angle degree is set as zero, the angles will not be fixed in configuration, but the angle information will still be generated.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setAngleDegree</code><span class="sig-paren">(</span><em class="sig-param">unsigned int idx1</em>, <em class="sig-param">unsigned int idx2</em>, <em class="sig-param">unsigned int idx3</em>, <em class="sig-param">double degree</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the angle with particle idx1, idx2, idx3, and degree.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setDihedralDegree">
+<code class="sig-name descname">setDihedralDegree</code><span class="sig-paren">(</span><em class="sig-param">string type1</em>, <em class="sig-param">string type2</em>, <em class="sig-param">string type3</em>, <em class="sig-param">string type4</em>, <em class="sig-param">double degree</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setDihedralDegree" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the dihedral with particle type1, type2, type3, type4, and degree.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setDihedralDegree</code><span class="sig-paren">(</span><em class="sig-param">unsigned int idx1</em>, <em class="sig-param">unsigned int idx2</em>, <em class="sig-param">unsigned int idx3</em>, <em class="sig-param">unsigned int idx4</em>, <em class="sig-param">double degree</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the dihedral with particle idx1, idx2, idx3, idx4, and degree.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setMass">
+<code class="sig-name descname">setMass</code><span class="sig-paren">(</span><em class="sig-param">double mass</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setMass" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the mass of all particles.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setMass</code><span class="sig-paren">(</span><em class="sig-param">string type</em>, <em class="sig-param">double mass</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the mass of a kind of particles.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setMass</code><span class="sig-paren">(</span><em class="sig-param">unsigned int particle_index</em>, <em class="sig-param">double mass</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the mass of a particle.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setCharge">
+<code class="sig-name descname">setCharge</code><span class="sig-paren">(</span><em class="sig-param">double charge</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setCharge" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the charge of all particles.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setCharge</code><span class="sig-paren">(</span><em class="sig-param">string type</em>, <em class="sig-param">double charge</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the charge of a kind of particles.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setCharge</code><span class="sig-paren">(</span><em class="sig-param">unsigned int particle_index</em>, <em class="sig-param">double charge</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the charge of a particle.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setOrientation">
+<code class="sig-name descname">setOrientation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setOrientation" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies all particles having orientation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setOrientation</code><span class="sig-paren">(</span><em class="sig-param">string type</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies a kind of particles having orientation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setOrientation</code><span class="sig-paren">(</span><em class="sig-param">unsigned int particle_index</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies a particle having orientation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setInert">
+<code class="sig-name descname">setInert</code><span class="sig-paren">(</span><em class="sig-param">double inertx</em>, <em class="sig-param">double inerty</em>, <em class="sig-param">double inertz</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setInert" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the inert in x, y, z directions of all particles.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setInert</code><span class="sig-paren">(</span><em class="sig-param">string type</em>, <em class="sig-param">double inertx</em>, <em class="sig-param">double inerty</em>, <em class="sig-param">double inertz</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the inert in x, y, z directions of a kind of particles.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setInert</code><span class="sig-paren">(</span><em class="sig-param">unsigned int particle_index</em>, <em class="sig-param">double inertx</em>, <em class="sig-param">double inerty</em>, <em class="sig-param">double inertz</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the inert in x, y, z directions of a particle.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setQuaternion">
+<code class="sig-name descname">setQuaternion</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setQuaternion" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies all particles having quaternion.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setQuaternion</code><span class="sig-paren">(</span><em class="sig-param">string type</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies a kind of particles having quaternion.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setQuaternion</code><span class="sig-paren">(</span><em class="sig-param">unsigned int particle_index</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies a particle having quaternion.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setDiameter">
+<code class="sig-name descname">setDiameter</code><span class="sig-paren">(</span><em class="sig-param">double di</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setDiameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the diameter of all particles.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setDiameter</code><span class="sig-paren">(</span><em class="sig-param">string type</em>, <em class="sig-param">double di</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the diameter of a kind of particles.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setDiameter</code><span class="sig-paren">(</span><em class="sig-param">unsigned int particle_index</em>, <em class="sig-param">double di</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the diameter of a particle.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setCris">
+<code class="sig-name descname">setCris</code><span class="sig-paren">(</span><em class="sig-param">unsigned int cris</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setCris" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the cris of all particles.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setCris</code><span class="sig-paren">(</span><em class="sig-param">string type</em>, <em class="sig-param">unsigned int cris</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the cris of a kind of particles.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setCris</code><span class="sig-paren">(</span><em class="sig-param">unsigned int particle_index</em>, <em class="sig-param">unsigned int cris</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the cris of a particle.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setInit">
+<code class="sig-name descname">setInit</code><span class="sig-paren">(</span><em class="sig-param">unsigned int init</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setInit" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the init of all particles.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setInit</code><span class="sig-paren">(</span><em class="sig-param">string type</em>, <em class="sig-param">unsigned int init</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the init of a kind of particles.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setInit</code><span class="sig-paren">(</span><em class="sig-param">unsigned int particle_index</em>, <em class="sig-param">unsigned int init</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the init of a particle.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setBody">
+<code class="sig-name descname">setBody</code><span class="sig-paren">(</span><em class="sig-param">unsigned int body_id</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setBody" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the body id of all particles (start form 0).</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setBody</code><span class="sig-paren">(</span><em class="sig-param">string type</em>, <em class="sig-param">unsigned int body_id</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the body id of a kind of particles (start form 0).</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setBody</code><span class="sig-paren">(</span><em class="sig-param">unsigned int particle_index</em>, <em class="sig-param">unsigned int body_id</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the body id of a particle (start form 0).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setMolecule">
+<code class="sig-name descname">setMolecule</code><span class="sig-paren">(</span><em class="sig-param">unsigned int mol_id</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setMolecule" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the molecule id of all particles (start form 0).</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setMolecule</code><span class="sig-paren">(</span><em class="sig-param">string type</em>, <em class="sig-param">unsigned int mol_id</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the mlecule id of a kind of particles (start form 0).</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setMolecule</code><span class="sig-paren">(</span><em class="sig-param">unsigned int particle_index</em>, <em class="sig-param">unsigned int mol_id</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the molecule id of a particle (start form 0).</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setBox">
+<code class="sig-name descname">setBox</code><span class="sig-paren">(</span><em class="sig-param">double lx</em>, <em class="sig-param">double ly</em>, <em class="sig-param">double lz</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the size of box where the molecules are generated.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setBox</code><span class="sig-paren">(</span><em class="sig-param">double lx_min</em>, <em class="sig-param">double lx_max</em>, <em class="sig-param">double ly_min</em>, <em class="sig-param">double ly_max</em>, <em class="sig-param">double lz_min</em>, <em class="sig-param">double lz_max</em><span class="sig-paren">)</span></dt>
+<dd><p>specifies the box where the molecules are generated with box boundaries: lx_min, lx_max, ly_min, ly_max, lz_min, lz_max.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setSphere">
+<code class="sig-name descname">setSphere</code><span class="sig-paren">(</span><em class="sig-param">double sx</em>, <em class="sig-param">double sy</em>, <em class="sig-param">double sz</em>, <em class="sig-param">double r_min</em>, <em class="sig-param">double r_max</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setSphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the sphere where the molecules are generated with sphere center position(sx, sy, sz), spherical shell radius r_min, and r_max. The molecules are generated in the range r_min&lt; r &lt; r_max.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setCylinder">
+<code class="sig-name descname">setCylinder</code><span class="sig-paren">(</span><em class="sig-param">double px</em>, <em class="sig-param">double py</em>, <em class="sig-param">double pz</em>, <em class="sig-param">double ax</em>, <em class="sig-param">double ay</em>, <em class="sig-param">double az</em>, <em class="sig-param">double r_min</em>, <em class="sig-param">double r_max</em><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setCylinder" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the cylinder where the molecules are generated with cylinder center position(px, py, pz), cylinder axe vecter(ax, ay, ax), cyliner radius r_min, and r_max. The molecules are generated in the range r_min&lt; r&lt;r_max.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Molecule.setBodyEvacuation">
+<code class="sig-name descname">setBodyEvacuation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Molecule.setBodyEvacuation" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the generation of molecules outside bodies.</p>
+</dd></dl>
+
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mol0</span><span class="o">=</span><span class="n">molgen</span><span class="o">.</span><span class="n">Molecule</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+<span class="c1"># initializes a molecule object with the number of particles.</span>
+<span class="n">mol0</span><span class="o">.</span><span class="n">setParticleTypes</span><span class="p">(</span><span class="s2">&quot;A,A,A,A,A,A,A,A&quot;</span><span class="p">)</span>
+<span class="c1"># sets particle types.</span>
+<span class="n">mol0</span><span class="o">.</span><span class="n">setTopology</span><span class="p">(</span><span class="s2">&quot;0-1,0-3,0-4,2-3,1-2,1-5,2-6,3-7,4-5,4-7,5-6,6-7&quot;</span><span class="p">)</span>
+<span class="c1"># sets topology.</span>
+<span class="n">mol0</span><span class="o">.</span><span class="n">setBondLength</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
+<span class="c1"># sets bond length for all bonds.</span>
+<span class="n">mol0</span><span class="o">.</span><span class="n">setMass</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="c1"># sets mass for all particle.</span>
+<span class="n">mol0</span><span class="o">.</span><span class="n">setAngleDegree</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="mf">90.0</span><span class="p">)</span>
+<span class="c1"># sets the degree of the angle of particles with the type 1, 2 and 3.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="objects-definition">
+<h2>Objects definition<a class="headerlink" href="#objects-definition" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Object">
+<em class="property">class </em><code class="sig-name descname">Object</code><span class="sig-paren">(</span><em class="sig-param">np</em>, <em class="sig-param">shape</em><span class="sig-paren">)</span><a class="headerlink" href="#Object" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor of an object with the number of particles and shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>np</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of particles.</p></li>
+<li><p><strong>shape</strong> (<em>Shape</em>) – The shape of object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="sig-name descname">Object</code><span class="sig-paren">(</span><em class="sig-param">string filename</em>, <em class="sig-param">unsigned int</em>, <em class="sig-param">Object::Shape</em><span class="sig-paren">)</span></dt>
+<dd><p>The constructor of an object by reading partial data from a file with file name, the number of particles, and shape (the candidates are “none” and “sphere”).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of inputting file.</p></li>
+<li><p><strong>np</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The number of particles.</p></li>
+<li><p><strong>shape</strong> (<em>Shape</em>) – The shape of object.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="Object.setRadius">
+<code class="sig-name descname">setRadius</code><span class="sig-paren">(</span><em class="sig-param">double radius</em><span class="sig-paren">)</span><a class="headerlink" href="#Object.setRadius" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the radius of the sphere which will be generated(only works for “sphere” shape) with radius.</p>
+</dd></dl>
+
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mol0</span> <span class="o">=</span> <span class="n">molgen</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="s2">&quot;sphere.MST&quot;</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="n">molgen</span><span class="o">.</span><span class="n">Object</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">none</span><span class="p">)</span>
+<span class="c1"># initializes an object by the reading file (containing 60 particles),</span>
+<span class="c1"># the number of particles, and object shape.</span>
+<span class="n">mol0</span><span class="o">.</span><span class="n">setParticleTypes</span><span class="p">(</span><span class="s2">&quot;A*5&quot;</span><span class="p">)</span>
+<span class="c1"># sets particle types (the former 60 types can be read form the file).</span>
+<span class="n">mol0</span><span class="o">.</span><span class="n">setTopology</span><span class="p">(</span><span class="s2">&quot;59-60,60-61,61-62,62-63,63-64&quot;</span><span class="p">)</span>
+<span class="c1"># sets topology.</span>
+<span class="n">mol0</span><span class="o">.</span><span class="n">setBody</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="c1"># sets body index (the type &quot;C&quot; particles are thereby rigid body particles).</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="generator-definition">
+<h2>Generator definition<a class="headerlink" href="#generator-definition" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="Generators">
+<em class="property">class </em><code class="sig-name descname">Generators</code><span class="sig-paren">(</span><em class="sig-param">double lx</em>, <em class="sig-param">double ly</em>, <em class="sig-param">double lz</em><span class="sig-paren">)</span><a class="headerlink" href="#Generators" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor of a molecule generator with box length in x y z directions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The box length in x direction.</p></li>
+<li><p><strong>ly</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The box length in y direction.</p></li>
+<li><p><strong>lz</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The box length in z direction.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="Generators.addMolecule">
+<code class="sig-name descname">addMolecule</code><span class="sig-paren">(</span><em class="sig-param">Molecule mol</em>, <em class="sig-param">unsigned int num</em><span class="sig-paren">)</span><a class="headerlink" href="#Generators.addMolecule" title="Permalink to this definition">¶</a></dt>
+<dd><p>adds a molecule into generator with molecule object and number.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Generators.setMinimumDistance">
+<code class="sig-name descname">setMinimumDistance</code><span class="sig-paren">(</span><em class="sig-param">double min_dis</em><span class="sig-paren">)</span><a class="headerlink" href="#Generators.setMinimumDistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>sets the minimum separated distance of all particles.</p>
+</dd></dl>
+
+<dl class="function">
+<dt>
+<code class="sig-name descname">setMinimumDistance</code><span class="sig-paren">(</span><em class="sig-param">string type1</em>, <em class="sig-param">string type2</em>, <em class="sig-param">double min_dis</em><span class="sig-paren">)</span></dt>
+<dd><p>sets the minimum separated distance between two particle types with particle type 1, particle type 2 and minimum distance.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Generators.setParam">
+<code class="sig-name descname">setParam</code><span class="sig-paren">(</span><em class="sig-param">string type1</em>, <em class="sig-param">string type2</em>, <em class="sig-param">double epsilon</em>, <em class="sig-param">double sigma</em>, <em class="sig-param">double r_cut</em><span class="sig-paren">)</span><a class="headerlink" href="#Generators.setParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>sets the LJ potential parameters between two particle types for Rosenblueth method with particle type1, particle type2, epsilon, sigma, and cut-off radius.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Generators.setDimension">
+<code class="sig-name descname">setDimension</code><span class="sig-paren">(</span><em class="sig-param">unsigned int dimension</em><span class="sig-paren">)</span><a class="headerlink" href="#Generators.setDimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies system dimension, the default value is 3.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Generators.outPutMST">
+<code class="sig-name descname">outPutMST</code><span class="sig-paren">(</span><em class="sig-param">string filename</em><span class="sig-paren">)</span><a class="headerlink" href="#Generators.outPutMST" title="Permalink to this definition">¶</a></dt>
+<dd><p>switch the function of outputting MST filename.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Generators.outPutMol2">
+<code class="sig-name descname">outPutMol2</code><span class="sig-paren">(</span><em class="sig-param">string filename</em><span class="sig-paren">)</span><a class="headerlink" href="#Generators.outPutMol2" title="Permalink to this definition">¶</a></dt>
+<dd><p>switch the function of outputting Mol2 files.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="Generators.outPutXML">
+<code class="sig-name descname">outPutXML</code><span class="sig-paren">(</span><em class="sig-param">string filename</em><span class="sig-paren">)</span><a class="headerlink" href="#Generators.outPutXML" title="Permalink to this definition">¶</a></dt>
+<dd><p>switch the function of outputting XML filename.</p>
+</dd></dl>
+
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gen</span><span class="o">=</span><span class="n">molgen</span><span class="o">.</span><span class="n">Generators</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="c1"># initializes a generator object by box length in x, y, and z direction.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">addMolecule</span><span class="p">(</span><span class="n">mol0</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="c1"># adds a molecule by molecule name and the number of molecules.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">setParam</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="c1"># sets the parameters of LJ potential which is used for Rosenblueth method.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">setMinimumDistance</span><span class="p">(</span><span class="mf">0.7</span><span class="p">)</span>
+<span class="c1"># sets the minimum separated distance of all particles.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">setMinimumDistance</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">)</span>
+<span class="c1"># sets the minimum separated distance between the particle types.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">outPutMST</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="c1"># sets the name of output MST file.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="galatackle.html" class="btn btn-neutral float-right" title="galaTackle" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="module-dpd.html" class="btn btn-neutral float-left" title="Dissipative particle dynamics" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, You-Liang Zhu, ylzhu@galamost.com
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

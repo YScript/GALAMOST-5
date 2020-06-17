@@ -1,0 +1,364 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Non-bonded interactions &mdash; GALAMOST 5.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Bonded interactions" href="forcefield-bonded.html" />
+    <link rel="prev" title="Force field" href="forcefield.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> GALAMOST
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                5.0.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">General introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functionalities.html">Functionalities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="units.html">Units</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Methods and modules</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="application.html">Application</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="forcefield.html">Force field</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Non-bonded interactions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#non-bonded-functions">Non-bonded functions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#self-defined-functions">Self-defined functions</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="forcefield-bonded.html">Bonded interactions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="integration.html">Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Modules</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Plug-Ins</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="molgen.html">molgen</a></li>
+<li class="toctree-l1"><a class="reference internal" href="galatackle.html">galaTackle</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Announcement</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source.html">Referenced Codes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GALAMOST</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="forcefield.html">Force field</a> &raquo;</li>
+        
+      <li>Non-bonded interactions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/forcefield-nonbonded.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="non-bonded-interactions">
+<h1>Non-bonded interactions<a class="headerlink" href="#non-bonded-interactions" title="Permalink to this headline">¶</a></h1>
+<p><strong>Overview</strong></p>
+<p>The gamst MD engine provides a few of functions for non-bonded interactions.
+However, it supports well self-defined analytical functions via writting codes of
+device function in script.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 39%" />
+<col style="width: 61%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#non-bonded"><span class="std std-ref">Non-bonded functions</span></a></p></td>
+<td><p><a class="reference internal" href="#force.nonbonded" title="force.nonbonded"><code class="xref py py-class docutils literal notranslate"><span class="pre">force.nonbonded</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="non-bonded-functions">
+<span id="non-bonded"></span><h2>Non-bonded functions<a class="headerlink" href="#non-bonded-functions" title="Permalink to this headline">¶</a></h2>
+<p>Description:</p>
+<blockquote>
+<div><p>The function of non-bonded interactions could be either one called from non-bonded interaction function libary, or a self-defined device function.
+Non-bonded interaction function libary contains Lennard-Jones function named as ‘lj’ and harmonic function named as ‘harmonic’.</p>
+<dl>
+<dt>Lennard-Jones function</dt><dd><div class="math notranslate nohighlight">
+\begin{eqnarray*}
+V_{\mathrm{LJ}}(r)  = &amp; 4 \epsilon \left[ \left( \frac{\sigma}{r} \right)^{12} -
+                  \alpha \left( \frac{\sigma}{r} \right)^{6} \right] &amp; r &lt; r_{\mathrm{cut}} \\
+                    = &amp; 0 &amp; r \ge r_{\mathrm{cut}} \\
+\end{eqnarray*}</div><p>The following coefficients must be set per unique pair of particle types:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\epsilon\)</span> - <em>epsilon</em> (in energy units)</p></li>
+<li><p><span class="math notranslate nohighlight">\(\sigma\)</span> - <em>sigma</em> (in distance units)</p></li>
+<li><p><span class="math notranslate nohighlight">\(\alpha\)</span> - <em>alpha</em> (unitless)</p></li>
+<li><p><span class="math notranslate nohighlight">\(r_{\mathrm{cut}}\)</span> - <em>r_cut</em> (in distance units)
+- <em>optional</em>: defaults to the global r_cut specified in the pair command</p></li>
+</ul>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="class">
+<dt id="force.nonbonded">
+<em class="property">class </em><code class="sig-prename descclassname">force.</code><code class="sig-name descname">nonbonded</code><span class="sig-paren">(</span><em class="sig-param">info</em>, <em class="sig-param">rcut</em>, <em class="sig-param">func</em><span class="sig-paren">)</span><a class="headerlink" href="#force.nonbonded" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor of non-bonded interaction calculation object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>info</strong> – system information.</p></li>
+<li><p><strong>rcut</strong> – cut-off radius of interactions.</p></li>
+<li><p><strong>func</strong> – function name.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="force.nonbonded.setParams">
+<code class="sig-name descname">setParams</code><span class="sig-paren">(</span><em class="sig-param">type_i</em>, <em class="sig-param">type_j</em>, <em class="sig-param">param</em><span class="sig-paren">)</span><a class="headerlink" href="#force.nonbonded.setParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies interaction parameters with type_i, type_j, a list of parameters.</p>
+</dd></dl>
+
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fn</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">force</span><span class="o">.</span><span class="n">nonbonded</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="n">mst</span><span class="p">,</span> <span class="n">rcut</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="s1">&#39;lj&#39;</span><span class="p">)</span>
+<span class="n">fn</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">type_i</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">type_j</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">])</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="self-defined-functions">
+<span id="self-defined-function"></span><h2>Self-defined functions<a class="headerlink" href="#self-defined-functions" title="Permalink to this headline">¶</a></h2>
+<p>Description:</p>
+<blockquote>
+<div><p>The device function for non-bonded interactions could be written in script and conveyed
+to kernal funcitons for calculation.</p>
+<p>Non-bonded interactions with potential form <span class="math notranslate nohighlight">\(p(r)\)</span></p>
+<ul class="simple">
+<li><p>p = <span class="math notranslate nohighlight">\(p(r)\)</span></p></li>
+<li><p>f = <span class="math notranslate nohighlight">\(-(\triangle p(r)/\triangle r)(1/r)\)</span></p></li>
+</ul>
+<p>Function code template:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@cuda</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">rsq</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">fp</span><span class="p">):</span>
+        <span class="n">rcut</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="o">...</span>
+        <span class="k">if</span> <span class="n">rsq</span><span class="o">&lt;</span><span class="n">rcut</span><span class="o">*</span><span class="n">rcut</span><span class="p">:</span>
+                <span class="n">calculation</span> <span class="n">codes</span>
+                <span class="o">...</span>
+                <span class="n">fp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">f</span>
+                <span class="n">fp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">p</span>
+
+<span class="n">fn</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">force</span><span class="o">.</span><span class="n">nonbonded</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">rcut</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
+<span class="n">fn</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">type_i</span><span class="p">,</span> <span class="n">type_j</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">[</span><span class="n">rcut</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span>
+<span class="o">....</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">numba</span> <span class="k">import</span> <span class="n">cuda</span>
+<span class="kn">import</span> <span class="nn">numba</span> <span class="k">as</span> <span class="nn">nb</span>
+
+<span class="nd">@cuda</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">lj</span><span class="p">(</span><span class="n">rsq</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">fp</span><span class="p">):</span>
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">rcut</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">rsq</span><span class="o">&lt;</span><span class="n">rcut</span><span class="o">*</span><span class="n">rcut</span><span class="p">:</span>
+                <span class="n">sigma2</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">*</span><span class="n">sigma</span>
+                <span class="n">r2inv</span> <span class="o">=</span> <span class="n">sigma2</span><span class="o">/</span><span class="n">rsq</span><span class="p">;</span>
+                <span class="n">r6inv</span> <span class="o">=</span> <span class="n">r2inv</span> <span class="o">*</span> <span class="n">r2inv</span> <span class="o">*</span> <span class="n">r2inv</span><span class="p">;</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">r2inv</span> <span class="o">*</span> <span class="n">r6inv</span> <span class="o">*</span> <span class="p">(</span><span class="n">nb</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="mf">12.0</span><span class="p">)</span>
+                    <span class="o">*</span> <span class="n">r6inv</span> <span class="o">-</span> <span class="n">nb</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="mf">6.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">alpha</span><span class="p">)</span><span class="o">/</span><span class="n">sigma2</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">nb</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="mf">4.0</span><span class="p">)</span> <span class="o">*</span> <span class="n">r6inv</span> <span class="o">*</span> <span class="p">(</span> <span class="n">r6inv</span> <span class="o">-</span> <span class="n">nb</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="mf">1.0</span><span class="p">))</span>
+                <span class="n">fp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">f</span>
+                <span class="n">fp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">p</span>
+
+<span class="n">fn</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">force</span><span class="o">.</span><span class="n">nonbonded</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="n">mst</span><span class="p">,</span> <span class="n">rcut</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">lj</span><span class="p">)</span>
+<span class="n">fn</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">type_i</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">type_j</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">])</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="forcefield-bonded.html" class="btn btn-neutral float-right" title="Bonded interactions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="forcefield.html" class="btn btn-neutral float-left" title="Force field" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, You-Liang Zhu, ylzhu@galamost.com
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
