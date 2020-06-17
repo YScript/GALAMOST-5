@@ -101,9 +101,9 @@ fn.setParams(type_i="A", type_j="B", alpha=40.0, sigma=3.0)
 app.add(fn)
 
 fb = gamst.force.bond(info=mst, func='harmonic')
-fb.setParams(bond_type = 'A-A', param=[4.0, 0.0])#(,K, R0)
-fb.setParams(bond_type = 'A-B', param=[4.0, 0.0])#(,K, R0)
-fb.setParams(bond_type = 'B-B', param=[4.0, 0.0])#(,K, R0)
+fb.setParams(bond_type = 'A-A', param=[4.0, 0.0])# param=[k, r0]
+fb.setParams(bond_type = 'A-B', param=[4.0, 0.0])# param=[k, r0]
+fb.setParams(bond_type = 'B-B', param=[4.0, 0.0])# param=[k, r0]
 app.add(fb)
 
 inn = gamst.integration.gwvv(info=mst, group='all')
