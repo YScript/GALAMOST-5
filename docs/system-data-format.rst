@@ -18,7 +18,11 @@ The data in a line of MST file corresponds to a particle and all particles are g
 For example, the coordinate of a particle in x, y, and z directions is written in a line and three columns in MST files. 
 However, this rule does not include topological relevant information, including bonds, angles and dihedrals.
 
-   An example MST file with particles coordinates, velocities, types, masses ... ::
+
+Snapshot file
+^^^^^^^^^^^^^
+
+   An example of MST snapshot file with particles coordinates, velocities, types, masses ... ::
 
 	mst_version 1.0
 		num_particles
@@ -175,7 +179,73 @@ However, this rule does not include topological relevant information, including 
 			B 1.0 1.0 3.0 1.0 1.0 0.2
 
 
+Trajectory file
+^^^^^^^^^^^^^^^
 
+   A MST trajectory file could contain multiple frames. The properties in trajectory file are divied into 
+   two classes, i.e. invariant data and variant data. The invarant data is only output once, whereas the variant data is output every frame.
+
+   An example of MST trajectory file::
    
-   
-   
+	mst_version 1.0
+	invariant_data
+		num_particles
+			4
+		dimension
+			3
+		box
+			10.0	10.00	10.0
+		bond
+			polymer 0 1
+			polymer 1 2
+			polymer 2 3	  
+		angle
+			theta 0 1 2
+			theta 1 2 3  
+		dihedral
+			phi 0 1 2 3
+		type
+			A
+			B
+			B
+			A	
+	variant_data
+	frame	0
+		timestep
+			0
+		position
+			0	0	0
+			1	0	0
+			2	0	0
+			3	0	0
+		image
+			0	0	0
+			0	0	0
+			0	0	0
+			0	0	0
+	frame	1
+		timestep
+			10000
+		position
+			0	1	0
+			1	1	0
+			2	1	0
+			3	1	0
+		image
+			0	0	0
+			0	0	0
+			0	0	0
+			0	0	0
+	frame	2
+		timestep
+			20000
+		position
+			0	2	0
+			1	2	0
+			2	2	0
+			3	2	0
+		image
+			0	0	0
+			0	0	0
+			0	0	0
+			0	0	0   

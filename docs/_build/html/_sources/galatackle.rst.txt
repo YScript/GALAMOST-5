@@ -276,14 +276,14 @@ Functions
       :maxbin=100|gpu=0|rmax=Lx/2|bondex=false|angleex=false|molex=false
 
 
-19 XML conversion:	  
+19 MST conversion:	  
 ^^^^^^^^^^^^^^^^^^
    
    Description:
-      To convert XML files into other formats
+      Converting MST files into other formats
 	  
    Parameters:
-      :lammps=false|gromacs=false
+      :lammps=false|gromacs=false|xml=false
   
 	  
  	  

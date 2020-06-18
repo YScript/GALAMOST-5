@@ -22,15 +22,7 @@ added ``add()`` into or removed ``remove()`` from the application before runing 
    .. py:function:: remove(object)
    
       removes an added object.
-	  
-   .. py:function:: clear()
-   
-      removes all objects from the application.
-	  
-   .. py:function:: setDt(float dt)
-   
-      sets integration time step.	  
-	  
+	
    .. py:function:: run(N)
    
       runs the simulation for N time steps.
@@ -53,8 +45,7 @@ otherwise they will be kept. For example:
 
 * First stage simulation::
 
-   dt = 0.001
-   app = galamost.Application(all_info, dt)
+   app = gamst.application.dynamics(info=mst, dt=0.001)
    app.add(lj)
    app.add(nvt)
    app.run(1000)
@@ -90,7 +81,7 @@ An example is given::
 		dimension
 			2
 		box
-			200.0    200.0    10.0   
+			200.0    200.0    0.0   
 		position
 			 28.5678528848   -37.9327360252     0.0000000000
 			 28.0019705849   -37.1082499897     0.0000000000

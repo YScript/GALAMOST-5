@@ -95,7 +95,7 @@
 </ul>
 <p class="caption"><span class="caption-text">Methods and modules</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System info</a></li>
 <li class="toctree-l1"><a class="reference internal" href="application.html">Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="forcefield.html">Force field</a></li>
 <li class="toctree-l1"><a class="reference internal" href="integration.html">Integration</a></li>
@@ -176,14 +176,14 @@
             
   <div class="section" id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
-<p>With a prepared script, you could run GALAMOST.</p>
+<p>With a prepared script, you could run gamst MD engine for abstaining trajectory.</p>
 <blockquote>
 <div><p>Examples:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python3</span> <span class="n">yourscript</span><span class="o">.</span><span class="n">gala</span> <span class="o">--</span><span class="n">gpu</span><span class="o">=</span><span class="mi">0</span> <span class="o">&gt;</span><span class="n">a</span><span class="o">.</span><span class="n">log</span><span class="o">&amp;</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>Where you may specify the GPU id with the <code class="docutils literal notranslate"><span class="pre">--gpu=</span></code> option and output the screen information into <code class="docutils literal notranslate"><span class="pre">a.log</span></code> file.</p>
+<p>Where you could specify the GPU id (default value is 0) with the <code class="docutils literal notranslate"><span class="pre">--gpu=</span></code> option and output the screen information into <code class="docutils literal notranslate"><span class="pre">a.log</span></code> file.</p>
 <p>For version 4, you could use multiple GPU for parallel computation by following commands:</p>
 <blockquote>
 <div><p>Examples:</p>
@@ -191,66 +191,45 @@
 </pre></div>
 </div>
 </div></blockquote>
-<p>Here is an example of script for DPD simulation. The head of GALAMOST script usually is:</p>
+<p>Here is an example of script for DPD simulation.</p>
+<p>Firstly, importing the gamst module installed as a package of python3 and reading system information by <a class="reference internal" href="system-data-input.html#snapshot.read" title="snapshot.read"><code class="xref py py-class docutils literal notranslate"><span class="pre">snapshot.read</span></code></a> from a mst file</p>
 <blockquote>
 <div><p>Examples:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/python</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;/opt/galamost3/lib&#39;</span><span class="p">)</span>
-<span class="kn">import</span> <span class="nn">galamost</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gamst</span>
+<span class="n">mst</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">snapshot</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;AB.mst&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>After that, we need to build up an application by <a class="reference internal" href="application.html#application.dynamics" title="application.dynamics"><code class="xref py py-class docutils literal notranslate"><span class="pre">application.dynamics</span></code></a> which will call defined and added objects.</p>
+<blockquote>
+<div><p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">app</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">dynamics</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="n">mst</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.04</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>Further, we should define objects by the classes of gamst and pass them to the application, such as the following example: DPD force <a class="reference internal" href="module-dpd.html#force.dpd" title="force.dpd"><code class="xref py py-class docutils literal notranslate"><span class="pre">force.dpd</span></code></a>
+, NVT thermostat with GWVV algorithm <a class="reference internal" href="module-dpd.html#integration.gwvv" title="integration.gwvv"><code class="xref py py-class docutils literal notranslate"><span class="pre">integration.gwvv</span></code></a>, and th dump of system collective information <a class="reference internal" href="system-data-output.html#dump.data" title="dump.data"><code class="xref py py-class docutils literal notranslate"><span class="pre">dump.data</span></code></a>.</p>
+<blockquote>
+<div><p>Examples:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fn</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">force</span><span class="o">.</span><span class="n">dpd</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="n">mst</span><span class="p">,</span> <span class="n">rcut</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">fn</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">type_i</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="n">type_j</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">25.0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="n">fn</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">type_i</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="n">type_j</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">40.0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="n">fn</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">type_i</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">type_j</span><span class="o">=</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">25.0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
 
-<span class="k">global</span> <span class="n">_options</span>
-<span class="n">parser</span> <span class="o">=</span> <span class="n">OptionParser</span><span class="p">()</span>
-<span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s1">&#39;--gpu&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;gpu&#39;</span><span class="p">,</span><span class="n">help</span><span class="o">=</span><span class="s1">&#39;GPU on which to execute&#39;</span><span class="p">)</span>
-<span class="p">(</span><span class="n">_options</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
-</pre></div>
-</div>
-</div></blockquote>
-<p>where the first paragraph sets the path of the installed library of GALAMOST <code class="docutils literal notranslate"><span class="pre">galamost.so</span></code> for loading the Python extensible modules of GALAMOST. The second paragraph is used for parsing GPU id from the executive command.</p>
-<p>Then, reading the configuration from a prepared XML file by <code class="xref py py-class docutils literal notranslate"><span class="pre">XmlReader</span></code> and building up perform configuration of GPU by <code class="xref py py-class docutils literal notranslate"><span class="pre">PerformConfig</span></code>, a system information (<code class="xref py py-class docutils literal notranslate"><span class="pre">AllInfo</span></code>) can be built up by</p>
-<blockquote>
-<div><p>Examples:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;A.xml&#39;</span>
-<span class="n">build_method</span> <span class="o">=</span> <span class="n">galamost</span><span class="o">.</span><span class="n">XmlReader</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-<span class="n">perform_config</span> <span class="o">=</span> <span class="n">galamost</span><span class="o">.</span><span class="n">PerformConfig</span><span class="p">(</span><span class="n">_options</span><span class="o">.</span><span class="n">gpu</span><span class="p">)</span>
-<span class="n">all_info</span> <span class="o">=</span> <span class="n">galamost</span><span class="o">.</span><span class="n">AllInfo</span><span class="p">(</span><span class="n">build_method</span><span class="p">,</span><span class="n">perform_config</span><span class="p">)</span>
-</pre></div>
-</div>
-</div></blockquote>
-<p>After that, we need to build up an application with <code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code> which will call following defined and added objects.</p>
-<blockquote>
-<div><p>Examples:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dt</span> <span class="o">=</span> <span class="mf">0.01</span>
-<span class="n">app</span> <span class="o">=</span> <span class="n">galamost</span><span class="o">.</span><span class="n">Application</span><span class="p">(</span><span class="n">all_info</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
-</pre></div>
-</div>
-</div></blockquote>
-<p>Further, we should define the wanted objects by the classes of GALAMOST and pass them to the application, such as the following example: non-bonded DPD force (<a class="reference internal" href="module-dpd.html#DpdForce" title="DpdForce"><code class="xref py py-class docutils literal notranslate"><span class="pre">DpdForce</span></code></a>), NVT thermostat with GWVV algorithm (<a class="reference internal" href="module-dpd.html#DpdGwvv" title="DpdGwvv"><code class="xref py py-class docutils literal notranslate"><span class="pre">DpdGwvv</span></code></a>), and information analysis methods (<code class="xref py py-class docutils literal notranslate"><span class="pre">ComputeInfo</span></code>).</p>
-<blockquote>
-<div><p>Examples:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">neighbor_list</span> <span class="o">=</span> <span class="n">galamost</span><span class="o">.</span><span class="n">NeighborList</span><span class="p">(</span><span class="n">all_info</span><span class="p">,</span> <span class="mf">1.0</span> <span class="p">,</span><span class="mf">0.05</span><span class="p">)</span> <span class="c1"># (,rcut,rbuffer)</span>
-<span class="n">dpd</span><span class="o">=</span><span class="n">galamost</span><span class="o">.</span><span class="n">DpdForce</span><span class="p">(</span><span class="n">all_info</span><span class="p">,</span><span class="n">neighbor_list</span><span class="p">,</span><span class="mf">1.0</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span> <span class="c1"># (,,rcut,seed)</span>
-<span class="n">dpd</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span> <span class="c1"># (type1, type2, alpha, sigma)</span>
-<span class="n">dpd</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="mf">40.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span> <span class="c1"># (type1, type2, alpha, sigma)</span>
-<span class="n">dpd</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span> <span class="c1"># (type1, type2, alpha, sigma)</span>
-<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dpd</span><span class="p">)</span>
 
-<span class="n">group</span> <span class="o">=</span> <span class="n">galamost</span><span class="o">.</span><span class="n">ParticleSet</span><span class="p">(</span><span class="n">all_info</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span> <span class="p">)</span>
-<span class="n">comp_info</span> <span class="o">=</span> <span class="n">galamost</span><span class="o">.</span><span class="n">ComputeInfo</span><span class="p">(</span><span class="n">all_info</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
-<span class="n">Gwvv</span> <span class="o">=</span> <span class="n">galamost</span><span class="o">.</span><span class="n">DpdGwvv</span><span class="p">(</span><span class="n">all_info</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
-<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Gwvv</span><span class="p">)</span>
+<span class="n">gw</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">integration</span><span class="o">.</span><span class="n">gwvv</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="n">mst</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gw</span><span class="p">)</span>
 
-<span class="n">dinfo</span> <span class="o">=</span> <span class="n">galamost</span><span class="o">.</span><span class="n">DumpInfo</span><span class="p">(</span><span class="n">all_info</span><span class="p">,</span> <span class="n">comp_info</span><span class="p">,</span> <span class="s1">&#39;data.log&#39;</span><span class="p">)</span>
-<span class="n">dinfo</span><span class="o">.</span><span class="n">setPeriod</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
-<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dinfo</span><span class="p">)</span>
+<span class="n">di</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">dump</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="n">mst</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s1">&#39;data.log&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">di</span><span class="p">)</span>
 </pre></div>
 </div>
 </div></blockquote>
-<p>The tail of script usually sets the number of time steps to run, and the function of analysis of neighbor list (<code class="xref py py-class docutils literal notranslate"><span class="pre">NeighborList</span></code>) etc.</p>
+<p>Finally, running the simulation with the number of time steps.</p>
 <blockquote>
 <div><p>Examples:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span> <span class="mi">10000</span><span class="p">)</span>
-<span class="n">neighbor_list</span><span class="o">.</span><span class="n">printStats</span><span class="p">()</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
 </pre></div>
 </div>
 </div></blockquote>

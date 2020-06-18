@@ -95,7 +95,7 @@
 </ul>
 <p class="caption"><span class="caption-text">Methods and modules</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="system.html">System info</a></li>
 <li class="toctree-l1"><a class="reference internal" href="application.html">Application</a></li>
 <li class="toctree-l1"><a class="reference internal" href="forcefield.html">Force field</a></li>
 <li class="toctree-l1"><a class="reference internal" href="integration.html">Integration</a></li>
@@ -211,64 +211,27 @@
 </ul>
 </div></blockquote>
 <dl class="class">
-<dt id="DpdForce">
-<em class="property">class </em><code class="sig-name descname">DpdForce</code><span class="sig-paren">(</span><em class="sig-param">all_info</em>, <em class="sig-param">nlist</em>, <em class="sig-param">r_cut</em>, <em class="sig-param">temperature</em>, <em class="sig-param">rand_num</em><span class="sig-paren">)</span><a class="headerlink" href="#DpdForce" title="Permalink to this definition">¶</a></dt>
-<dd><p>The constructor of a DPD interaction object.</p>
+<dt id="force.dpd">
+<em class="property">class </em><code class="sig-prename descclassname">force.</code><code class="sig-name descname">dpd</code><span class="sig-paren">(</span><em class="sig-param">info</em>, <em class="sig-param">rcut=1.0</em><span class="sig-paren">)</span><a class="headerlink" href="#force.dpd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor of a DPD interaction object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>all_info</strong> (<em>AllInfo</em>) – The system information.</p></li>
-<li><p><strong>nlist</strong> (<em>NeighborList</em>) – The neighbor list.</p></li>
-<li><p><strong>r_cut</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The cut-off radius.</p></li>
-<li><p><strong>temperature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The temperature.</p></li>
-<li><p><strong>rand_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The seed of random number generator.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="class">
-<dt>
-<em class="property">class </em><code class="sig-name descname">DpdForce</code><span class="sig-paren">(</span><em class="sig-param">all_info</em>, <em class="sig-param">nlist</em>, <em class="sig-param">r_cut</em>, <em class="sig-param">rand_num</em><span class="sig-paren">)</span></dt>
-<dd><p>The constructor of a DPD interaction object. The default temperature is 1.0.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>all_info</strong> (<em>AllInfo</em>) – The system information.</p></li>
-<li><p><strong>nlist</strong> (<em>NeighborList</em>) – The neighbor list.</p></li>
-<li><p><strong>r_cut</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.8)"><em>float</em></a>) – The cut-off radius.</p></li>
-<li><p><strong>rand_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)"><em>int</em></a>) – The seed of random number generator.</p></li>
+<li><p><strong>info</strong> – system information.</p></li>
+<li><p><strong>rcut</strong> – the cut-off radius of interactions.</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="function">
-<dt id="DpdForce.setParams">
-<code class="sig-name descname">setParams</code><span class="sig-paren">(</span><em class="sig-param">string typei</em>, <em class="sig-param">string typej</em>, <em class="sig-param">float alpha</em>, <em class="sig-param">float sigma</em><span class="sig-paren">)</span><a class="headerlink" href="#DpdForce.setParams" title="Permalink to this definition">¶</a></dt>
-<dd><p>specifies the DPD interaction parameters per unique pair of particle types.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="DpdForce.setT">
-<code class="sig-name descname">setT</code><span class="sig-paren">(</span><em class="sig-param">float T</em><span class="sig-paren">)</span><a class="headerlink" href="#DpdForce.setT" title="Permalink to this definition">¶</a></dt>
-<dd><p>specifies the temperature with a constant value.</p>
-</dd></dl>
-
-<dl class="function">
-<dt>
-<code class="sig-name descname">setT</code><span class="sig-paren">(</span><em class="sig-param">Variant vT</em><span class="sig-paren">)</span></dt>
-<dd><p>specifies the temperature with a varying value by time step.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="DpdForce.setDPDVV">
-<code class="sig-name descname">setDPDVV</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#DpdForce.setDPDVV" title="Permalink to this definition">¶</a></dt>
-<dd><p>calls the function to enable DPDVV method (the default is GWVV).</p>
+<dt id="force.dpd.setParams">
+<code class="sig-name descname">setParams</code><span class="sig-paren">(</span><em class="sig-param">type_i</em>, <em class="sig-param">type_j</em>, <em class="sig-param">alpha</em>, <em class="sig-param">sigma</em><span class="sig-paren">)</span><a class="headerlink" href="#force.dpd.setParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the DPD interaction parameters between two types of particles.</p>
 </dd></dl>
 
 <p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dpd</span> <span class="o">=</span> <span class="n">galamost</span><span class="o">.</span><span class="n">DpdForce</span><span class="p">(</span><span class="n">all_info</span><span class="p">,</span> <span class="n">neighbor_list</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mi">12345</span><span class="p">)</span>
-<span class="n">dpd</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="mf">25.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">)</span>
-<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dpd</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">fn</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">force</span><span class="o">.</span><span class="n">dpd</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="n">mst</span><span class="p">,</span> <span class="n">rcut</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">fn</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">type_i</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="n">type_j</span><span class="o">=</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">25.0</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -292,26 +255,20 @@
 </ul>
 </div></blockquote>
 <dl class="class">
-<dt id="DpdGwvv">
-<em class="property">class </em><code class="sig-name descname">DpdGwvv</code><span class="sig-paren">(</span><em class="sig-param">AllInfo all_info</em>, <em class="sig-param">ParticleSet group</em><span class="sig-paren">)</span><a class="headerlink" href="#DpdGwvv" title="Permalink to this definition">¶</a></dt>
-<dd><p>The constructor of a GWVV NVT thermostat for a group of DPD particles.</p>
+<dt id="integration.gwvv">
+<em class="property">class </em><code class="sig-prename descclassname">integration.</code><code class="sig-name descname">gwvv</code><span class="sig-paren">(</span><em class="sig-param">info</em>, <em class="sig-param">group</em><span class="sig-paren">)</span><a class="headerlink" href="#integration.gwvv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor of a GWVV NVT thermostat for a group of DPD particles.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>all_info</strong> (<em>AllInfo</em>) – The system information.</p></li>
-<li><p><strong>group</strong> (<em>ParticleSet</em>) – The group of particles.</p></li>
+<li><p><strong>info</strong> – system information.</p></li>
+<li><p><strong>group</strong> – a group of particles.</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="function">
-<dt id="DpdGwvv.setLambda">
-<code class="sig-name descname">setLambda</code><span class="sig-paren">(</span><em class="sig-param">float lambda</em><span class="sig-paren">)</span><a class="headerlink" href="#DpdGwvv.setLambda" title="Permalink to this definition">¶</a></dt>
-<dd><p>specifies lambda.</p>
-</dd></dl>
-
 <p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gwvv</span> <span class="o">=</span> <span class="n">galamost</span><span class="o">.</span><span class="n">DpdGwvv</span><span class="p">(</span><span class="n">all_info</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>
-<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gwvv</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">gw</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">integration</span><span class="o">.</span><span class="n">gwvv</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="n">mst</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">gw</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>

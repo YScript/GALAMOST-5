@@ -36,8 +36,8 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Data input" href="data-input.html" />
-    <link rel="prev" title="Data" href="data.html" /> 
+    <link rel="next" title="Data input" href="system-data-input.html" />
+    <link rel="prev" title="System info" href="system.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -95,13 +95,18 @@
 </ul>
 <p class="caption"><span class="caption-text">Methods and modules</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="data.html">Data</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="system.html">System info</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Data format</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mst-format">MST format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mst-format">MST format</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#snapshot-file">Snapshot file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#trajectory-file">Trajectory file</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="data-input.html">Data input</a></li>
-<li class="toctree-l2"><a class="reference internal" href="data-output.html">Data output</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="system-data-input.html">Data input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="system-data-output.html">Data output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="system-group.html">Group</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="application.html">Application</a></li>
@@ -163,7 +168,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="data.html">Data</a> &raquo;</li>
+          <li><a href="system.html">System info</a> &raquo;</li>
         
       <li>Data format</li>
     
@@ -171,7 +176,7 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/data-format.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/system-data-format.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -195,8 +200,10 @@ Here is an example of the MST file of a single molecule system. The molecule con
 <p>The data in a line of MST file corresponds to a particle and all particles are given in sequence.
 For example, the coordinate of a particle in x, y, and z directions is written in a line and three columns in MST files.
 However, this rule does not include topological relevant information, including bonds, angles and dihedrals.</p>
+<div class="section" id="snapshot-file">
+<h3>Snapshot file<a class="headerlink" href="#snapshot-file" title="Permalink to this headline">¶</a></h3>
 <blockquote>
-<div><p>An example MST file with particles coordinates, velocities, types, masses …</p>
+<div><p>An example of MST snapshot file with particles coordinates, velocities, types, masses …</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mst_version</span> <span class="mf">1.0</span>
         <span class="n">num_particles</span>
                 <span class="mi">4</span>
@@ -354,6 +361,79 @@ However, this rule does not include topological relevant information, including 
 </div>
 </div></blockquote>
 </div>
+<div class="section" id="trajectory-file">
+<h3>Trajectory file<a class="headerlink" href="#trajectory-file" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><p>A MST trajectory file could contain multiple frames. The properties in trajectory file are divied into
+two classes, i.e. invariant data and variant data. The invarant data is only output once, whereas the variant data is output every frame.</p>
+<p>An example of MST trajectory file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">mst_version</span> <span class="mf">1.0</span>
+<span class="n">invariant_data</span>
+        <span class="n">num_particles</span>
+                <span class="mi">4</span>
+        <span class="n">dimension</span>
+                <span class="mi">3</span>
+        <span class="n">box</span>
+                <span class="mf">10.0</span>    <span class="mf">10.00</span>   <span class="mf">10.0</span>
+        <span class="n">bond</span>
+                <span class="n">polymer</span> <span class="mi">0</span> <span class="mi">1</span>
+                <span class="n">polymer</span> <span class="mi">1</span> <span class="mi">2</span>
+                <span class="n">polymer</span> <span class="mi">2</span> <span class="mi">3</span>
+        <span class="n">angle</span>
+                <span class="n">theta</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span>
+                <span class="n">theta</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span>
+        <span class="n">dihedral</span>
+                <span class="n">phi</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span>
+        <span class="nb">type</span>
+                <span class="n">A</span>
+                <span class="n">B</span>
+                <span class="n">B</span>
+                <span class="n">A</span>
+<span class="n">variant_data</span>
+<span class="n">frame</span>   <span class="mi">0</span>
+        <span class="n">timestep</span>
+                <span class="mi">0</span>
+        <span class="n">position</span>
+                <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+                <span class="mi">1</span>       <span class="mi">0</span>       <span class="mi">0</span>
+                <span class="mi">2</span>       <span class="mi">0</span>       <span class="mi">0</span>
+                <span class="mi">3</span>       <span class="mi">0</span>       <span class="mi">0</span>
+        <span class="n">image</span>
+                <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+                <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+                <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+                <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+<span class="n">frame</span>   <span class="mi">1</span>
+        <span class="n">timestep</span>
+                <span class="mi">10000</span>
+        <span class="n">position</span>
+                <span class="mi">0</span>       <span class="mi">1</span>       <span class="mi">0</span>
+                <span class="mi">1</span>       <span class="mi">1</span>       <span class="mi">0</span>
+                <span class="mi">2</span>       <span class="mi">1</span>       <span class="mi">0</span>
+                <span class="mi">3</span>       <span class="mi">1</span>       <span class="mi">0</span>
+        <span class="n">image</span>
+                <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+                <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+                <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+                <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+<span class="n">frame</span>   <span class="mi">2</span>
+        <span class="n">timestep</span>
+                <span class="mi">20000</span>
+        <span class="n">position</span>
+                <span class="mi">0</span>       <span class="mi">2</span>       <span class="mi">0</span>
+                <span class="mi">1</span>       <span class="mi">2</span>       <span class="mi">0</span>
+                <span class="mi">2</span>       <span class="mi">2</span>       <span class="mi">0</span>
+                <span class="mi">3</span>       <span class="mi">2</span>       <span class="mi">0</span>
+        <span class="n">image</span>
+                <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+                <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+                <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+                <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+</div>
 </div>
 
 
@@ -364,10 +444,10 @@ However, this rule does not include topological relevant information, including 
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="data-input.html" class="btn btn-neutral float-right" title="Data input" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="system-data-input.html" class="btn btn-neutral float-right" title="Data input" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="data.html" class="btn btn-neutral float-left" title="Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="system.html" class="btn btn-neutral float-left" title="System info" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

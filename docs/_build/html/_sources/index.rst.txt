@@ -20,7 +20,7 @@ Welcome to galamost's documentation!
    :maxdepth: 3
    :caption: Methods and modules
    
-   data
+   system
    application   
    forcefield
    integration

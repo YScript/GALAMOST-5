@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Data output &mdash; GALAMOST 5.0.0 documentation</title>
+  <title>Group &mdash; GALAMOST 5.0.0 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Application" href="application.html" />
-    <link rel="prev" title="Data input" href="data-input.html" /> 
+    <link rel="prev" title="Data output" href="system-data-output.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -95,13 +95,11 @@
 </ul>
 <p class="caption"><span class="caption-text">Methods and modules</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="data.html">Data</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="data-format.html">Data format</a></li>
-<li class="toctree-l2"><a class="reference internal" href="data-input.html">Data input</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Data output</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#collective-information">Collective information</a></li>
-</ul>
-</li>
+<li class="toctree-l1 current"><a class="reference internal" href="system.html">System info</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="system-data-format.html">Data format</a></li>
+<li class="toctree-l2"><a class="reference internal" href="system-data-input.html">Data input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="system-data-output.html">Data output</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Group</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="application.html">Application</a></li>
@@ -163,15 +161,15 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-          <li><a href="data.html">Data</a> &raquo;</li>
+          <li><a href="system.html">System info</a> &raquo;</li>
         
-      <li>Data output</li>
+      <li>Group</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/data-output.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/system-group.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -184,32 +182,37 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="data-output">
-<h1>Data output<a class="headerlink" href="#data-output" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="collective-information">
-<h2>Collective information<a class="headerlink" href="#collective-information" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="group">
+<h1>Group<a class="headerlink" href="#group" title="Permalink to this headline">¶</a></h1>
+<p>A group specifies the particles for certain functions, such as integration and data output. Group objects
+will not be defined in script. Instead, they will be defined in other objects. And then, ususally only keywords or a list of
+particle types and particle indexes are needed to indicate the particles.</p>
 <dl class="class">
-<dt id="dump.data">
-<em class="property">class </em><code class="sig-prename descclassname">dump.</code><code class="sig-name descname">data</code><span class="sig-paren">(</span><em class="sig-param">info</em>, <em class="sig-param">group</em>, <em class="sig-param">file</em>, <em class="sig-param">period</em><span class="sig-paren">)</span><a class="headerlink" href="#dump.data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Constructor of an information dump object for a group of particles.</p>
-<dl class="field-list simple">
+<dt id="chare.particle_set">
+<em class="property">class </em><code class="sig-prename descclassname">chare.</code><code class="sig-name descname">particle_set</code><span class="sig-paren">(</span><em class="sig-param">info</em>, <em class="sig-param">group</em><span class="sig-paren">)</span><a class="headerlink" href="#chare.particle_set" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>info</strong> – System information.</p></li>
-<li><p><strong>group</strong> – A group of particles.</p></li>
-<li><p><strong>filename</strong> – Output file name.</p></li>
-<li><p><strong>period</strong> – The period to output data.</p></li>
+<li><p><strong>info</strong> – system information.</p></li>
+<li><p><strong>group</strong> – either a string or a python list. The string is a keyword with candidates “all”, “body”, “charge”, and “nonbody”.
+The list could contain particle types and particle indexes.</p></li>
 </ul>
 </dd>
 </dl>
 <p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dd</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">dump</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="n">mst</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">],</span> <span class="n">file</span><span class="o">=</span><span class="s1">&#39;data.log&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dd</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dm</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">dump</span><span class="o">.</span><span class="n">mst</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="n">mst</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="s1">&#39;p.mst&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dm</span><span class="p">)</span>
+
+<span class="n">dm</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">dump</span><span class="o">.</span><span class="n">mst</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="n">mst</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">],</span> <span class="n">file</span><span class="o">=</span><span class="s1">&#39;p.mst&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dm</span><span class="p">)</span>
+
+
+<span class="n">dm</span> <span class="o">=</span> <span class="n">gamst</span><span class="o">.</span><span class="n">dump</span><span class="o">.</span><span class="n">mst</span><span class="p">(</span><span class="n">info</span><span class="o">=</span><span class="n">mst</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">file</span><span class="o">=</span><span class="s1">&#39;p.mst&#39;</span><span class="p">,</span> <span class="n">period</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span>
+<span class="n">app</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">dm</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
 
-</div>
 </div>
 
 
@@ -223,7 +226,7 @@
         <a href="application.html" class="btn btn-neutral float-right" title="Application" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="data-input.html" class="btn btn-neutral float-left" title="Data input" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="system-data-output.html" class="btn btn-neutral float-left" title="Data output" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

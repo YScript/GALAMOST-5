@@ -32,46 +32,22 @@ Description:
     - :math:`\sigma` - *sigma* (unitless)
 
 
-.. py:class:: DpdForce(all_info, nlist, r_cut, temperature, rand_num)
+.. py:class:: force.dpd(info, rcut=1.0)
 
-   The constructor of a DPD interaction object.
+   Constructor of a DPD interaction object.
 	  
-   :param AllInfo all_info: The system information.
-   :param NeighborList nlist: The neighbor list.  
-   :param float r_cut: The cut-off radius.
-   :param float temperature: The temperature.
-   :param int rand_num: The seed of random number generator.   
-   
-.. py:class:: DpdForce(all_info, nlist, r_cut, rand_num)
+   :param info: system information.
+   :param rcut: the cut-off radius of interactions. 
 
-   The constructor of a DPD interaction object. The default temperature is 1.0.
-	  
-   :param AllInfo all_info: The system information.
-   :param NeighborList nlist: The neighbor list.  
-   :param float r_cut: The cut-off radius.
-   :param int rand_num: The seed of random number generator.
+   .. py:function:: setParams(type_i, type_j, alpha, sigma)
    
-   .. py:function:: setParams(string typei, string typej, float alpha, float sigma)
-   
-      specifies the DPD interaction parameters per unique pair of particle types.
-	  
-   .. py:function:: setT(float T)
-   
-      specifies the temperature with a constant value.
-	  
-   .. py:function:: setT(Variant vT)
-   
-      specifies the temperature with a varying value by time step.
-	  
-   .. py:function:: setDPDVV()
-   
-      calls the function to enable DPDVV method (the default is GWVV).
+      specifies the DPD interaction parameters between two types of particles.
 	  
    Example::
    
-      dpd = galamost.DpdForce(all_info, neighbor_list, 1.0, 12345)
-      dpd.setParams('A', 'A', 25.0, 3.0)
-      app.add(dpd)
+      fn = gamst.force.dpd(info=mst, rcut=1.0)
+      fn.setParams(type_i="A", type_j="A", alpha=25.0, sigma=3.0)
+      app.add(fn)
 	  
 GWVV integration
 ----------------
@@ -95,19 +71,15 @@ Description:
     - :math:`\lambda` - *lambda* (unitless)
       - *optional*: defaults to 0.65
 	  
-.. py:class:: DpdGwvv(AllInfo all_info, ParticleSet group)
+.. py:class:: integration.gwvv(info, group)
 
-   The constructor of a GWVV NVT thermostat for a group of DPD particles.
+   Constructor of a GWVV NVT thermostat for a group of DPD particles.
 
-   :param AllInfo all_info: The system information.
-   :param ParticleSet group: The group of particles.	   
-
-   .. py:function:: setLambda(float lambda)
-   
-      specifies lambda.	  
+   :param info: system information.
+   :param group: a group of particles.
 	  
    Example::
 
-      gwvv = galamost.DpdGwvv(all_info, group)
-      app.add(gwvv)
+      gw = gamst.integration.gwvv(info=mst, group='all')
+      app.add(gw)
 	  
