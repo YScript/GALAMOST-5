@@ -22,7 +22,7 @@ app.add(gw)
 di = gamst.dump.data(info=mst, group='all', file='data.log', period=500)
 app.add(di)
 
-dm = gamst.dump.mst(info=mst, group='all', file='p.mst', period=100000
+dm = gamst.dump.mst(info=mst, group='all', file='p.mst', period=100000)
 app.add(dm)
 
 #ready ro run

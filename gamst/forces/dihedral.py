@@ -388,7 +388,7 @@ class dihedral:
 		# for i in range(0, self.info.force.shape[0]):
 			# print(i, self.info.force[i], self.info.virial_potential[i])
 			
-	def setCosFactor(factor)
+	def setCosFactor(factor):
 		self.cos_factor = factor
 		self.params_changed = True
 

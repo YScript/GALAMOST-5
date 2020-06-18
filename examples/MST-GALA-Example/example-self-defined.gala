@@ -66,13 +66,13 @@ fd = gamst.force.dihedral(info=mst, func=dihedral_harmonic)
 fd.setParams(dihedral_type = 'A-A-A-A', param=[25.0, math.cos(math.pi), math.sin(math.pi), -1.0])#param=[k, cos_phi0, sin_phi0, cos_factor]
 app.add(fd)
 
-nvt = gamst.integration.nvt(info=mst, group=['all'], method="nh", tau=0.5, temperature=1.0)
+nvt = gamst.integration.nvt(info=mst, group='all', method="nh", tau=0.5, temperature=1.0)
 app.add(nvt)
 
-dd = gamst.dump.data(info=mst, group=['all'], file='data.log', period=100)
+dd = gamst.dump.data(info=mst, group='all', file='data.log', period=100)
 app.add(dd)
 
-dm = gamst.dump.mst(info=mst, group=['all'], file='p.mst', period=10000)
+dm = gamst.dump.mst(info=mst, group='all', file='p.mst', period=10000)
 app.add(dm)
 
 #run 
