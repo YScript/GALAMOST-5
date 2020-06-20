@@ -1,6 +1,6 @@
 mst_version 1.0
 	num_particles
-		3
+		4
 	timestep
 		0
 	dimension

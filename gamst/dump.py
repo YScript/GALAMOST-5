@@ -213,7 +213,7 @@ class mst:
 			f.write('\tdihedral\n')
 			for i in range(0, len(self.info.dihedral.dihedrals)):
 				di = self.info.dihedral.dihedrals[i]
-				f.write('\t\t%s\t%10d\t%10d\t%10d\n' % (di[0], di[1], di[2], di[3], di[4]))
+				f.write('\t\t%s\t%10d\t%10d\t%10d\t%10d\n' % (di[0], di[1], di[2], di[3], di[4]))
 
 	def register(self, timestep):
 		return

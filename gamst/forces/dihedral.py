@@ -190,7 +190,7 @@ def dihedral_force(cu_func_pro, cu_func_imp):
 					ab_rinv = math.sqrt(aa_rsqinv*bb_rsqinv)
 					cos_abcd = (aa0*bb0 + aa1*bb1 + aa2*bb2)*ab_rinv
 					sin_abcd = g_r*ab_rinv*(aa0*d_dc0 + aa1*d_dc1 + aa2*d_dc2)
-					print(sin_abcd, g_r, ab_rinv, aa0*d_dc0 + aa1*d_dc1 + aa2*d_dc2)
+					# print(sin_abcd, g_r, ab_rinv, aa0*d_dc0 + aa1*d_dc1 + aa2*d_dc2)
 					
 					if cos_abcd > nb.float32(1.0):
 						cos_abcd = nb.float32(1.0)

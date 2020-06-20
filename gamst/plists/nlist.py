@@ -289,7 +289,8 @@ class nlist:
 		self.call += np.int32(1)
 		self.p_call += np.int32(1)
 		if self.call%np.int32(1000)==np.int32(0):
-			self.update_period = np.int32(self.p_call/self.p_update)
+			if self.p_update > 0:
+				self.update_period = np.int32(self.p_call/self.p_update)
 			self.p_update = np.int32(0)
 			self.p_call = np.int32(0)
 			# print(self.update_period)
