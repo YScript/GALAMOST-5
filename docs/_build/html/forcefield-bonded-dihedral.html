@@ -233,7 +233,7 @@ V_{\mathrm{dihedral}}(\varphi)=k\left[ 1+f\cos \left( \varphi-\delta \right) \ri
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The dihedral angles set in script are in the unit of degree, and the program will convert them into radian automatically.</p>
+<p>Dihedral angles for the functions in library should be given in script in the unit of degree, and the program will convert them into radian automatically.</p>
 </div>
 </dd>
 <dt>Harmonic function for improper dihedrals</dt><dd><div class="math notranslate nohighlight">
@@ -246,7 +246,7 @@ V_{\mathrm{dihedral}}(\varphi)=k\left( \varphi-\delta \right)^2
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The dihedral angles set in script are in the unit of degree, and the program will convert them into radian automatically.</p>
+<p>Dihedral angles for the functions in library should be given in script in the unit of degree, and the program will convert them into radian automatically.</p>
 </div>
 </dd>
 </dl>
@@ -265,8 +265,9 @@ V_{\mathrm{dihedral}}(\varphi)=k\left( \varphi-\delta \right)^2
 </dl>
 <dl class="function">
 <dt id="force.dihedral.setParams">
-<code class="sig-name descname">setParams</code><span class="sig-paren">(</span><em class="sig-param">angle_type</em>, <em class="sig-param">param</em><span class="sig-paren">)</span><a class="headerlink" href="#force.dihedral.setParams" title="Permalink to this definition">¶</a></dt>
-<dd><p>specifies the dihedral interaction parameters with dihedral type and a list of parameters.</p>
+<code class="sig-name descname">setParams</code><span class="sig-paren">(</span><em class="sig-param">dihedral_type</em>, <em class="sig-param">param</em>, <em class="sig-param">term='proper'</em><span class="sig-paren">)</span><a class="headerlink" href="#force.dihedral.setParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>specifies the dihedral interaction parameters with dihedral type, a list of parameters and the term of dihedral.
+The term candidates of dihedral are ‘proper’ and ‘improper’ with the default ‘proper’.</p>
 </dd></dl>
 
 <dl class="function">

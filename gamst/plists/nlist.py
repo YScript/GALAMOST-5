@@ -103,7 +103,18 @@ def cu_check_build(npa, pos, box, last_pos, rbuff_half_rsq, situation):
 		if rsq > rbuff_half_rsq:
 			situation[0] = nb.int32(1)
 			
-			
+#sort ex list
+@cuda.jit("void(int32, int32[:], int32[:, :], int32[:], int32[:, :], int32[:])")
+def cu_sort_ex_list(npa, ex_size_idx, ex_list_idx, ex_size_tag, ex_list_tag, rtag):
+	tag = cuda.grid(1)
+	if tag < npa:
+		ne = ex_size_tag[tag]
+		idx = rtag[tag]
+		for j in range(0, ne):
+			ej = ex_list_tag[tag][j]
+			ex_list_idx[idx][j] = rtag[ej]
+		ex_size_idx[idx] = ne			
+
 @cuda.jit("void(int32[:])")
 def cu_zero(situation):
 	i = cuda.grid(1)
@@ -112,7 +123,7 @@ def cu_zero(situation):
 			
 class nlist:
 	#定义构造方法
-	def __init__(self, info, rcut, rbuff):
+	def __init__(self, info, rcut, rbuff, exclusion):
 		self.cutoff_rsq = rcut*rcut
 		self.rbuff_half_rsq = (rbuff/2.0)*(rbuff/2.0)
 #		print(self.rcut)
@@ -121,12 +132,15 @@ class nlist:
 		self.nmax = np.int32(8)
 		self.neighbor_list = np.zeros([self.info.npa, self.nmax], dtype = np.int32)
 		self.block_size = 64
+		self.nblocks = math.ceil(self.info.npa / self.block_size)
+		self.ex_list=[[] for i in range(self.info.npa)]
+
 		self.last_pos = np.zeros([self.info.npa, 3], dtype = np.float32)		
-		self.neighbor_size = np.zeros([self.info.npa], dtype = np.int32)
+		self.neighbor_size = np.zeros(self.info.npa, dtype = np.int32)
 
 		self.situation = np.zeros(3, dtype = np.int32)
 		self.d_situation = cuda.to_device(self.situation)
-		
+		self.set_exclusion = False
 #		device arrays
 		self.d_neighbor_list = cuda.to_device(self.neighbor_list)
 		self.d_last_pos = cuda.to_device(self.last_pos)
@@ -139,17 +153,103 @@ class nlist:
 		self.update_period = np.int32(1)
 		self.p_update = np.int32(0)
 		self.update_offset = np.int32(0)
+		if exclusion is not None:
+			if not isinstance(exclusion, list):
+				raise RuntimeError("Error exclusion type ", type(exclusion),", the type of exclusion should be list !")
+			for i in exclusion:
+				if i =="bond":
+					self.bond_exclusion()
+				if i =="angle":
+					self.angle_exclusion()				
+				if i =="dihedral":
+					self.dihedral_exclusion()
+			if self.set_exclusion:
+				self.ex_initiation()
 		
+	def sort(self):
+		cu_sort_ex_list[self.nblocks, self.block_size](self.info.npa, self.d_ex_size_idx, self.d_ex_list_idx, self.d_ex_size_tag, self.d_ex_list_tag, self.info.d_rtag)		
 		
+	def add_ex_list(a, b):
+		exist_a = False
+		exist_b = False
+
+		if a >= self.info.npa:
+			raise RuntimeError('Error, the index of particle ', a,' is out of the range of 0 to ', self.info.npa-1)
+		if b >= self.info.npa:
+			raise RuntimeError('Error, the index of particle ', b,' is out of the range of 0 to ', self.info.npa-1)
+
+		for i in range(len(self.ex_list[a])):
+			if self.ex_list[a][i] == b:
+				exist_b = True
+
+		for i in range(len(self.ex_list[b])):
+			if self.ex_list[b][i] == a:
+				exist_a = True	
+				
+		if not exist_b:
+			self.ex_list[a].append(b)
+			
+		if not exist_a:			
+			self.ex_list[b].append(a)
+			
+		self.set_exclusion = True
+			
+	def bond_exclusion():
+		if self.info.bond is None:
+			raise RuntimeError('Error, no bonds given for exclusion ')
+
+		for i in range(0, len(self.info.bond.bonds)):
+			bi = self.info.bond.bonds[i]
+			add_ex_list(bi[1], bi[2])
+			
+	def angle_exclusion():
+		if self.info.angle is None:
+			raise RuntimeError('Error, no angles given for exclusion ')
+
+		for i in range(0, len(self.info.angle.angles)):
+			ai = self.info.angle.angles[i]
+			add_ex_list(ai[1], ai[3])
+			
+	def dihedral_exclusion():
+		if self.info.dihedral is None:
+			raise RuntimeError('Error, no dihedrals given for exclusion ')
+
+		for i in range(0, len(self.info.dihedral.dihedrals)):
+			di = self.info.dihedral.dihedrals[i]
+			add_ex_list(di[1], di[4])
+	
+	def ex_initiation():
+		max_size = 0
+		for i in range(self.info.npa):
+			if len(self.ex_list[i]) > max_size:
+				max_size=len(self.ex_list[i])
+				
+		self.ex_list_tag = np.zeros([self.info.npa, max_size], dtype = np.int32)	
+		self.ex_size_tag = np.zeros(self.info.npa, dtype = np.int32)
+		
+		self.ex_list_idx = np.zeros([self.info.npa, max_size], dtype = np.int32)	
+		self.ex_size_idx = np.zeros(self.info.npa, dtype = np.int32)
+
+		for i in range(self.info.npa):
+			for j in range(len(self.ex_list[i])):
+				self.ex_list_tag[i][j] = self.ex_list[i][j]
+			self.ex_size_tag[i] = len(self.ex_list[i])
+		
+		self.d_ex_list_tag = cuda.to_device(self.ex_list_tag)
+		self.d_ex_size_tag = cuda.to_device(self.ex_size_tag)
+		
+		self.d_ex_list_idx = cuda.to_device(self.ex_list_idx)
+		self.d_ex_size_idx = cuda.to_device(self.ex_size_idx)
+		
+		self.sort()
+
 	def calculate(self, build_list):
 		if self.if_jump():
 			return
-
-		nblocks = math.ceil(self.info.npa / self.block_size)
 		# start = time.time()
 		# self.d_situation = cuda.to_device(self.situation_zero)
 		cu_zero[1,32](self.d_situation)
-		cu_check_build[nblocks, self.block_size](self.info.npa, self.info.d_pos, self.info.d_box, self.d_last_pos, self.rbuff_half_rsq, self.d_situation)
+		cu_check_build[self.nblocks, self.block_size](self.info.npa, self.info.d_pos, self.info.d_box, self.d_last_pos, self.rbuff_half_rsq, self.d_situation)
 		self.situation = self.d_situation.copy_to_host()
 
 		if self.situation[0]==np.int32(1):
@@ -167,7 +267,7 @@ class nlist:
 			# end2 = time.time()	
 			# print("cell list",end2 - end1)
 			cu_zero[1,32](self.d_situation)
-			cu_neighbor_build[nblocks, self.block_size](self.info.npa, self.info.d_pos, self.clist.d_dim, self.clist.d_box_low_boundary, self.clist.d_inv_width, self.info.d_box, self.clist.d_cell_adj, 
+			cu_neighbor_build[self.nblocks, self.block_size](self.info.npa, self.info.d_pos, self.clist.d_dim, self.clist.d_box_low_boundary, self.clist.d_inv_width, self.info.d_box, self.clist.d_cell_adj, 
 			                                            self.clist.d_cell_size, self.clist.d_cell_list, self.d_neighbor_size, self.d_neighbor_list, self.d_last_pos, self.cutoff_rsq, self.d_situation)
 			self.situation = self.d_situation.copy_to_host()
 			# cuda.synchronize()

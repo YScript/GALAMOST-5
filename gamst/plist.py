@@ -32,10 +32,11 @@ CORRESPONDENCE
 from gamst import plists
 
 class neighbor:
-	def __init__(self, info, rcut):
+	def __init__(self, info, rcut, exclusion):
 		# self.data=plists.vlist.vlist(info, rcut)
 		self.rcut=rcut
-		self.data=plists.nlist.nlist(info, rcut, rcut*0.1)
+		self.exclusion = exclusion
+		self.data=plists.nlist.nlist(info, rcut, rcut*0.1, exclusion)
 		self.last_ts = 0xffffffff
 		
 	def calculate(self, timestep):

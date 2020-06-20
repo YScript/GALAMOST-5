@@ -145,8 +145,8 @@ class read:
 			if i.group==group:
 				return i
 			
-	def find_plist(self, rcut):
+	def find_plist(self, rcut, exclusion):
 		for i in self.plist:
-			if i.rcut>=rcut:
+			if i.rcut>=rcut and i.exclusion==exclusion:
 				return i			
 			

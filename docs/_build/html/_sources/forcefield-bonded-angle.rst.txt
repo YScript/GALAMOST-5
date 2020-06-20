@@ -44,7 +44,7 @@ Description:
     - :math:`\theta_{0}` - equilibrium angle ``theta0`` (in radians)
 
     .. note::
-	    The angles set in script are in the unit of degree, and the program will convert them into radian automatically.
+	    Angles for the functions in library should be given in script in the unit of degree, and the program will convert them into radian automatically.
 
    Harmonic cosine function		
     .. math::
@@ -60,7 +60,7 @@ Description:
     - :math:`\theta_{0}` - equilibrium angle ``theta0`` (in radians)
 	
     .. note::
-	    The angles set in script are in the unit of degree, and the program will convert them into radian automatically.		
+	    Angles for the functions in library should be given in script in the unit of degree, and the program will convert them into radian automatically.		
 
 .. py:class:: force.angle(info, func)
 

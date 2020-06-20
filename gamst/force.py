@@ -33,10 +33,10 @@ from gamst import forces
 from gamst import plist
 
 class nonbonded:
-	def __init__(self, info, rcut, func):
-		nl = info.find_plist(rcut)
+	def __init__(self, info, rcut, func, exclusion=None):
+		nl = info.find_plist(rcut, exclusion)
 		if nl is None:
-			nl = plist.neighbor(info, rcut)
+			nl = plist.neighbor(info, rcut, exclusion)
 			info.plist.append(nl)	
 		self.info = info
 		self.data=forces.pair.pair(info, nl, func)
@@ -62,9 +62,9 @@ class nonbonded:
 					raise RuntimeError('Error! the parameters between type ',self.info.typemap[i],' and type ',self.info.typemap[j],' has not been set!')
 class dpd:
 	def __init__(self, info, rcut=1.0):
-		nl = info.find_plist(rcut)
+		nl = info.find_plist(rcut, None)
 		if nl is None:
-			nl = plist.neighbor(info, rcut)
+			nl = plist.neighbor(info, rcut, None)
 			info.plist.append(nl)
 		self.info = info
 		self.data=forces.pair.dpd(info, nl)

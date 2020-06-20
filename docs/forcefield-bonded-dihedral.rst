@@ -46,7 +46,7 @@ Description:
       - *optional*: defaults to `-1.0`		
 	
     .. note::
-	    The dihedral angles set in script are in the unit of degree, and the program will convert them into radian automatically.
+	    Dihedral angles for the functions in library should be given in script in the unit of degree, and the program will convert them into radian automatically.
 		
    Harmonic function for improper dihedrals		
     .. math::
@@ -62,7 +62,7 @@ Description:
     - :math:`\delta` - phase shift angle ``delta`` (in radians)
 
     .. note::
-	    The dihedral angles set in script are in the unit of degree, and the program will convert them into radian automatically.			
+	    Dihedral angles for the functions in library should be given in script in the unit of degree, and the program will convert them into radian automatically.			
 
 .. py:class:: force.dihedral(info, func)
 
@@ -71,9 +71,10 @@ Description:
    :param info: system information.
    :param func: function that is either a string or a device function. 
 
-   .. py:function:: setParams(angle_type, param)
+   .. py:function:: setParams(dihedral_type, param, term='proper')
    
-      specifies the dihedral interaction parameters with dihedral type and a list of parameters.	
+      specifies the dihedral interaction parameters with dihedral type, a list of parameters and the term of dihedral.
+      The term candidates of dihedral are 'proper' and 'improper' with the default 'proper'. 	
 
    .. py:function:: setCosFactor(factor)
    
