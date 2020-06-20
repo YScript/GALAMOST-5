@@ -113,7 +113,9 @@ def cu_sort_ex_list(npa, ex_size_idx, ex_list_idx, ex_size_tag, ex_list_tag, rta
 		for j in range(0, ne):
 			ej = ex_list_tag[tag][j]
 			ex_list_idx[idx][j] = rtag[ej]
-		ex_size_idx[idx] = ne			
+			print(tag, j, ej)			
+		ex_size_idx[idx] = ne
+
 
 @cuda.jit("void(int32[:])")
 def cu_zero(situation):
@@ -159,17 +161,20 @@ class nlist:
 			for i in exclusion:
 				if i =="bond":
 					self.bond_exclusion()
-				if i =="angle":
+				elif i =="angle":
 					self.angle_exclusion()				
-				if i =="dihedral":
+				elif i =="dihedral":
 					self.dihedral_exclusion()
+				else:
+					raise RuntimeError("Error exclusion element ", i,", the candidates are bond, angle, and dihedral !")
 			if self.set_exclusion:
 				self.ex_initiation()
 		
 	def sort(self):
-		cu_sort_ex_list[self.nblocks, self.block_size](self.info.npa, self.d_ex_size_idx, self.d_ex_list_idx, self.d_ex_size_tag, self.d_ex_list_tag, self.info.d_rtag)		
+		if self.set_exclusion:
+			cu_sort_ex_list[self.nblocks, self.block_size](self.info.npa, self.d_ex_size_idx, self.d_ex_list_idx, self.d_ex_size_tag, self.d_ex_list_tag, self.info.d_rtag)		
 		
-	def add_ex_list(a, b):
+	def add_ex_list(self, a, b):
 		exist_a = False
 		exist_b = False
 
@@ -194,31 +199,31 @@ class nlist:
 			
 		self.set_exclusion = True
 			
-	def bond_exclusion():
+	def bond_exclusion(self):
 		if self.info.bond is None:
 			raise RuntimeError('Error, no bonds given for exclusion ')
 
 		for i in range(0, len(self.info.bond.bonds)):
 			bi = self.info.bond.bonds[i]
-			add_ex_list(bi[1], bi[2])
+			self.add_ex_list(bi[1], bi[2])
 			
-	def angle_exclusion():
+	def angle_exclusion(self):
 		if self.info.angle is None:
 			raise RuntimeError('Error, no angles given for exclusion ')
 
 		for i in range(0, len(self.info.angle.angles)):
 			ai = self.info.angle.angles[i]
-			add_ex_list(ai[1], ai[3])
+			self.add_ex_list(ai[1], ai[3])
 			
-	def dihedral_exclusion():
+	def dihedral_exclusion(self):
 		if self.info.dihedral is None:
 			raise RuntimeError('Error, no dihedrals given for exclusion ')
 
 		for i in range(0, len(self.info.dihedral.dihedrals)):
 			di = self.info.dihedral.dihedrals[i]
-			add_ex_list(di[1], di[4])
+			self.add_ex_list(di[1], di[4])
 	
-	def ex_initiation():
+	def ex_initiation(self):
 		max_size = 0
 		for i in range(self.info.npa):
 			if len(self.ex_list[i]) > max_size:
@@ -280,6 +285,8 @@ class nlist:
 				self.d_neighbor_list = cuda.to_device(self.neighbor_list)
 			else:
 				build_list = False
+				
+		
 		# nlist = self.d_neighbor_list.copy_to_host()
 		# nlist_size = self.d_neighbor_size.copy_to_host()
 		# for i in range(0, nlist.shape[0]):

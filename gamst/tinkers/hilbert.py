@@ -264,8 +264,9 @@ class sort_order:
 			cu_copy_float2d[self.nblocks, self.block_size](self.info.npa, self.info.d_velo, self.d_temp_float4)			
 
 		for p in self.info.plist:
+			p.data.sort()
 			p.data.calculate(True)
-			
+
 		for p in self.info.particle_set:
 			p.sort()
 
