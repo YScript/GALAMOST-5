@@ -22,7 +22,7 @@ fn = gamst.force.nonbonded(info=mst, rcut=3.0, func=lj)
 fn.setParams(type_i="A", type_j="A", param=[1.0, 1.0, 1.0, 3.0])
 app.add(fn)
 
-
+@cuda.jit(device=True)
 def bond_harmonic(rsq, param, fp):
 	k = param[0]
 	r0 = param[1]
@@ -51,7 +51,7 @@ fa = gamst.force.angle(info=mst, func=angle_harmonic)
 fa.setParams(angle_type='A-A-A', param=[100.0, 120.0])#param=[k, t0]
 app.add(fa)
 
-
+@cuda.jit(device=True)
 def dihedral_harmonic(cos_abcd, sin_abcd, param, fp):
 	k = param[0]
 	cos_phi0 = param[1]
