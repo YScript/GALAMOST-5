@@ -19,10 +19,10 @@ Non-bonded functions
 
 Description:
 
-   The function of non-bonded interactions could be either one called from non-bonded interaction function libary, or a self-defined device function.
+   The function describing non-bonded interactions could be either the one called from non-bonded interaction function libary, or the one defined by user himself in script.
    Non-bonded interaction function libary contains Lennard-Jones function named as 'lj' and harmonic function named as 'harmonic'.
    
-   Lennard-Jones function
+   Lennard-Jones function (lj)
     .. math::
         :nowrap:
 
@@ -34,20 +34,36 @@ Description:
 
     The following coefficients must be set per unique pair of particle types:
 
-    - :math:`\epsilon` - *epsilon* (in energy units)
-    - :math:`\sigma` - *sigma* (in distance units)
-    - :math:`\alpha` - *alpha* (unitless)
-    - :math:`r_{\mathrm{cut}}` - *r_cut* (in distance units)
-      - *optional*: defaults to the global r_cut specified in the pair command   
+    - :math:`\epsilon` - the depth of the potential well (in energy units)
+    - :math:`\sigma` - the collision diameter (in distance units)
+    - :math:`\alpha` - the factor of attraction (unitless)
+    - :math:`r_{\mathrm{cut}}` - cutoff radius (in distance units)
+      - *note*: equal to or smaller than the global rcut specified in ``force.nonbonded``
    
+   
+   Harmonic function (harmonic)
+    .. math::
+        :nowrap:
 
-.. py:class:: force.nonbonded(info, rcut, func)
+        \begin{eqnarray*}
+        V_{\mathrm{H}}(r) = \frac{1}{2}\alpha \left( r - r_{\mathrm{cut}} \right)^{2}, r < r_{\mathrm{cut}} 
+        \end{eqnarray*}
 
-   The constructor of non-bonded interaction calculation object.
+    Coefficients:
+
+    - :math:`\alpha` - spring constant (in units of energy/distance^2)
+    - :math:`r_{\mathrm{cut}}` - cutoff radius (in distance units)
+      - *note*: equal to or smaller than the global rcut specified in ``force.nonbonded`` 
+
+.. py:class:: force.nonbonded(info, rcut, func, exclusion=None)
+
+   Constructor of non-bonded interaction calculation object.
 	  
    :param info: system information.
    :param rcut: cut-off radius of interactions.
    :param func: function name.
+   :param exclusion: a python list of exclusions, the candidates are 'bond', 'angle', 'dihedral', 
+                the default is None.    
 
    .. py:function:: setParams(type_i, type_j, param)
  
@@ -60,6 +76,10 @@ Description:
       app.add(fn)
 
 
+      fn = gamst.force.nonbonded(info=mst, rcut=3.0, func='lj', exclusion=['bond'])
+      fn.setParams(type_i="a", type_j="a", param=[1.0, 1.0, 1.0, 3.0])
+      app.add(fn)
+
 
 .. _self-defined-function:
 
@@ -69,9 +89,9 @@ Self-defined functions
 Description:
 
    The device function for non-bonded interactions could be written in script and conveyed 
-   to kernal funcitons for calculation.
+   to kernel funciton for calculation.
    
-   Non-bonded interactions with potential form :math:`p(r)`
+   With the potential form of non-bonded interactions :math:`p(r)`, the expression of parameters in script are: 
 
    * p = :math:`p(r)`
    * f = :math:`-(\triangle p(r)/\triangle r)(1/r)`
@@ -111,9 +131,9 @@ Description:
 				sigma2 = sigma*sigma
 				r2inv = sigma2/rsq;
 				r6inv = r2inv * r2inv * r2inv;
-				f = nb.float32(4.0) * r2inv * r6inv * (nb.float32(12.0) 
+				f = nb.float32(4.0) * epsilon * r2inv * r6inv * (nb.float32(12.0) 
 				    * r6inv - nb.float32(6.0) * alpha)/sigma2	
-				p = nb.float32(4.0) * r6inv * ( r6inv - nb.float32(1.0))
+				p = nb.float32(4.0) * epsilon * r6inv * ( r6inv - nb.float32(1.0))
 				fp[0]=f
 				fp[1]=p
 				

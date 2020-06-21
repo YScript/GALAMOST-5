@@ -27,10 +27,10 @@ Angle functions
 
 Description:
 
-   Function of angle interactions could be either one called from angle interaction function libary, or a self-defined device function.
+   Function of angle interactions could be either the one called from angle interaction function libary, or the one defined by user himself.
    Angle interaction function libary contains harmonic function named as 'harmonic' and harmonic cosine function named as 'harmonic_cos'.
    
-   Harmonic function
+   Harmonic function (harmonic)
     .. math::
         :nowrap:
 
@@ -46,7 +46,7 @@ Description:
     .. note::
 	    Angles for the functions in library should be given in script in the unit of degree, and the program will convert them into radian automatically.
 
-   Harmonic cosine function		
+   Harmonic cosine function (harmonic_cos)		
     .. math::
         :nowrap:
 
@@ -85,9 +85,9 @@ Self-defined bond functions
 Description:
 
    The device function for angle interactions could be written in script and conveyed 
-   to kernal funcitons for calculation.
+   to kernel funciton for calculation.
    
-   Angle interactions with potential form :math:`p(\theta)`
+   With the potential form of angle interactions :math:`p(\theta)`, the expression of parameters in script are: 
 
    * p = :math:`p(\theta)`
    * f = :math:`\triangle p(\theta)/\triangle \theta`  

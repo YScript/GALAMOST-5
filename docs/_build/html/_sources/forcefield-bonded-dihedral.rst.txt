@@ -27,10 +27,10 @@ Dihedral functions
 
 Description:
 
-   Function of angle interactions could be either one called from angle interaction function libary, or a self-defined device function.
+   Function of angle interactions could be either the one called from angle interaction function libary, or the one defined by user himself.
    Angle interaction function libary contains harmonic function named as 'harmonic' and harmonic cosine function named as 'harmonic_cos'.
 
-   Harmonic function for proper dihedrals
+   Harmonic function for proper dihedrals(harmonic)
     .. math::
         :nowrap:
 
@@ -48,7 +48,7 @@ Description:
     .. note::
 	    Dihedral angles for the functions in library should be given in script in the unit of degree, and the program will convert them into radian automatically.
 		
-   Harmonic function for improper dihedrals		
+   Harmonic function for improper dihedrals (harmonic)		
     .. math::
         :nowrap:
 
@@ -92,9 +92,9 @@ Self-defined bond functions
 Description:
 
    The device function for dihedral interactions could be written in script and conveyed 
-   to kernal funcitons for calculation.
+   to kernel funciton for calculation.
    
-   Dihedral interactions with potential form :math:`p(\varphi)`
+   With the potential form of dihedral interactions :math:`p(\varphi)`, the expression of parameters in script are: 
 
    * p = :math:`p(\varphi)`
    * f = :math:`\triangle p(\varphi)/\triangle \varphi`     
@@ -119,7 +119,8 @@ Description:
    
 		from numba import cuda
 		import numba as nb
-
+		
+		@cuda.jit(device=True)
 		def harmonic(cos_abcd, sin_abcd, param, fp):
 			k = param[0]
 			cos_phi0 = param[1]

@@ -218,10 +218,10 @@ The bonds are specified in <a class="reference internal" href="system-data-forma
 <span id="bond-function"></span><h2>Bond functions<a class="headerlink" href="#bond-functions" title="Permalink to this headline">¶</a></h2>
 <p>Description:</p>
 <blockquote>
-<div><p>Function of bond interactions could be either one called from bond interaction function libary, or a self-defined device function.
+<div><p>Function of bond interactions could be either the one called from bond interaction function libary, or the one defined by user himself.
 Bond interaction function libary contains harmonic function named as ‘harmonic’.</p>
 <dl>
-<dt>Harmonic function</dt><dd><div class="math notranslate nohighlight">
+<dt>Harmonic function (harmonic)</dt><dd><div class="math notranslate nohighlight">
 \begin{eqnarray*}
 V_{\mathrm{bond}}(r) = \frac{1}{2}k\left( r - r_{0} \right)^{2}
 \end{eqnarray*}</div><p>Coefficients:</p>
@@ -266,8 +266,8 @@ V_{\mathrm{bond}}(r) = \frac{1}{2}k\left( r - r_{0} \right)^{2}
 <p>Description:</p>
 <blockquote>
 <div><p>The device function for bond interactions could be written in script and conveyed
-to kernal funcitons for calculation.</p>
-<p>Bond interactions with potential form <span class="math notranslate nohighlight">\(p(r)\)</span></p>
+to kernel funciton for calculation.</p>
+<p>With the potential form of bond interactions <span class="math notranslate nohighlight">\(p(r)\)</span>, the expression of parameters in script are:</p>
 <ul class="simple">
 <li><p>p = <span class="math notranslate nohighlight">\(p(r)\)</span></p></li>
 <li><p>f = <span class="math notranslate nohighlight">\(-(\triangle p(r)/\triangle r)(1/r)\)</span></p></li>

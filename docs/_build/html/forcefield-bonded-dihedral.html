@@ -218,10 +218,10 @@ The dihedrals are specified in <a class="reference internal" href="system-data-f
 <span id="dihedral-function"></span><h2>Dihedral functions<a class="headerlink" href="#dihedral-functions" title="Permalink to this headline">¶</a></h2>
 <p>Description:</p>
 <blockquote>
-<div><p>Function of angle interactions could be either one called from angle interaction function libary, or a self-defined device function.
+<div><p>Function of angle interactions could be either the one called from angle interaction function libary, or the one defined by user himself.
 Angle interaction function libary contains harmonic function named as ‘harmonic’ and harmonic cosine function named as ‘harmonic_cos’.</p>
 <dl>
-<dt>Harmonic function for proper dihedrals</dt><dd><div class="math notranslate nohighlight">
+<dt>Harmonic function for proper dihedrals(harmonic)</dt><dd><div class="math notranslate nohighlight">
 \begin{eqnarray*}
 V_{\mathrm{dihedral}}(\varphi)=k\left[ 1+f\cos \left( \varphi-\delta \right) \right]
 \end{eqnarray*}</div><p>Coefficients:</p>
@@ -236,7 +236,7 @@ V_{\mathrm{dihedral}}(\varphi)=k\left[ 1+f\cos \left( \varphi-\delta \right) \ri
 <p>Dihedral angles for the functions in library should be given in script in the unit of degree, and the program will convert them into radian automatically.</p>
 </div>
 </dd>
-<dt>Harmonic function for improper dihedrals</dt><dd><div class="math notranslate nohighlight">
+<dt>Harmonic function for improper dihedrals (harmonic)</dt><dd><div class="math notranslate nohighlight">
 \begin{eqnarray*}
 V_{\mathrm{dihedral}}(\varphi)=k\left( \varphi-\delta \right)^2
 \end{eqnarray*}</div><p>Coefficients:</p>
@@ -290,8 +290,8 @@ The term candidates of dihedral are ‘proper’ and ‘improper’ with the def
 <p>Description:</p>
 <blockquote>
 <div><p>The device function for dihedral interactions could be written in script and conveyed
-to kernal funcitons for calculation.</p>
-<p>Dihedral interactions with potential form <span class="math notranslate nohighlight">\(p(\varphi)\)</span></p>
+to kernel funciton for calculation.</p>
+<p>With the potential form of dihedral interactions <span class="math notranslate nohighlight">\(p(\varphi)\)</span>, the expression of parameters in script are:</p>
 <ul class="simple">
 <li><p>p = <span class="math notranslate nohighlight">\(p(\varphi)\)</span></p></li>
 <li><p>f = <span class="math notranslate nohighlight">\(\triangle p(\varphi)/\triangle \varphi\)</span></p></li>
@@ -316,6 +316,7 @@ to kernal funcitons for calculation.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">numba</span> <span class="k">import</span> <span class="n">cuda</span>
 <span class="kn">import</span> <span class="nn">numba</span> <span class="k">as</span> <span class="nn">nb</span>
 
+<span class="nd">@cuda</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">device</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">harmonic</span><span class="p">(</span><span class="n">cos_abcd</span><span class="p">,</span> <span class="n">sin_abcd</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">fp</span><span class="p">):</span>
         <span class="n">k</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">cos_phi0</span> <span class="o">=</span> <span class="n">param</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>

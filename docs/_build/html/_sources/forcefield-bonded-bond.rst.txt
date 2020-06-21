@@ -28,10 +28,10 @@ Bond functions
 
 Description:
 
-   Function of bond interactions could be either one called from bond interaction function libary, or a self-defined device function.
+   Function of bond interactions could be either the one called from bond interaction function libary, or the one defined by user himself.
    Bond interaction function libary contains harmonic function named as 'harmonic'.
 
-   Harmonic function
+   Harmonic function (harmonic)
     .. math::
         :nowrap:
 
@@ -69,9 +69,9 @@ Self-defined bond functions
 Description:
 
    The device function for bond interactions could be written in script and conveyed 
-   to kernal funcitons for calculation.
+   to kernel funciton for calculation.
    
-   Bond interactions with potential form :math:`p(r)`
+   With the potential form of bond interactions :math:`p(r)`, the expression of parameters in script are: 
 
    * p = :math:`p(r)`
    * f = :math:`-(\triangle p(r)/\triangle r)(1/r)`  

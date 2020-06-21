@@ -105,17 +105,47 @@ def cu_check_build(npa, pos, box, last_pos, rbuff_half_rsq, situation):
 			
 #sort ex list
 @cuda.jit("void(int32, int32[:], int32[:, :], int32[:], int32[:, :], int32[:])")
-def cu_sort_ex_list(npa, ex_size_idx, ex_list_idx, ex_size_tag, ex_list_tag, rtag):
+def cu_sort_ex_list(npa, ex_size, ex_list, ex_size_tag, ex_list_tag, rtag):
 	tag = cuda.grid(1)
 	if tag < npa:
 		ne = ex_size_tag[tag]
 		idx = rtag[tag]
 		for j in range(0, ne):
 			ej = ex_list_tag[tag][j]
-			ex_list_idx[idx][j] = rtag[ej]
-			print(tag, j, ej)			
-		ex_size_idx[idx] = ne
-
+			ex_list[idx][j] = rtag[ej]
+			# print(tag, j, ej)			
+		ex_size[idx] = ne
+		
+		
+@cuda.jit("void(int32, int32[:], int32[:, :],  int32[:], int32[:, :], int32)")
+def filter_nlist(npa, neighbor_size, neighbor_list, ex_size, ex_list, offset):
+	i = cuda.grid(1)
+	if i < npa:
+		ns = neighbor_size[i]
+		es = ex_size[i]
+		nns = 0
+		if offset >= es:
+			return
+		es_left = es - offset
+		ex_list_batch = cuda.local.array(4, dtype = nb.int32)
+		for j in range(0, 4):
+			if j < es_left:
+				ex_list_batch[j] = ex_list[i, j + offset]
+			else:
+				ex_list_batch[j] = 0xffffffff
+		
+		for j in range(0, ns):
+			nj = neighbor_list[i, j]
+			excluded = False
+			if nj == ex_list_batch[0] or nj == ex_list_batch[1] or nj == ex_list_batch[2] or nj == ex_list_batch[3]:
+				excluded = True
+			
+			# print(i, nj ,ex_list_batch[0], ex_list_batch[1], ex_list_batch[2], ex_list_batch[3], offset)
+			if not excluded:
+				if nns != j:
+					neighbor_list[i, nns] = nj
+				nns += 1
+		neighbor_size[i] = nns
 
 @cuda.jit("void(int32[:])")
 def cu_zero(situation):
@@ -135,7 +165,7 @@ class nlist:
 		self.neighbor_list = np.zeros([self.info.npa, self.nmax], dtype = np.int32)
 		self.block_size = 64
 		self.nblocks = math.ceil(self.info.npa / self.block_size)
-		self.ex_list=[[] for i in range(self.info.npa)]
+		self.ex_list_host=[[] for i in range(self.info.npa)]
 
 		self.last_pos = np.zeros([self.info.npa, 3], dtype = np.float32)		
 		self.neighbor_size = np.zeros(self.info.npa, dtype = np.int32)
@@ -172,7 +202,7 @@ class nlist:
 		
 	def sort(self):
 		if self.set_exclusion:
-			cu_sort_ex_list[self.nblocks, self.block_size](self.info.npa, self.d_ex_size_idx, self.d_ex_list_idx, self.d_ex_size_tag, self.d_ex_list_tag, self.info.d_rtag)		
+			cu_sort_ex_list[self.nblocks, self.block_size](self.info.npa, self.d_ex_size, self.d_ex_list, self.d_ex_size_tag, self.d_ex_list_tag, self.info.d_rtag)		
 		
 	def add_ex_list(self, a, b):
 		exist_a = False
@@ -183,19 +213,19 @@ class nlist:
 		if b >= self.info.npa:
 			raise RuntimeError('Error, the index of particle ', b,' is out of the range of 0 to ', self.info.npa-1)
 
-		for i in range(len(self.ex_list[a])):
-			if self.ex_list[a][i] == b:
+		for i in range(len(self.ex_list_host[a])):
+			if self.ex_list_host[a][i] == b:
 				exist_b = True
 
-		for i in range(len(self.ex_list[b])):
-			if self.ex_list[b][i] == a:
+		for i in range(len(self.ex_list_host[b])):
+			if self.ex_list_host[b][i] == a:
 				exist_a = True	
 				
 		if not exist_b:
-			self.ex_list[a].append(b)
+			self.ex_list_host[a].append(b)
 			
 		if not exist_a:			
-			self.ex_list[b].append(a)
+			self.ex_list_host[b].append(a)
 			
 		self.set_exclusion = True
 			
@@ -224,27 +254,27 @@ class nlist:
 			self.add_ex_list(di[1], di[4])
 	
 	def ex_initiation(self):
-		max_size = 0
+		self.ex_max_size = 0
 		for i in range(self.info.npa):
-			if len(self.ex_list[i]) > max_size:
-				max_size=len(self.ex_list[i])
+			if len(self.ex_list_host[i]) > self.ex_max_size:
+				self.ex_max_size=len(self.ex_list_host[i])
 				
-		self.ex_list_tag = np.zeros([self.info.npa, max_size], dtype = np.int32)	
+		self.ex_list_tag = np.zeros([self.info.npa, self.ex_max_size], dtype = np.int32)	
 		self.ex_size_tag = np.zeros(self.info.npa, dtype = np.int32)
 		
-		self.ex_list_idx = np.zeros([self.info.npa, max_size], dtype = np.int32)	
-		self.ex_size_idx = np.zeros(self.info.npa, dtype = np.int32)
+		self.ex_list = np.zeros([self.info.npa, self.ex_max_size], dtype = np.int32)	
+		self.ex_size = np.zeros(self.info.npa, dtype = np.int32)
 
 		for i in range(self.info.npa):
-			for j in range(len(self.ex_list[i])):
-				self.ex_list_tag[i][j] = self.ex_list[i][j]
-			self.ex_size_tag[i] = len(self.ex_list[i])
+			for j in range(len(self.ex_list_host[i])):
+				self.ex_list_tag[i][j] = self.ex_list_host[i][j]
+			self.ex_size_tag[i] = len(self.ex_list_host[i])
 		
 		self.d_ex_list_tag = cuda.to_device(self.ex_list_tag)
 		self.d_ex_size_tag = cuda.to_device(self.ex_size_tag)
 		
-		self.d_ex_list_idx = cuda.to_device(self.ex_list_idx)
-		self.d_ex_size_idx = cuda.to_device(self.ex_size_idx)
+		self.d_ex_list = cuda.to_device(self.ex_list)
+		self.d_ex_size = cuda.to_device(self.ex_size)
 		
 		self.sort()
 
@@ -264,6 +294,7 @@ class nlist:
 		# end1 = time.time()			
 		# cuda.synchronize()
 		# print("check build",end1 - start)
+		update_list = build_list
 		while build_list:
 			# end1 = time.time()				
 			self.clist.calculate()
@@ -286,7 +317,20 @@ class nlist:
 			else:
 				build_list = False
 				
-		
+				
+				
+		if self.set_exclusion and update_list:
+			# self.neighbor_list = self.d_neighbor_list.copy_to_host()
+			# self.neighbor_size = self.d_neighbor_size.copy_to_host()
+			# print('before', self.neighbor_size, self.neighbor_list)
+			nbatch = math.ceil(self.ex_max_size / 4)
+			offset = 0
+			for i in range(0, nbatch):
+				filter_nlist[self.nblocks, self.block_size](self.info.npa, self.d_neighbor_size, self.d_neighbor_list, self.d_ex_size, self.d_ex_list, offset)
+				offset += 4
+			# self.neighbor_size = self.d_neighbor_size.copy_to_host()	
+			# self.neighbor_list = self.d_neighbor_list.copy_to_host()
+			# print('after',self.neighbor_size, self.neighbor_list)
 		# nlist = self.d_neighbor_list.copy_to_host()
 		# nlist_size = self.d_neighbor_size.copy_to_host()
 		# for i in range(0, nlist.shape[0]):

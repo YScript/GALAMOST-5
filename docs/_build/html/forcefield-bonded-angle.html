@@ -218,10 +218,10 @@ The angles are specified in <a class="reference internal" href="system-data-form
 <span id="angle-function"></span><h2>Angle functions<a class="headerlink" href="#angle-functions" title="Permalink to this headline">¶</a></h2>
 <p>Description:</p>
 <blockquote>
-<div><p>Function of angle interactions could be either one called from angle interaction function libary, or a self-defined device function.
+<div><p>Function of angle interactions could be either the one called from angle interaction function libary, or the one defined by user himself.
 Angle interaction function libary contains harmonic function named as ‘harmonic’ and harmonic cosine function named as ‘harmonic_cos’.</p>
 <dl>
-<dt>Harmonic function</dt><dd><div class="math notranslate nohighlight">
+<dt>Harmonic function (harmonic)</dt><dd><div class="math notranslate nohighlight">
 \begin{eqnarray*}
 V_{\mathrm{angle}}(\theta) = \frac{1}{2}k\left( \theta -\theta_{0} \right)^{2}
 \end{eqnarray*}</div><p>Coefficients:</p>
@@ -234,7 +234,7 @@ V_{\mathrm{angle}}(\theta) = \frac{1}{2}k\left( \theta -\theta_{0} \right)^{2}
 <p>Angles for the functions in library should be given in script in the unit of degree, and the program will convert them into radian automatically.</p>
 </div>
 </dd>
-<dt>Harmonic cosine function</dt><dd><div class="math notranslate nohighlight">
+<dt>Harmonic cosine function (harmonic_cos)</dt><dd><div class="math notranslate nohighlight">
 \begin{eqnarray*}
 V_{\mathrm{angle}}(\theta)=k\left[ 1-\cos \left( \theta - {\theta}_{0} \right) \right]
 \end{eqnarray*}</div><p>Coefficients:</p>
@@ -281,8 +281,8 @@ V_{\mathrm{angle}}(\theta)=k\left[ 1-\cos \left( \theta - {\theta}_{0} \right) \
 <p>Description:</p>
 <blockquote>
 <div><p>The device function for angle interactions could be written in script and conveyed
-to kernal funcitons for calculation.</p>
-<p>Angle interactions with potential form <span class="math notranslate nohighlight">\(p(\theta)\)</span></p>
+to kernel funciton for calculation.</p>
+<p>With the potential form of angle interactions <span class="math notranslate nohighlight">\(p(\theta)\)</span>, the expression of parameters in script are:</p>
 <ul class="simple">
 <li><p>p = <span class="math notranslate nohighlight">\(p(\theta)\)</span></p></li>
 <li><p>f = <span class="math notranslate nohighlight">\(\triangle p(\theta)/\triangle \theta\)</span></p></li>

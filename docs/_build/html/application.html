@@ -183,18 +183,19 @@
 <h1>Application<a class="headerlink" href="#application" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="modules-management">
 <h2>Modules management<a class="headerlink" href="#modules-management" title="Permalink to this headline">¶</a></h2>
-<p>GALAMOST is a modular program. Application manages and calls modules and run simulation.
+<p>GALAMOST is organized by being composed of modules. Application manages and calls modules, and thereby run simulations.
 Usually, we only define an application object in the context of script. The modules can be
-added <code class="docutils literal notranslate"><span class="pre">add()</span></code> into or removed <code class="docutils literal notranslate"><span class="pre">remove()</span></code> from the application before runing <code class="docutils literal notranslate"><span class="pre">run()</span></code> the simulation.</p>
+added into by <code class="docutils literal notranslate"><span class="pre">add()</span></code> or removed from by <code class="docutils literal notranslate"><span class="pre">remove()</span></code> the application before runing <code class="docutils literal notranslate"><span class="pre">run()</span></code> the simulation.</p>
 <dl class="class">
 <dt id="application.dynamics">
-<em class="property">class </em><code class="sig-prename descclassname">application.</code><code class="sig-name descname">dynamics</code><span class="sig-paren">(</span><em class="sig-param">info</em>, <em class="sig-param">dt</em><span class="sig-paren">)</span><a class="headerlink" href="#application.dynamics" title="Permalink to this definition">¶</a></dt>
-<dd><p>The constructor of an application object.</p>
+<em class="property">class </em><code class="sig-prename descclassname">application.</code><code class="sig-name descname">dynamics</code><span class="sig-paren">(</span><em class="sig-param">info</em>, <em class="sig-param">dt</em>, <em class="sig-param">sort=True</em><span class="sig-paren">)</span><a class="headerlink" href="#application.dynamics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor of application object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>info</strong> – system information</p></li>
 <li><p><strong>dt</strong> – integration time step</p></li>
+<li><p><strong>sort</strong> – if device memory is sorted by Hilbert curve, the default is True.</p></li>
 </ul>
 </dd>
 </dl>

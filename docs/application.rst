@@ -4,16 +4,17 @@ Application
 Modules management
 ------------------
 
-GALAMOST is a modular program. Application manages and calls modules and run simulation.
+GALAMOST is organized by being composed of modules. Application manages and calls modules, and thereby run simulations.
 Usually, we only define an application object in the context of script. The modules can be 
-added ``add()`` into or removed ``remove()`` from the application before runing ``run()`` the simulation. 
+added into by ``add()`` or removed from by ``remove()`` the application before runing ``run()`` the simulation. 
 
-.. py:class:: application.dynamics(info, dt)
+.. py:class:: application.dynamics(info, dt, sort=True)
 
-   The constructor of an application object.
+   Constructor of application object.
 	  
    :param info: system information
-   :param dt: integration time step	   
+   :param dt: integration time step
+   :param sort: if device memory is sorted by Hilbert curve, the default is True. 	    
 
    .. py:function:: add(object)
    
