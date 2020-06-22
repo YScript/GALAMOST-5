@@ -47,6 +47,11 @@ def cu_cell_build(npa, pos, dim, box_low_boundary, inv_width, cell_size, cell_li
 		if math.isnan(pix) or math.isnan(piy) or math.isnan(piz):
 			situation[0]=i+nb.int32(1)
 			return
+			
+		if pix<box_low_boundary[0] or pix>=-box_low_boundary[0] or piy<box_low_boundary[1] or piy>=-box_low_boundary[1] or piz<box_low_boundary[2] or piz>=-box_low_boundary[2]:
+			situation[1]=i+nb.int32(1)
+			return
+			
 		dpix = pix - box_low_boundary[0]
 		dpiy = piy - box_low_boundary[1]
 		dpiz = piz - box_low_boundary[2]
