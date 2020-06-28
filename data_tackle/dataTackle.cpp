@@ -94,7 +94,7 @@ int main(int argc,char* argv[])
 	parameter_list[7] =  "Parameters with default value :bondex=true|bodyex=true|diameter=true";
 	parameter_list[9] =  "Parameters with default value :unwrap_molecule=true|label_free_particle=particle type|molecule_center_in_box=false\n";
 	parameter_list[9] += "                               |shiftx=0.0|shifty=0.0|shiftz=0.0|remove_image=false|add_image_to_pos=true\n";
-	parameter_list[9] += "                               |convert_constraint_to_bond=true|remove_bond_cross_box=false|body_keep=false";
+	parameter_list[9] += "                               |remove_bond_cross_box=false|body_keep=false";
 	parameter_list[10] = "Parameters with default value :direction=XYZ, candidates are X,Y,Z,XY,YZ,XZ,XYZ";
 	parameter_list[11] = "Parameters with default value :maxbin=100|gpu=0|rmax=Lx/2";
 	parameter_list[12] = "Parameters with default value :direction=XYZ, candidates are X,Y,Z,XY,YZ,XZ,XYZ";
@@ -556,19 +556,6 @@ int main(int argc,char* argv[])
 								else
 									cout<<"Warning!! Ignore the unreasonable value 'remove_image="<<value<<"'"<<endl;
 								}
-							else if(param=="convert_constraint_to_bond")
-								{
-								if(value=="true"||value=="false")
-									{
-									if(value=="true")
-										re_image->setConvertConstraintsToBonds(true);
-									else
-										re_image->setConvertConstraintsToBonds(false);
-									cout<<"Note! Change convert_constraint_to_bond="<<value<<" successfully."<<endl;
-									}
-								else
-									cout<<"Warning!! Ignore the unreasonable value 'convert_constraint_to_bond="<<value<<"'"<<endl;									
-								}
 							else if(param=="add_image_to_pos")
 								{
 								if(value=="true"||value=="false")
@@ -580,7 +567,7 @@ int main(int argc,char* argv[])
 									cout<<"Note! Change add_image_to_pos="<<value<<" successfully."<<endl;
 									}
 								else
-									cout<<"Warning!! Ignore the unreasonable value 'convert_constraint_to_bond="<<value<<"'"<<endl;									
+									cout<<"Warning!! Ignore the unreasonable value 'add_image_to_pos="<<value<<"'"<<endl;									
 								}								
 							else if(param=="remove_bond_cross_box")
 								{

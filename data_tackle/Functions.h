@@ -377,12 +377,14 @@ class Density : public Function
 				cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
 				throw runtime_error("Error Density dump");
 				}
+			m_Nf=0;
 			}
 		virtual ~Density() {};
 
 		virtual void compute();			
     private:
 		std::ofstream m_file;
+		unsigned int m_Nf;
 	};	
 //--- case 9
 class Reimage : public Function
@@ -394,7 +396,6 @@ class Reimage : public Function
 			m_label_free_particle = false;
 			m_unwrap_molecule = true;
 			m_keep_molecule_center_in_box = false;
-			m_convert_constraints_to_bonds = true;
 			m_remove_bond_cross_box = false;
 			m_remove_image = false;
 			m_body_keep = false;
@@ -405,6 +406,9 @@ class Reimage : public Function
 			m_nprecision = 10;
 			m_nhead = 7;
 			m_add_image_to_pos = true;
+			m_Nf=0;
+			m_sp = ios::beg;
+			m_file="xxxxxxxx";
 			}
 		virtual ~Reimage() {};
 		void setShiftX(double shiftx)
@@ -437,10 +441,6 @@ class Reimage : public Function
 			m_remove_image = remove_image;
 			m_add_image_to_pos=false;
 			}
-		void setConvertConstraintsToBonds(bool convert_constraints_to_bonds)
-			{
-			m_convert_constraints_to_bonds = convert_constraints_to_bonds;
-			}
 		void setRemoveBondCrossBox(bool remove_bond_cross_box)
 			{
 			m_remove_bond_cross_box = remove_bond_cross_box;
@@ -460,7 +460,6 @@ class Reimage : public Function
 		bool m_unwrap_molecule;
 		bool m_keep_molecule_center_in_box;
 		bool m_remove_image;
-		bool m_convert_constraints_to_bonds;
 		bool m_remove_bond_cross_box;
 		bool m_add_image_to_pos;
 		bool m_body_keep;
@@ -470,6 +469,9 @@ class Reimage : public Function
 		unsigned int m_nprecision;
 		unsigned int m_nhead;
 		std::string m_target_type;
+		unsigned int m_Nf;
+		ifstream::pos_type m_sp;
+		std::string m_file;
 	};	
 //--- case 10
 class MSD : public Function

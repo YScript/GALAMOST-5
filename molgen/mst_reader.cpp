@@ -46,9 +46,11 @@ mst_reader::mst_reader()
     m_dimension = 3;
 	m_box = BoxSize(0.0, 0.0, 0.0);
 	m_num_particles = 0;
+	m_last_np = 0;
 	m_mst_read = false;
 	m_invariant_data = false;
 	m_variant_data = false;
+	m_if_trajectory = false;
 	m_read_indicator = { {"bond", false}, {"angle", false}, {"box", false}, {"position", false}, {"type", false}, 
 	                     {"image", false}, {"mass", false}, {"velocity", false}, {"force", false}, {"virial", false} };
 
@@ -106,6 +108,11 @@ unsigned int mst_reader::getNParticles() const
     {
     return m_num_particles;
     }
+	
+unsigned int mst_reader::getLastNParticles() const
+    {
+    return m_last_np;
+    }	
 
 unsigned int mst_reader::getNParticleTypes() const
     {
@@ -142,7 +149,7 @@ bool mst_reader::readDataFromMST(const string &fname)
 		}
 	else
 		{
-		// cout<<"INFO : read '"<<fname.c_str()<<"'"<<endl;
+		// cout<<"read '"<<fname.c_str()<<"'"<<endl;
 		m_fname = fname;		
 		m_mst_read = false;
 		m_invariant_data = false;
@@ -168,6 +175,13 @@ bool mst_reader::readDataFromMST(const string &fname)
 		// cout<<line<<endl;
 		if (m_mst_read)
 			{
+			if (line.find("mst_end") != line.npos)
+				{	
+				read_frame = true;
+				m_sp=file.tellg();				
+				break;
+				}	
+				
 			if (line.find("invariant_data") != line.npos)
 				{
 				m_invariant_data = true;
@@ -181,8 +195,15 @@ bool mst_reader::readDataFromMST(const string &fname)
 				m_variant_data = true;	
 				continue;
 				}
-				
-			if (line.find("frame") != line.npos)
+			
+			if (line.find("frame_end") != line.npos)
+				{
+				// file.seekg(-line.size()-1, ios::cur);
+				read_frame = true;
+				m_sp=file.tellg();	
+				break;
+				}
+			else if (line.find("frame") != line.npos)
 				{
 				// check node 
 					{
@@ -198,19 +219,11 @@ bool mst_reader::readDataFromMST(const string &fname)
 					
 					m_if_trajectory = true;
 					}
-
-				if (read_frame)
-					{
-					file.seekg(-line.size()-1, ios::cur);
-					m_sp=file.tellg();	
-					break;
-					}
 					
 				if (m_variant_data)
 					clear_data();
 				else
 					throw runtime_error("Error! mst files with multiple frames without the label of 'variant_data'");
-				read_frame = true;
 				continue;
 				}				
 
@@ -316,8 +329,20 @@ bool mst_reader::readDataFromMST(const string &fname)
 				{
 				unsigned int np;
 				parser >> np;
+				
+				if(np==0)
+					{	
+					cerr << endl
+					<< "***Error! number of particles is zero"
+					<< endl << endl;
+					throw runtime_error("Error extracting data from galamost_mst file");
+					}
+				
 				if (np!=m_num_particles)
-					m_if_changed_np =  true;			
+					{
+					m_if_changed_np =  true;
+					m_last_np = m_num_particles;
+					}
 				m_num_particles = np;
 
 				}
@@ -393,6 +418,9 @@ bool mst_reader::readDataFromMST(const string &fname)
 			}
 		}
 		
+	if (file.eof())
+		return false;	
+
 	if(!m_mst_read)
 		{
         cerr << endl
@@ -546,50 +574,39 @@ bool mst_reader::readDataFromMST(const string &fname)
 			}
 		}
 
-	if (file.eof())
-		return false;
-	
 	return read_frame;
     }
 	
 void mst_reader::outPutInfo()
 	{
     // notify the user of what we have accomplished
-    cout <<"----------------------------------------- "<< endl;	
-    cout <<"INFO : --- galamost mst file read summary" << endl;
-    cout <<"INFO : "<< getNParticles() << " particles at timestep " << m_timestep << endl;
+    cout <<"--- galamost mst file read summary" << endl;
+    cout <<" "<< getNParticles() << " particles at timestep " << m_timestep << endl;
     if (m_image.size() > 0)
-        cout <<"INFO : "<< m_image.size() << " images" << endl;
+        cout <<" "<< m_image.size() << " images" << endl;
     if (m_vel.size() > 0)
-        cout <<"INFO : "<< m_vel.size() << " velocities" << endl;
+        cout <<" "<< m_vel.size() << " velocities" << endl;
     if (m_mass.size() > 0)
-        cout <<"INFO : "<< m_mass.size() << " masses" << endl;
+        cout <<" "<< m_mass.size() << " masses" << endl;
     if (m_diameter.size() > 0)
-        cout <<"INFO : "<< m_diameter.size() << " diameters" << endl;
-    cout <<"INFO : "<< getNParticleTypes() <<  " particle types" << endl;
+        cout <<" "<< m_diameter.size() << " diameters" << endl;
+    cout <<" "<< getNParticleTypes() <<  " particle types" << endl;
     if (m_body.size() > 0)
-        cout <<"INFO : "<< m_body.size() << " particle body values" << endl; 	
+        cout <<" "<< m_body.size() << " particle body values" << endl; 	
     if (m_bonds.size() > 0)
-        cout <<"INFO : "<< m_bonds.size() << " bonds" << endl;
+        cout <<" "<< m_bonds.size() << " bonds" << endl;
     if (m_angles.size() > 0)
-        cout <<"INFO : "<< m_angles.size() << " angles" << endl;
+        cout <<" "<< m_angles.size() << " angles" << endl;
     if (m_dihedrals.size() > 0)
-        cout <<"INFO : "<< m_dihedrals.size() << " dihedrals" << endl;
+        cout <<" "<< m_dihedrals.size() << " dihedrals" << endl;
     if (m_charge.size() > 0)
-        cout <<"INFO : "<< m_charge.size() << " charges" << endl;
+        cout <<" "<< m_charge.size() << " charges" << endl;
     if (m_orientation.size() > 0)
-        cout <<"INFO : "<< m_orientation.size() << " orientations" << endl;
+        cout <<" "<< m_orientation.size() << " orientations" << endl;
     if (m_quaternion.size() > 0)
-        cout <<"INFO : "<< m_quaternion.size() << " quaternions" << endl;		
+        cout <<" "<< m_quaternion.size() << " quaternions" << endl;		
     if (m_molecule.size() > 0)
-        cout <<"INFO : "<< m_molecule.size() << " molecules" << endl;	
-	if(m_mass.size()==0)
-		{
-		m_mass.resize(m_pos.size());
-		for(unsigned int i=0; i<m_mass.size();i++)
-			m_mass[i] = 1.0;
-        cout <<"INFO : "<<" set mass to be 1.0 by default!" << endl;			
-		}		
+        cout <<" "<< m_molecule.size() << " molecules" << endl;	
 	}
 
 

@@ -180,6 +180,7 @@ class mst_reader
         mst_reader();
         unsigned int getNDimensions() const;
         unsigned int getNParticles() const;
+        unsigned int getLastNParticles() const;		
         unsigned int getNParticleTypes() const;
         unsigned int getTimeStep() const;
         BoxSize getBox() const;
@@ -287,6 +288,7 @@ class mst_reader
 		std::string m_object_name;
 		bool m_if_changed_np;
 		bool m_if_trajectory;
+		unsigned int m_last_np;
     };
 
 #endif

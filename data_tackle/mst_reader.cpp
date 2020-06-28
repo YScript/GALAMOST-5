@@ -607,13 +607,6 @@ void mst_reader::outPutInfo()
         cout <<" "<< m_quaternion.size() << " quaternions" << endl;		
     if (m_molecule.size() > 0)
         cout <<" "<< m_molecule.size() << " molecules" << endl;	
-	if(m_mass.size()==0)
-		{
-		m_mass.resize(m_pos.size());
-		for(unsigned int i=0; i<m_mass.size();i++)
-			m_mass[i] = 1.0;
-        cout <<" "<<"set mass to be 1.0 by default!" << endl;			
-		}		
 	}
 
 

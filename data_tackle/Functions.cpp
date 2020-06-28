@@ -32,8 +32,6 @@ CORRESPONDENCE
 #include "Functions.h"
 #include "cuComplex.h"
 
-
-	
 double rsq_cal(std::string direction, double dx, double dy, double dz)
 	{
 	double rsq = dx*dx + dy*dy + dz*dz;		
@@ -61,7 +59,8 @@ void Rg2::compute()
 	std::vector< double > mass = m_build->getMass();
 	if(mass.size()==0)
 		{
-        cout<< "***Warning! no input mass, set particle mass to be 1.0!" << endl << endl;
+		if(m_Nf==0)
+			cout<< "***Warning! no input mass, set particle mass to be 1.0!" << endl << endl;
 		mass.resize(pos0.size());
 		for(unsigned int i=0; i< mass.size(); i++)
 			mass[i]=1.0;
@@ -790,7 +789,16 @@ void StressTensor::compute()
 	vec_uint m_dim = m_mol->getDim();	
 	std::vector<unsigned int> type = m_build->getType();
 	std::vector<vec> vel = m_build->getVel();
-	std::vector<double> mass = m_build->getMass();		
+	std::vector<double> mass = m_build->getMass();
+	if(mass.size()==0)
+		{
+ 		if(m_Nf==0)
+			cout<< "***Warning! no input mass, set particle mass to be 1.0!" << endl << endl;
+		mass.resize(pos.size());
+		for(unsigned int i=0; i< mass.size(); i++)
+			mass[i]=1.0;
+		}
+	
 	unsigned int Ntypes = m_build->getNParticleTypes();
 	BoxSize box = m_build->getBox();
 	double Lx = double (box.lx);
@@ -1053,9 +1061,12 @@ void Density::compute()
 	std::vector< double > mass = m_build->getMass();
 	if(mass.size()==0)
 		{
-        cerr << endl << "***Error! no input mass!" << endl << endl;
-		throw runtime_error("Error Density::compute!");
-		}	
+		if(m_Nf==0)
+			cout<< "***Warning! no input mass, set particle mass to be 1.0!" << endl << endl;
+		mass.resize(N);
+		for(unsigned int i=0; i< mass.size(); i++)
+			mass[i]=1.0;
+		}
 	double tmass =0;
 	for(unsigned int i=0; i< N; i++)
 		tmass += mass[i];
@@ -1069,15 +1080,16 @@ void Density::compute()
 	m_file <<fname;
 	m_file <<"  "<<density<<" (g/cm^3)"; 
 	m_file <<"\n";	
+	m_Nf += 1;
 	}
 //--- case 9
 void Reimage::compute()
 	{
 	BoxSize box = m_build->getBox();
 	std::vector<vec> pos0 = m_mol->getPos0();
-	std::vector< double > mass = m_build->getMass();
 	std::vector<vec> pos = m_build->getPos();
 	std::vector<unsigned int> body = m_build->getBody();
+	unsigned int np =  m_build->getNParticles();
 	if(body.size()!=pos.size())
 		m_body_keep=false;
 	std::vector<Bond> bond = m_build->getBond();
@@ -1195,14 +1207,6 @@ void Reimage::compute()
 	ifstream from(fname_in.c_str());
 
 	string filetype = "reimage.mst";
-	if(m_build->iftrajectory())
-		{
-		unsigned int timestep = m_build->getTimeStep();
-		ostringstream extend_fname;
-		extend_fname << setfill('0') << setw(10) << timestep << "."+filetype;
-		filetype = extend_fname.str();	
-		}
-
 	string::size_type xp = fname_out.find("mst");
 	string outs;
 	if (xp!=fname_out.npos)
@@ -1210,118 +1214,95 @@ void Reimage::compute()
 	else
 		outs = fname_out+"."+filetype;
 
-	ofstream to(outs.c_str());
+
+	ofstream to;
+	if(m_build->iftrajectory())
+		{
+		from.seekg(m_sp);
+		// ofstream to(outs.c_str(), ios::app);
+		if(m_file!=outs.c_str())
+			{
+			to.open(outs.c_str());
+			m_file = outs.c_str();
+			}
+		else
+			to.open(outs.c_str(), ios::app);
+		}
+	else
+		{
+		m_sp = ios::beg;
+		to.open(outs.c_str());
+		}
+	
 	if(!from||!to) 
 		cout<<"9.  Error!! reading or writing files failed!"<<endl;
 	string line;
 	bool imageout =false;
 	bool posout =false;
 	bool typeout =false;
-	bool bondout =false;
-	bool constraintout =false;	
-	bool found_image =false;
-	bool found_bond =false;	
+	bool bondout = false;
 
+	bool found_image =false;
+	
 	unsigned int count_image =0;
 	unsigned int count_pos =0;	
 	unsigned int count_type =0;
 	unsigned int count_bond = 0;
+
 	while(getline(from, line))
 		{
-		if(line.find("</configuration>")!= line.npos&&!found_image&&m_unwrap_molecule&&!m_remove_image)
+		// cout<<	line <<endl;
+		if(line.find("mst_end")!= line.npos||line.find("frame_end")!= line.npos)
 			{
-			to <<"<image num=\"" << image.size() << "\">" << "\n";
-			for(unsigned int i=0;i<image.size();i++)
+			if(!found_image&&m_unwrap_molecule&&!m_remove_image)
 				{
-				if(m_add_image_to_pos)
-					to<<0 << " " << 0 << " "<< 0<< "\n";				
-				else
+				to <<"\timage" << "\n";
+				for(unsigned int i=0;i<image.size();i++)
 					{
-					if (m_body_keep)
-						{
-						unsigned int b = body[count_image];
-						if(b!=NO_BODY)
-							to<<0 << " " << 0 << " "<< 0 << "\n";
-						else
-							to<<image[i].x << " " << image[i].y << " "<< image[i].z << "\n";						
-						}
+					if(m_add_image_to_pos)
+						to<<"\t\t"<<0 << " " << 0 << " "<< 0<< "\n";				
 					else
-						to<<image[i].x << " " << image[i].y << " "<< image[i].z << "\n";	
-					}
-				}
-			to<<"</image>"<<"\n";
-			}
-		if(line.find("</configuration>")!= line.npos&&!found_bond&&m_convert_constraints_to_bonds&&bond.size()>0)
-			{
-			to <<"<bond num=\"" << bond.size() << "\">" << "\n";
-			for(unsigned int bi =0; bi<bond.size(); bi++)
-				{
-				bool out=true;
-				if(m_remove_bond_cross_box)
-					{
-					float dx = 	pos[bond[bi].a].x - pos[bond[bi].b].x;
-					float dy = 	pos[bond[bi].a].y - pos[bond[bi].b].y;
-					float dz = 	pos[bond[bi].a].z - pos[bond[bi].b].z;
-					if(fabs(dx)>Lx/2||fabs(dy)>Ly/2||fabs(dz)>Lz/2)
-						out=false;
-					}
-				if(out)	
-					to << bond_type_exchmap[bond[bi].id] << " " << bond[bi].a  << " " << bond[bi].b << "\n";
-				}
-			to<<"</bond>"<<"\n";
-			}			
-		if(line.find("<box")!= line.npos)
-			{
-			to << "<box " << "lx=\""<< Lx << "\" ly=\""<< Ly << "\" lz=\""<< Lz << "\"/>" << "\n";
-			continue;
-			}			
-		if(line.find("</image")!= line.npos)
-			imageout=false;
-		if(line.find("</position")!= line.npos)
-			posout=false;		
-		if(line.find("</type")!= line.npos)
-			typeout=false;
-		if(line.find("</bond")!= line.npos&&(m_convert_constraints_to_bonds||m_remove_bond_cross_box))
-			{
-			if(count_bond<bond.size()&&m_convert_constraints_to_bonds)
-				{
-				for(unsigned int bi =count_bond; bi<bond.size(); bi++)
-					{
-					bool out=true;
-					if(m_remove_bond_cross_box)
 						{
-						float dx = 	pos[bond[bi].a].x - pos[bond[bi].b].x;
-						float dy = 	pos[bond[bi].a].y - pos[bond[bi].b].y;
-						float dz = 	pos[bond[bi].a].z - pos[bond[bi].b].z;
-						if(fabs(dx)>Lx/2||fabs(dy)>Ly/2||fabs(dz)>Lz/2)
-							out=false;
+						if (m_body_keep)
+							{
+							unsigned int b = body[count_image];
+							if(b!=NO_BODY)
+								to<<"\t\t"<<0 << " " << 0 << " "<< 0 << "\n";
+							else
+								to<<"\t\t"<<image[i].x << " " << image[i].y << " "<< image[i].z << "\n";						
+							}
+						else
+							to<<"\t\t"<<image[i].x << " " << image[i].y << " "<< image[i].z << "\n";	
 						}
-					if(out)	
-						to << bond_type_exchmap[bond[bi].id] << " " << bond[bi].a  << " " << bond[bi].b << "\n";
 					}
 				}
-			bondout=false;				
-			}
-		if(line.find("<constraint")!= line.npos&&m_convert_constraints_to_bonds)
-			constraintout=true;			
+			}		
+			
+		if(count_image==np)
+			imageout=false;
+		if(count_pos==np)
+			posout=false;		
+		if(count_type==np)
+			typeout=false;
+		if(count_bond==bond.size())
+			bondout=false;		
 
-		
 		if (imageout&&m_unwrap_molecule)
 			{
 			if(m_remove_image||m_add_image_to_pos)
-				to<<0 << " " << 0 << " "<< 0 << "\n";				
+				to<< "\t\t"<<0 << "\t" << 0 << "\t"<< 0 << "\n";				
 			else
 				{
 				if (m_body_keep)
 					{
 					unsigned int b = body[count_image];
 					if(b!=NO_BODY)
-						to<<0 << " " << 0 << " "<< 0 << "\n";
+						to<< "\t\t"<<0 << "\t" << 0 << "\t"<< 0 << "\n";
 					else
-						to<<image[count_image].x << " " << image[count_image].y << " "<< image[count_image].z << "\n";						
+						to<< "\t\t"<<image[count_image].x << "\t" << image[count_image].y << "\t"<< image[count_image].z << "\n";						
 					}
 				else
-					to<<image[count_image].x << " " << image[count_image].y << " "<< image[count_image].z << "\n";
+					to<< "\t\t"<<image[count_image].x << "\t" << image[count_image].y << "\t"<< image[count_image].z << "\n";
 				}
 
 			count_image += 1;
@@ -1334,23 +1315,23 @@ void Reimage::compute()
 					{
 					unsigned int b = body[count_pos];
 					if(b!=NO_BODY)
-						to<<setiosflags(ios::fixed)<<setprecision(m_nprecision)<<setw(m_nprecision+m_nhead)<<pos[count_pos].x<<setw(m_nprecision+m_nhead)<<pos[count_pos].y<<setw(m_nprecision+m_nhead)<<pos[count_pos].z<< "\n";
+						to<< "\t\t"<<setiosflags(ios::fixed)<<setprecision(m_nprecision)<<setw(m_nprecision+m_nhead)<<pos[count_pos].x<<setw(m_nprecision+m_nhead)<<pos[count_pos].y<<setw(m_nprecision+m_nhead)<<pos[count_pos].z<< "\n";
 					else
-						to<<setiosflags(ios::fixed)<<setprecision(m_nprecision)<<setw(m_nprecision+m_nhead)<<pos[count_pos].x+double(image[count_pos].x)*Lx<<setw(m_nprecision+m_nhead)<<pos[count_pos].y+double(image[count_pos].y)*Ly<<setw(m_nprecision+m_nhead)<<pos[count_pos].z+double(image[count_pos].z)*Lz<< "\n";						
+						to<< "\t\t"<<setiosflags(ios::fixed)<<setprecision(m_nprecision)<<setw(m_nprecision+m_nhead)<<pos[count_pos].x+double(image[count_pos].x)*Lx<<setw(m_nprecision+m_nhead)<<pos[count_pos].y+double(image[count_pos].y)*Ly<<setw(m_nprecision+m_nhead)<<pos[count_pos].z+double(image[count_pos].z)*Lz<< "\n";						
 					}
 				else
-					to<<setiosflags(ios::fixed)<<setprecision(m_nprecision)<<setw(m_nprecision+m_nhead)<<pos[count_pos].x+double(image[count_pos].x)*Lx<<setw(m_nprecision+m_nhead)<<pos[count_pos].y+double(image[count_pos].y)*Ly<<setw(m_nprecision+m_nhead)<<pos[count_pos].z+double(image[count_pos].z)*Lz<< "\n";				
+					to<< "\t\t"<<setiosflags(ios::fixed)<<setprecision(m_nprecision)<<setw(m_nprecision+m_nhead)<<pos[count_pos].x+double(image[count_pos].x)*Lx<<setw(m_nprecision+m_nhead)<<pos[count_pos].y+double(image[count_pos].y)*Ly<<setw(m_nprecision+m_nhead)<<pos[count_pos].z+double(image[count_pos].z)*Lz<< "\n";				
 				}
 			else		
-				to<<setiosflags(ios::fixed)<<setprecision(m_nprecision)<<setw(m_nprecision+m_nhead)<<pos[count_pos].x<<setw(m_nprecision+m_nhead)<<pos[count_pos].y<<setw(m_nprecision+m_nhead)<<pos[count_pos].z<< "\n";
+				to<< "\t\t"<<setiosflags(ios::fixed)<<setprecision(m_nprecision)<<setw(m_nprecision+m_nhead)<<pos[count_pos].x<<setw(m_nprecision+m_nhead)<<pos[count_pos].y<<setw(m_nprecision+m_nhead)<<pos[count_pos].z<< "\n";
 			count_pos += 1;			
 			}
 		else if (typeout&&m_label_free_particle)
 			{
-			to<<name[count_type] << "\n";
+			to<< "\t\t"<<name[count_type] << "\n";
 			count_type += 1;
 			}
-		else if (bondout&&(m_convert_constraints_to_bonds||m_remove_bond_cross_box))
+		else if (bondout)
 			{
 			bool out=true;
 			if(m_remove_bond_cross_box)
@@ -1362,41 +1343,38 @@ void Reimage::compute()
 					out=false;
 				}
 			if(out)
-				to << bond_type_exchmap[bond[count_bond].id] << " " << bond[count_bond].a  << " " << bond[count_bond].b << "\n";
+				to << "\t\t"<< bond_type_exchmap[bond[count_bond].id] << "\t" << bond[count_bond].a  << "\t" << bond[count_bond].b << "\n";
 			count_bond += 1;
-			}
-		else if (constraintout&&m_convert_constraints_to_bonds)
-			{
-			}				
+			}			
 		else
 			to<<line<<"\n";
 
-		
-		if(line.find("<image") != line.npos)
+		if(line.find("image") != line.npos)
 			{
 			imageout = true;
 			found_image = true;
 			}
-		if(line.find("<position") != line.npos)
+		if(line.find("position") != line.npos)
 			{
 			posout=true;
 			}			
-		if(line.find("<type") != line.npos)
+		if(line.find("type") != line.npos)
 			{
 			typeout=true;
 			}
-		if(line.find("<bond") != line.npos&&(m_convert_constraints_to_bonds||m_remove_bond_cross_box))
+		if(line.find("bond") != line.npos)
 			{
 			bondout=true;
-			found_bond = true;
 			}	
-		if(line.find("</constraint") != line.npos&&m_convert_constraints_to_bonds)
+		if(line.find("frame_end")!= line.npos)
 			{
-			constraintout=false;
-			}				
+			m_sp=from.tellg();	
+			break;				
+			}			
 		}
 	from.close();
 	to.close();
+	m_Nf += 1;		
 	}
 //--- case 10
 void MSD::setParam()
@@ -1885,6 +1863,14 @@ void Entanglement::compute()
 	std::vector<unsigned int > mol_id_per_particle = m_mol->getMolIdPerParticle();
 	std::vector<unsigned int > mol_type_id = m_mol->getMolTypeId();
 	std::vector< double > mass = m_build->getMass();
+	if(mass.size()==0)
+		{
+		if(m_Nf==0)
+			cout<< "***Warning! no input mass, set particle mass to be 1.0!" << endl << endl;
+		mass.resize(pos0.size());
+		for(unsigned int i=0; i< mass.size(); i++)
+			mass[i]=1.0;
+		}
 	std::vector< double > massPerMol;	
 	std::vector< vec > center_per_mol;
 	massPerMol.resize(mol_type_id.size());
