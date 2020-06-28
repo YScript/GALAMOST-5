@@ -1347,7 +1347,7 @@ int main(int argc,char* argv[])
 					{
 					mol.initialize();
 					if (i>1)
-						cout<< endl<< "Warning, the number of particles is changed from "<<build.getLastNParticles()<<" to "<< build.getNParticles()<<"!!!"<< endl<< endl;
+						cout<< endl<< "Warning, the number of particles is changed from "<<build.getLastNParticles()<<" to "<< build.getNParticles()<<" !!!"<< endl<< endl;
 					}
 				mol.updatePosition0();
 				for(unsigned int j=0;j<object.size(); j++)
@@ -1355,21 +1355,6 @@ int main(int argc,char* argv[])
 					cout<<"Computing... "<<endl;
 					object[j]->compute();
 					}				
-				}
-				
-			cout<< "Reading " << mst_open.c_str() << "..." << endl;					
-			if (build.ifchangedNp())
-				{
-				mol.initialize();
-				if (i>1)
-					cout<< endl<< "Warning, the number of particles is changed from "<<build.getLastNParticles()<<" to "<< build.getNParticles()<<"!!!"<< endl<< endl;
-				}
-
-			mol.updatePosition0();
-			for(unsigned int j=0;j<object.size(); j++)
-				{
-				cout<<"Computing... "<<endl;
-				object[j]->compute();
 				}
 			}
 		build.outPutInfo();

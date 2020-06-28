@@ -176,7 +176,9 @@ bool mst_reader::readDataFromMST(const string &fname)
 		if (m_mst_read)
 			{
 			if (line.find("mst_end") != line.npos)
-				{					
+				{	
+				read_frame = true;
+				m_sp=file.tellg();				
 				break;
 				}	
 				
@@ -416,6 +418,9 @@ bool mst_reader::readDataFromMST(const string &fname)
 			}
 		}
 		
+	if (file.eof())
+		return false;	
+
 	if(!m_mst_read)
 		{
         cerr << endl
@@ -569,9 +574,6 @@ bool mst_reader::readDataFromMST(const string &fname)
 			}
 		}
 
-	if (file.eof())
-		return false;
-	
 	return read_frame;
     }
 	
