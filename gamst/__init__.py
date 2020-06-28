@@ -29,9 +29,29 @@ CORRESPONDENCE
 	Email: ylzhu@galamost.com
 '''
 
-import sys;
-import ctypes;
-import os;
+import sys
+import ctypes
+import os
+
+curr_file = os.path.abspath(__file__)
+poetry_path = curr_file.replace("gamst/__init__.py", "poetry")
+import json
+import random
+if os.path.exists(poetry_path):
+	tang = random.randint(0, 56)
+	tang = tang * 1000
+	filename = poetry_path+'/poet.tang.' + repr(tang) + '.json'
+	with open(filename, 'r', encoding='utf8')as fp:
+		json_data = json.load(fp)
+	x = random.randint(0, 999)
+	#json1 = json.dumps(json_data[x], indent=1, ensure_ascii=False)
+	# print (type(json1))
+	# print (json1)
+	ser_dic = json_data[x]
+	print("Read a Chinese Tang poem and wait a few seconds for the program initialization")
+	print(ser_dic['title'] + '  作者:  ' + ser_dic['author'])
+	for i in ser_dic['paragraphs']:
+		print(i)
 
 from gamst import application
 from gamst import chare
