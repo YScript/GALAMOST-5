@@ -46,6 +46,7 @@ mst_reader::mst_reader()
     m_dimension = 3;
 	m_box = BoxSize(0.0, 0.0, 0.0);
 	m_num_particles = 0;
+	m_last_np = 0;
 	m_mst_read = false;
 	m_invariant_data = false;
 	m_variant_data = false;
@@ -107,6 +108,11 @@ unsigned int mst_reader::getNParticles() const
     {
     return m_num_particles;
     }
+	
+unsigned int mst_reader::getLastNParticles() const
+    {
+    return m_last_np;
+    }	
 
 unsigned int mst_reader::getNParticleTypes() const
     {
@@ -169,6 +175,11 @@ bool mst_reader::readDataFromMST(const string &fname)
 		// cout<<line<<endl;
 		if (m_mst_read)
 			{
+			if (line.find("mst_end") != line.npos)
+				{					
+				break;
+				}	
+				
 			if (line.find("invariant_data") != line.npos)
 				{
 				m_invariant_data = true;
@@ -182,8 +193,15 @@ bool mst_reader::readDataFromMST(const string &fname)
 				m_variant_data = true;	
 				continue;
 				}
-				
-			if (line.find("frame") != line.npos)
+			
+			if (line.find("frame_end") != line.npos)
+				{
+				// file.seekg(-line.size()-1, ios::cur);
+				read_frame = true;
+				m_sp=file.tellg();	
+				break;
+				}
+			else if (line.find("frame") != line.npos)
 				{
 				// check node 
 					{
@@ -199,19 +217,11 @@ bool mst_reader::readDataFromMST(const string &fname)
 					
 					m_if_trajectory = true;
 					}
-
-				if (read_frame)
-					{
-					file.seekg(-line.size()-1, ios::cur);
-					m_sp=file.tellg();	
-					break;
-					}
 					
 				if (m_variant_data)
 					clear_data();
 				else
 					throw runtime_error("Error! mst files with multiple frames without the label of 'variant_data'");
-				read_frame = true;
 				continue;
 				}				
 
@@ -317,8 +327,20 @@ bool mst_reader::readDataFromMST(const string &fname)
 				{
 				unsigned int np;
 				parser >> np;
+				
+				if(np==0)
+					{	
+					cerr << endl
+					<< "***Error! number of particles is zero"
+					<< endl << endl;
+					throw runtime_error("Error extracting data from galamost_mst file");
+					}
+				
 				if (np!=m_num_particles)
-					m_if_changed_np =  true;			
+					{
+					m_if_changed_np =  true;
+					m_last_np = m_num_particles;
+					}
 				m_num_particles = np;
 
 				}
@@ -588,7 +610,7 @@ void mst_reader::outPutInfo()
 		m_mass.resize(m_pos.size());
 		for(unsigned int i=0; i<m_mass.size();i++)
 			m_mass[i] = 1.0;
-        cout <<" "<<" set mass to be 1.0 by default!" << endl;			
+        cout <<" "<<"set mass to be 1.0 by default!" << endl;			
 		}		
 	}
 

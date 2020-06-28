@@ -225,6 +225,7 @@ Trajectory file
 			0	0	0
 			0	0	0
 			0	0	0
+	frame_end
 	frame	1
 		timestep
 			10000
@@ -238,6 +239,7 @@ Trajectory file
 			0	0	0
 			0	0	0
 			0	0	0
+	frame_end			
 	frame	2
 		timestep
 			20000
@@ -251,5 +253,5 @@ Trajectory file
 			0	0	0
 			0	0	0
 			0	0	0   
-	mst_end
+	frame_end
 	

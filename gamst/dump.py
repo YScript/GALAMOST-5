@@ -117,6 +117,7 @@ class mst:
 				with open(self.file, 'a') as f:
 					f.write('frame\t%d\n' % (self.frame))
 					self.write_properties(f, timestep, True)
+					f.write('frame_end\n')
 			else:
 				ip = self.file.find('.mst')
 				if ip == -1:
@@ -125,7 +126,8 @@ class mst:
 				with open(file_new, 'w') as f:
 					f.write("mst_version 1.0 #Copyright You-Liang Zhu\n")
 					self.write_properties(f, timestep, False)					
-					self.write_properties(f, timestep, True)					
+					self.write_properties(f, timestep, True)
+					f.write('mst_end\n')						
 			self.frame += 1
 			
 	def write_properties(self, f, timestep, variant_indicator):
@@ -213,8 +215,7 @@ class mst:
 			f.write('\tdihedral\n')
 			for i in range(0, len(self.info.dihedral.dihedrals)):
 				di = self.info.dihedral.dihedrals[i]
-				f.write('\t\t%s\t%10d\t%10d\t%10d\t%10d\n' % (di[0], di[1], di[2], di[3], di[4]))
-		f.write('mst_end\n')					
+				f.write('\t\t%s\t%10d\t%10d\t%10d\t%10d\n' % (di[0], di[1], di[2], di[3], di[4]))				
 	def register(self, timestep):
 		return
 

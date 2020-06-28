@@ -1337,27 +1337,18 @@ int main(int argc,char* argv[])
 			object[j]->add(&build, &mol);
 			}
 		
-		unsigned int ntimes_np_changed = 0;
-		
 		for(unsigned int i=1;i<filename.size(); i++)
 			{
 			std::string mst_open = filename[i];
-
 			while(build.readDataFromMST(mst_open.c_str()))
 				{
+				cout<< "Reading " << mst_open.c_str() << "..." << endl;
 				if (build.ifchangedNp())
 					{
-					if(ntimes_np_changed>0)
-						{
-						build.outPutInfo();
-						mol.outPutInfo();
-						cout<<"-----------------------------------------"<<endl;
-						}						
 					mol.initialize();
-					ntimes_np_changed += 1;
+					if (i>1)
+						cout<< endl<< "Warning, the number of particles is changed from "<<build.getLastNParticles()<<" to "<< build.getNParticles()<<"!!!"<< endl<< endl;
 					}
-				cout<< "Reading " << mst_open.c_str() << "..." << endl;
-				
 				mol.updatePosition0();
 				for(unsigned int j=0;j<object.size(); j++)
 					{
@@ -1366,19 +1357,14 @@ int main(int argc,char* argv[])
 					}				
 				}
 				
+			cout<< "Reading " << mst_open.c_str() << "..." << endl;					
 			if (build.ifchangedNp())
 				{
-				if(ntimes_np_changed>0)
-					{
-					build.outPutInfo();
-					mol.outPutInfo();
-					cout<<"-----------------------------------------"<<endl;					
-					}
 				mol.initialize();
-				ntimes_np_changed += 1;
+				if (i>1)
+					cout<< endl<< "Warning, the number of particles is changed from "<<build.getLastNParticles()<<" to "<< build.getNParticles()<<"!!!"<< endl<< endl;
 				}
-				
-			cout<< "Reading " << mst_open.c_str() << "..." << endl;					
+
 			mol.updatePosition0();
 			for(unsigned int j=0;j<object.size(); j++)
 				{
