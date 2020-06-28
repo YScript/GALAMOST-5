@@ -169,7 +169,7 @@ int main(int argc,char* argv[])
 				i++;
 			}
 		}
-	std::cout<<"---------------------------"<<endl;
+	std::cout<<"-----------------------------------------"<<endl;
 	std::vector<shared_ptr<Function> > object;
 	for(unsigned int i=0;i<command.size();i++)
 		{
@@ -1272,7 +1272,7 @@ int main(int argc,char* argv[])
 					return 0;
 				} 
 		}
-	cout<<"---------------------------"<<endl;
+	cout<<"-----------------------------------------"<<endl;
 	bool mst_dcd = false;
 	if(filename.size()==1)
 		cout<<"Error! Please specify configuration files!"<<endl;		
@@ -1299,7 +1299,7 @@ int main(int argc,char* argv[])
 			{
 			string mst_open = file1;
 			string dcd_open = file2;
-			cout<< "INFO : Reading " << mst_open.c_str() << "..." << endl;			
+			cout<< "Reading " << mst_open.c_str() << "..." << endl;			
 			Dcdbuilder build;		
 			MolInfo mol(build);
 			build.readDataFromMST(mst_open.c_str());
@@ -1312,7 +1312,7 @@ int main(int argc,char* argv[])
 				
 			build.initiate(dcd_open.c_str());
 			unsigned int nframe = build.getNframes();
-			cout<<"INFO : Computing... "<<endl;
+			cout<<"Computing... "<<endl;
 			for(unsigned int i=0; i<nframe; i++)
 				{
 				build.updateDataFromDCD();
@@ -1336,44 +1336,58 @@ int main(int argc,char* argv[])
 			{
 			object[j]->add(&build, &mol);
 			}
-			
+		
+		unsigned int ntimes_np_changed = 0;
+		
 		for(unsigned int i=1;i<filename.size(); i++)
 			{
 			std::string mst_open = filename[i];
 
 			while(build.readDataFromMST(mst_open.c_str()))
 				{
-				cout<< "INFO : Reading " << mst_open.c_str() << "..." << endl;	
 				if (build.ifchangedNp())
 					{
-					mol.initialize();				
-					build.outPutInfo();
-					mol.outPutInfo();
+					if(ntimes_np_changed>0)
+						{
+						build.outPutInfo();
+						mol.outPutInfo();
+						cout<<"-----------------------------------------"<<endl;
+						}						
+					mol.initialize();
+					ntimes_np_changed += 1;
 					}
+				cout<< "Reading " << mst_open.c_str() << "..." << endl;
 				
 				mol.updatePosition0();
 				for(unsigned int j=0;j<object.size(); j++)
 					{
-					cout<<"INFO : Computing... "<<endl;
+					cout<<"Computing... "<<endl;
 					object[j]->compute();
 					}				
 				}
 				
-			cout<< "INFO : Reading " << mst_open.c_str() << "..." << endl;	
 			if (build.ifchangedNp())
 				{
+				if(ntimes_np_changed>0)
+					{
+					build.outPutInfo();
+					mol.outPutInfo();
+					cout<<"-----------------------------------------"<<endl;					
+					}
 				mol.initialize();
+				ntimes_np_changed += 1;
+				}
 				
-				build.outPutInfo();
-				mol.outPutInfo();
-				}	
+			cout<< "Reading " << mst_open.c_str() << "..." << endl;					
 			mol.updatePosition0();
 			for(unsigned int j=0;j<object.size(); j++)
 				{
-				cout<<"INFO : Computing... "<<endl;
+				cout<<"Computing... "<<endl;
 				object[j]->compute();
 				}
 			}
+		build.outPutInfo();
+		mol.outPutInfo();
 		}
 		
 return 0;	

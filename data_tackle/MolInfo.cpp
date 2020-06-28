@@ -614,13 +614,11 @@ void MolInfo::buildMol()
 void MolInfo::outPutInfo()
 	{
 	if(m_mol_type_exchmap.size()>0)	
-		cout<<"----- Molecules statistics -----"<<endl;		
+		cout<<"--- Molecules statistics"<<endl;		
 	for(unsigned int i=0; i<m_mol_type_exchmap.size(); i++)
 		{
-		cout<<m_n_mol_per_kind[i]<<" Mol"<<i<<" with assigned name "<<m_mol_type_exchmap[i]<<endl;
+		cout<<" "<<m_n_mol_per_kind[i]<<" Mol"<<i<<" with assigned name "<<m_mol_type_exchmap[i]<<endl;
 		}
-	if(m_mol_type_exchmap.size()>0)
-		cout<<"----- Statistics  finished -----"<<endl;	
 	}	
 	
 

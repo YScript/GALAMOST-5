@@ -32,6 +32,7 @@ CORRESPONDENCE
 import sys
 import ctypes
 import os
+import zipfile
 
 curr_file = os.path.abspath(__file__)
 poetry_path = curr_file.replace("gamst/__init__.py", "poetry")
@@ -40,7 +41,9 @@ import random
 if os.path.exists(poetry_path):
 	tang = random.randint(0, 56)
 	tang = tang * 1000
-	filename = poetry_path+'/poet.tang.' + repr(tang) + '.json'
+	filename = 'poet.tang.' + repr(tang) + '.json'
+	f1 = zipfile.ZipFile(poetry_path+'/poetry.zip')
+	f1.extract(filename)	
 	with open(filename, 'r', encoding='utf8')as fp:
 		json_data = json.load(fp)
 	x = random.randint(0, 999)
@@ -52,6 +55,7 @@ if os.path.exists(poetry_path):
 	print(ser_dic['title'] + '  作者:  ' + ser_dic['author'])
 	for i in ser_dic['paragraphs']:
 		print(i)
+	os.remove(filename)
 
 from gamst import application
 from gamst import chare

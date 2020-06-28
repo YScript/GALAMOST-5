@@ -198,12 +198,23 @@ cudaError_t gpu_compute_rdf(float4 *dpos,
 void RDF::compute()
 	{
 	std::string fname = m_build->getFilename();
+	string filetype = "rdf";
+	
+	if(m_build->iftrajectory())
+		{
+		unsigned int timestep = m_build->getTimeStep();
+		ostringstream extend_fname;
+		extend_fname << setfill('0') << setw(10) << timestep << "."+filetype;
+		filetype = extend_fname.str();	
+		}
+	
 	string::size_type xp = fname.find("mst");
 	string outs;
 	if (xp!=fname.npos)
-		outs = fname.replace(xp,xp+3, "rdf");
+		outs = fname.replace(xp,xp+3, filetype);
 	else
-		outs = fname+".rdf";
+		outs = fname+"."+filetype;	
+
 	ofstream fp(outs.c_str());
 	
 	unsigned int N = m_build->getNParticles();
@@ -337,12 +348,23 @@ void RDF::compute()
 void Bond_distr::compute()
 	{
 	std::string fname = m_build->getFilename();
+	string filetype = "bond_distr";
+	
+	if(m_build->iftrajectory())
+		{
+		unsigned int timestep = m_build->getTimeStep();
+		ostringstream extend_fname;
+		extend_fname << setfill('0') << setw(10) << timestep << "."+filetype;
+		filetype = extend_fname.str();	
+		}
+	
 	string::size_type xp = fname.find("mst");
 	string outs;
 	if (xp!=fname.npos)
-		outs = fname.replace(xp,xp+3, "bond_distr");
+		outs = fname.replace(xp,xp+3, filetype);
 	else
-		outs = fname+".bond_distr";
+		outs = fname+"."+filetype;		
+
 	ofstream fp(outs.c_str());
 	
 	BoxSize box = m_build->getBox();
@@ -427,12 +449,23 @@ void Bond_distr::compute()
 void Angle_distr::compute()
 	{
 	std::string fname = m_build->getFilename();
+	string filetype = "angle_distr";
+	
+	if(m_build->iftrajectory())
+		{
+		unsigned int timestep = m_build->getTimeStep();
+		ostringstream extend_fname;
+		extend_fname << setfill('0') << setw(10) << timestep << "."+filetype;
+		filetype = extend_fname.str();	
+		}
+	
 	string::size_type xp = fname.find("mst");
 	string outs;
 	if (xp!=fname.npos)
-		outs = fname.replace(xp,xp+3, "angle_distr");
+		outs = fname.replace(xp,xp+3, filetype);
 	else
-		outs = fname+".angle_distr";
+		outs = fname+"."+filetype;		
+	
 	ofstream fp(outs.c_str());
 	
 	if (m_Nf==0)
@@ -533,13 +566,24 @@ void Angle_distr::compute()
 //--- case 6
 void Dihedral_distr::compute()
 	{
-	std::string fname = m_build->getFilename();
+	std::string fname = m_build->getFilename();		
+	string filetype = "dihedral_distr";
+	
+	if(m_build->iftrajectory())
+		{
+		unsigned int timestep = m_build->getTimeStep();
+		ostringstream extend_fname;
+		extend_fname << setfill('0') << setw(10) << timestep << "."+filetype;
+		filetype = extend_fname.str();	
+		}
+	
 	string::size_type xp = fname.find("mst");
 	string outs;
 	if (xp!=fname.npos)
-		outs = fname.replace(xp,xp+3, "dihedral_distr");
+		outs = fname.replace(xp,xp+3, filetype);
 	else
-		outs = fname+".dihedral_distr";
+		outs = fname+"."+filetype;		
+
 	ofstream fp(outs.c_str());	
 
 	if (m_Nf==0)
@@ -1490,13 +1534,24 @@ void MSD::compute()
 //--- case 11
 void RDFCM::compute()
 	{
-	std::string fname = m_build->getFilename();
+	std::string fname = m_build->getFilename();		
+	string filetype = "cm.rdf";
+	
+	if(m_build->iftrajectory())
+		{
+		unsigned int timestep = m_build->getTimeStep();
+		ostringstream extend_fname;
+		extend_fname << setfill('0') << setw(10) << timestep << "."+filetype;
+		filetype = extend_fname.str();	
+		}
+	
 	string::size_type xp = fname.find("mst");
 	string outs;
 	if (xp!=fname.npos)
-		outs = fname.replace(xp,xp+3, "cm.rdf");
+		outs = fname.replace(xp,xp+3, filetype);
 	else
-		outs = fname+".cm.rdf";
+		outs = fname+"."+filetype;		
+
 	ofstream fp(outs.c_str());
 
 	std::vector<vec> pos0 = m_mol->getPos0();
@@ -2337,13 +2392,24 @@ union floatint
 
 void STRFAC::compute()
 	{
-	std::string fname = m_build->getFilename();
+	std::string fname = m_build->getFilename();		
+	string filetype = "strf";
+	
+	if(m_build->iftrajectory())
+		{
+		unsigned int timestep = m_build->getTimeStep();
+		ostringstream extend_fname;
+		extend_fname << setfill('0') << setw(10) << timestep << "."+filetype;
+		filetype = extend_fname.str();	
+		}
+	
 	string::size_type xp = fname.find("mst");
 	string outs;
 	if (xp!=fname.npos)
-		outs = fname.replace(xp,xp+3, "strf");
+		outs = fname.replace(xp,xp+3, filetype);
 	else
-		outs = fname+".strf";
+		outs = fname+"."+filetype;	
+
 	ofstream fp(outs.c_str());
 
 	unsigned int Num = m_build->getNParticles();
@@ -3418,13 +3484,24 @@ void ConfigCheck::compute()
 //--- case 18
 void RDFBetweenTypes::compute()
 	{
-	std::string fname = m_build->getFilename();
+	std::string fname = m_build->getFilename();		
+	string filetype = "type.rdf";
+	
+	if(m_build->iftrajectory())
+		{
+		unsigned int timestep = m_build->getTimeStep();
+		ostringstream extend_fname;
+		extend_fname << setfill('0') << setw(10) << timestep << "."+filetype;
+		filetype = extend_fname.str();	
+		}
+	
 	string::size_type xp = fname.find("mst");
 	string outs;
 	if (xp!=fname.npos)
-		outs = fname.replace(xp,xp+3, "type.rdf");
+		outs = fname.replace(xp,xp+3, filetype);
 	else
-		outs = fname+".rdf";
+		outs = fname+"."+filetype;		
+
 	ofstream fp(outs.c_str());
 	
 	unsigned int N = m_build->getNParticles();

@@ -142,7 +142,7 @@ bool mst_reader::readDataFromMST(const string &fname)
 		}
 	else
 		{
-		// cout<<"INFO : read '"<<fname.c_str()<<"'"<<endl;
+		// cout<<"read '"<<fname.c_str()<<"'"<<endl;
 		m_fname = fname;		
 		m_mst_read = false;
 		m_invariant_data = false;
@@ -555,40 +555,39 @@ bool mst_reader::readDataFromMST(const string &fname)
 void mst_reader::outPutInfo()
 	{
     // notify the user of what we have accomplished
-    cout <<"----------------------------------------- "<< endl;	
-    cout <<"INFO : --- galamost mst file read summary" << endl;
-    cout <<"INFO : "<< getNParticles() << " particles at timestep " << m_timestep << endl;
+    cout <<"--- galamost mst file read summary" << endl;
+    cout <<" "<< getNParticles() << " particles at timestep " << m_timestep << endl;
     if (m_image.size() > 0)
-        cout <<"INFO : "<< m_image.size() << " images" << endl;
+        cout <<" "<< m_image.size() << " images" << endl;
     if (m_vel.size() > 0)
-        cout <<"INFO : "<< m_vel.size() << " velocities" << endl;
+        cout <<" "<< m_vel.size() << " velocities" << endl;
     if (m_mass.size() > 0)
-        cout <<"INFO : "<< m_mass.size() << " masses" << endl;
+        cout <<" "<< m_mass.size() << " masses" << endl;
     if (m_diameter.size() > 0)
-        cout <<"INFO : "<< m_diameter.size() << " diameters" << endl;
-    cout <<"INFO : "<< getNParticleTypes() <<  " particle types" << endl;
+        cout <<" "<< m_diameter.size() << " diameters" << endl;
+    cout <<" "<< getNParticleTypes() <<  " particle types" << endl;
     if (m_body.size() > 0)
-        cout <<"INFO : "<< m_body.size() << " particle body values" << endl; 	
+        cout <<" "<< m_body.size() << " particle body values" << endl; 	
     if (m_bonds.size() > 0)
-        cout <<"INFO : "<< m_bonds.size() << " bonds" << endl;
+        cout <<" "<< m_bonds.size() << " bonds" << endl;
     if (m_angles.size() > 0)
-        cout <<"INFO : "<< m_angles.size() << " angles" << endl;
+        cout <<" "<< m_angles.size() << " angles" << endl;
     if (m_dihedrals.size() > 0)
-        cout <<"INFO : "<< m_dihedrals.size() << " dihedrals" << endl;
+        cout <<" "<< m_dihedrals.size() << " dihedrals" << endl;
     if (m_charge.size() > 0)
-        cout <<"INFO : "<< m_charge.size() << " charges" << endl;
+        cout <<" "<< m_charge.size() << " charges" << endl;
     if (m_orientation.size() > 0)
-        cout <<"INFO : "<< m_orientation.size() << " orientations" << endl;
+        cout <<" "<< m_orientation.size() << " orientations" << endl;
     if (m_quaternion.size() > 0)
-        cout <<"INFO : "<< m_quaternion.size() << " quaternions" << endl;		
+        cout <<" "<< m_quaternion.size() << " quaternions" << endl;		
     if (m_molecule.size() > 0)
-        cout <<"INFO : "<< m_molecule.size() << " molecules" << endl;	
+        cout <<" "<< m_molecule.size() << " molecules" << endl;	
 	if(m_mass.size()==0)
 		{
 		m_mass.resize(m_pos.size());
 		for(unsigned int i=0; i<m_mass.size();i++)
 			m_mass[i] = 1.0;
-        cout <<"INFO : "<<" set mass to be 1.0 by default!" << endl;			
+        cout <<" "<<" set mass to be 1.0 by default!" << endl;			
 		}		
 	}
 
