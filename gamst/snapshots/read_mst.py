@@ -53,6 +53,9 @@ class read_mst:
 #				print(line_array)
 				if len(line_array)==0:
 					continue
+					
+				if line_array[0]=="mst_end":
+					break
 
 				if line_array[0]=="mst_version" and float(line_array[1])== 1.0:
 					print("info : read mst file with version 1.0")

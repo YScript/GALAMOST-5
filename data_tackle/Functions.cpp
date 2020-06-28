@@ -1193,13 +1193,22 @@ void Reimage::compute()
 	if(m_build->getObjectName()=="Dcdbuilder")
 		fname_in=m_build->getFirstFilename();
 	ifstream from(fname_in.c_str());
-	
+
+	string filetype = "reimage.mst";
+	if(m_build->iftrajectory())
+		{
+		unsigned int timestep = m_build->getTimeStep();
+		ostringstream extend_fname;
+		extend_fname << setfill('0') << setw(10) << timestep << "."+filetype;
+		filetype = extend_fname.str();	
+		}
+
 	string::size_type xp = fname_out.find("mst");
 	string outs;
 	if (xp!=fname_out.npos)
-		outs = fname_out.replace(xp,xp+3, "reimage.mst");
+		outs = fname_out.replace(xp,xp+3, filetype);
 	else
-		outs = fname_out+".reimage.mst";
+		outs = fname_out+"."+filetype;
 
 	ofstream to(outs.c_str());
 	if(!from||!to) 

@@ -49,6 +49,7 @@ mst_reader::mst_reader()
 	m_mst_read = false;
 	m_invariant_data = false;
 	m_variant_data = false;
+	m_if_trajectory = false;
 	m_read_indicator = { {"bond", false}, {"angle", false}, {"box", false}, {"position", false}, {"type", false}, 
 	                     {"image", false}, {"mass", false}, {"velocity", false}, {"force", false}, {"virial", false} };
 

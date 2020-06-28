@@ -1700,7 +1700,7 @@ void Generators::outPutMST(std::string fname)
 	
 			}
 		}		
-    
+    f <<"mst_end" << "\n";	
     if (!f.good())
         {
         cerr << endl << "***Error! Unexpected error writing galamost dump file" << endl << endl;

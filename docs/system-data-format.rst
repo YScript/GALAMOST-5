@@ -54,7 +54,7 @@ Snapshot file
 			1.0
 			1.0
 
-   The file could include the nodes of bond, angle, dihedral ... :: 
+   The file could include the information of bond, angle, dihedral ... :: 
    
      # bond with 'bond type, the index of particle i, j'. 
 		bond
@@ -71,7 +71,7 @@ Snapshot file
 		dihedral
 			phi 0 1 2 3
          
-   The other nodes of XML ... :: 
+   The other information of MST ... :: 
       
      # the diameter of particles in float type.
 		diameter
@@ -158,7 +158,7 @@ Snapshot file
 			1
 			1	 	  
 
-   The nodes of anisotropic particle attribute ... ::
+   The attribute of anisotropic particles ... ::
 
     # the particle patch attribute with 'particle type, patch number' 
     # followd by 'patch type, patch size, patch position vector in x, y, z directions'.
@@ -177,8 +177,10 @@ Snapshot file
 		Aspheres
 			A 1.0 1.0 1.0 3.0 3.0 3.0      
 			B 1.0 1.0 3.0 1.0 1.0 0.2
-
-
+			
+    # the end of file.
+	mst_end
+	
 Trajectory file
 ^^^^^^^^^^^^^^^
 
@@ -249,3 +251,5 @@ Trajectory file
 			0	0	0
 			0	0	0
 			0	0	0   
+	mst_end
+	
