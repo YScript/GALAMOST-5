@@ -215,7 +215,8 @@ class mst_reader
         const std::vector< vec4 >& getQuaternion() const { return m_quaternion; }
         const std::vector< vec >& getInert() const { return m_inert; }
         const std::vector< unsigned int >& getCris() const { return m_cris; }
-        const std::vector< unsigned int >& getInit() const { return m_init; }		
+        const std::vector< unsigned int >& getInit() const { return m_init; }
+		const std::vector<vec>& getRotangle() const {return m_rotangle;}		
         virtual std::string getFilename() { return m_fname; }
         std::string getFirstFilename(){ return m_fname; }		
 		virtual bool readDataFromMST(const string &fname);
@@ -259,7 +260,8 @@ class mst_reader
         std::vector< Dihedral > m_vsites;                         
 
         std::vector< vec > m_orientation;         
-        std::vector< vec4 > m_quaternion;         		
+        std::vector< vec4 > m_quaternion;         
+        std::vector<vec> m_rotangle; 	
         std::vector< str_vec6 > m_asphere;
         std::vector< str_vec6 > m_patch;
         std::vector< str_vec6 > m_patch_num;		
@@ -275,14 +277,20 @@ class mst_reader
 		bool m_num_particles_read;
 		bool m_timestep_read;
 		bool m_dimension_read;
+		bool m_bond_read;
+		bool m_angle_read;
+		bool m_box_read;		
 		bool m_position_read;
 		bool m_type_read;
 		bool m_image_read;
 		bool m_mass_read;
 		bool m_velocity_read;
-		bool m_bond_read;
-		bool m_angle_read;
-		bool m_box_read;
+		bool m_charge_read;
+		bool m_body_read;
+		bool m_diameter_read;		
+		bool m_rotangle_read;
+		bool m_virial_read;	
+		bool m_force_read;		
 		std::map< std::string, bool > m_read_indicator;
 		ifstream::pos_type m_sp;
 		std::string m_object_name;

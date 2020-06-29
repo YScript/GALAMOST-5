@@ -368,8 +368,8 @@ void Bond_distr::compute()
 	
 	BoxSize box = m_build->getBox();
 	double Lx = double (box.lx);
-	double Ly = double (box.ly);		 
-	double Lz = double (box.lz);	
+	double Ly = double (box.ly);
+	double Lz = double (box.lz);
 	
 	double Lxinv = 0.0;
 	double Lyinv = 0.0;
@@ -3656,7 +3656,8 @@ void RDFBetweenTypes::compute()
 	fp.close();
 	m_Nf += 1;	
 	}
-
+	
+//---case 19
 void MSTfileConversion::compute()
 	{
 	if(!m_lammps&&!m_gromacs&&!m_xml)
@@ -4101,7 +4102,8 @@ void exyzFromQuaternion(vec4 &quat, vec4 &ex_space, vec4 &ey_space, vec4 &ez_spa
     ez_space.y = double(2.0) * (quat.z * quat.w - quat.x * quat.y);
     ez_space.z = quat.x * quat.x - quat.y * quat.y - quat.z * quat.z + quat.w * quat.w;
     }
-
+	
+//---case 20
 void PatchToParticle::compute()
 	{
 	std::string fname = m_build->getFilename();
@@ -4577,5 +4579,3530 @@ void PatchToParticle::compute()
 	m_Nf += 1;	
 	}	
 
+//---case 21
+void SSF::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image = m_build->getImage();
+	std::vector<unsigned int> type=m_build->getType();
+	if(image.size()==0 && m_Nf==0)
+		{
+		 cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		 image.resize(pos.size());
+		}
+
+	BoxSize box=m_build->getBox();
+	double Lx=double(box.lx), LxINV=1.0/Lx;
+	double Ly=double(box.ly), LyINV=1.0/Ly;		 
+	double Lz=double(box.lz), LzINV=1.0/Lz;
 	
+	unsigned int qnummax;
+	if(m_qnummax>0)
+		 qnummax=m_qnummax;
+		double c=2.0*3.1415926*LxINV;
+		std::vector<double> q_num;
+		std::vector<std::vector<vec> > qvec_all;
+	for(unsigned int qnum=1; qnum<=qnummax*qnummax; qnum++)
+		{
+		std::vector<vec> qvec;
+		for(unsigned int i=0; i<=qnummax; i++)
+			{	
+			if(qvec.size()>10000) break;
+			for(unsigned int j=0; j<=qnummax; j++)
+				{
+				if(qvec.size()>10000) break;
+				for(unsigned int k=0; k<=qnummax; k++)
+					{						
+					unsigned int mm=i*i+j*j+k*k;								
+					if(mm==qnum)
+						{
+						double ic=i*c, jc=j*c, kc=k*c;
+						qvec.push_back(vec( ic, jc, kc));
+						qvec.push_back(vec( ic,-jc, kc));
+						qvec.push_back(vec( ic, jc,-kc));
+						qvec.push_back(vec( ic,-jc,-kc));	
+						qvec.push_back(vec(-ic, jc, kc));
+						qvec.push_back(vec(-ic,-jc, kc));
+						qvec.push_back(vec(-ic, jc,-kc));
+						qvec.push_back(vec(-ic,-jc,-kc));							 
+						}
+					if(qvec.size()>10000) break;						
+					}
+				}
+			}
+		if(qvec.size()>0)
+			{
+			double q=c*sqrt(double(qnum));
+			q_num.push_back(q);
+			qvec_all.push_back(qvec);	 
+			}	
+		}		
+	std::vector<double> ssf(qvec_all.size(), 0.0); 
+	ssf.reserve(qvec_all.size());		
+	for(unsigned int i=0; i<qvec_all.size(); i++)
+		{
+		unsigned int count=0;
+		for(unsigned int l=0; l<qvec_all[i].size(); l++)
+			{
+			double ssfcos=0.0;
+			double ssfsin=0.0;				
+			for(unsigned j=0; j<pos.size(); j++)
+				{
+				if(type[j]==0)
+					{
+					double theta=pos[j].x*qvec_all[i][l].x+pos[j].y*qvec_all[i][l].y+pos[j].z*qvec_all[i][l].z;				 
+					ssfcos += cos(theta);
+					ssfsin += sin(theta);	
+					count += 1;						
+					}
+				}
+			ssf[i] += ssfcos*ssfcos + ssfsin*ssfsin;
+			}
+		ssf[i] /= double(count);
+		}	
+	q_all.push_back(q_num);
+	ssf_all.push_back(ssf);		
+	m_Nf += 1;
+	}		
+
+//--- case 22                                                                                                                                 
+void ADF::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();	
+	std::vector<vec4> quat=m_build->getQuaternion();
+	std::vector<unsigned int> type=m_build->getType();
+	std::vector<vec_int> image=m_build->getImage();	
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed images and xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}		
+	BoxSize box=m_build->getBox();   				    	
+	double Lx=double (box.lx), LxINV=1.0/Lx;
+	double Ly=double (box.ly), LyINV=1.0/Ly;		 
+	double Lz=double (box.lz), LzINV=1.0/Lz;		
+	double delr=2.0/maxbin;	
+	std::vector<double> sx(quat.size());	
+	std::vector<double> sy(quat.size());	
+	std::vector<double> sz(quat.size());	
+	std::vector<double> rx(pos.size());	
+	std::vector<double> ry(pos.size());
+	std::vector<double> rz(pos.size());
+	for(unsigned int i=0; i<pos.size(); i++) 
+		{		
+		rx[i]=double(pos[i].x+image[i].x*Lx);
+		ry[i]=double(pos[i].y+image[i].y*Ly);
+		rz[i]=double(pos[i].z+image[i].z*Lz);	
+		vec4 quat4=quat[i];
+		sx[i]=double(2*quat4.y*quat4.w+2*quat4.x*quat4.z);
+		sy[i]=double(2*quat4.z*quat4.w-2*quat4.x*quat4.y);
+		sz[i]=double(quat4.x*quat4.x-quat4.y*quat4.y-quat4.z*quat4.z+quat4.w*quat4.w);	
+		}
+	double rcut;		
+	if(m_rcut>0.0)
+		rcut=m_rcut;		
+	double beta;		
+	if(m_beta>=0.0&&m_beta<=180.0)
+		beta=(m_beta/180.0)*4.0*atan(1.0);
+	std::vector<unsigned int> num(pos.size(), 0);
+	std::vector<std::vector<unsigned int> > nb(pos.size(),std::vector<unsigned int>(500, 0));	 
+	std::vector<double> g(maxbin, 0);
+	std::vector<double> r_DPD(maxbin, 0);
+	for(unsigned int i=0; i<pos.size(); i++)
+		{
+		for(unsigned int j=0; j<pos.size(); j++)
+			{
+			if(i!=j)
+				{
+				double rxij=rx[i]-rx[j];
+				double ryij=ry[i]-ry[j];
+				double rzij=rz[i]-rz[j];
+				rxij -= Lx*rint(rxij/Lx);
+				ryij -= Ly*rint(ryij/Ly);
+				rzij -= Lz*rint(rzij/Lz);
+				double rijsq=rxij*rxij+ryij*ryij+rzij*rzij;
+				double rij=sqrt(rijsq);		
+				if(rij<rcut) 					
+					{										
+					nb[i][num[i]]=j;
+					num[i] += 1;
+					}
+				}
+			}
+		}
+	for(unsigned int i=0; i<pos.size(); i++)	
+		{
+		unsigned int typei=type[i];
+//		if(typei==0)
+			{
+			for(unsigned int j=0; j<num[i]; j++)
+				{	                			
+				unsigned int typej=type[nb[i][j]];
+//				if(typej==0)
+					{	
+					double rxij=rx[i]-rx[nb[i][j]];
+					double ryij=ry[i]-ry[nb[i][j]];
+					double rzij=rz[i]-rz[nb[i][j]];
+					rxij -= Lx*rint(rxij/Lx);
+					ryij -= Ly*rint(ryij/Ly);
+					rzij -= Lz*rint(rzij/Lz);
+					double rijsq=rxij*rxij+ryij*ryij+rzij*rzij;			 
+					double rij=sqrt(rijsq), rijINV=1.0/rij;			 
+					double sirij=sx[i]*rxij+sy[i]*ryij+sz[i]*rzij;
+					double sjrij=sx[nb[i][j]]*rxij+sy[nb[i][j]]*ryij+sz[nb[i][j]]*rzij;
+					double costhetai= -sirij*rijINV;
+					double costhetaj=  sjrij*rijINV;			 
+					if(costhetai>=cos(beta)&&costhetaj>=cos(beta))
+						{
+						double costhetaij=sx[i]*sx[nb[i][j]]+sy[i]*sy[nb[i][j]]+sz[i]*sz[nb[i][j]]+1.0;
+						unsigned int bin=costhetaij/delr;
+						if(bin<maxbin) 
+							{
+							g[bin]=g[bin]+1.0;	
+							}						
+						}  
+					}	
+				}
+			}
+		}
+	for(unsigned int bin=0; bin<maxbin; bin++)
+		{
+		r_DPD[bin]=double(bin)*delr-1.0;
+		}
+	r_all.push_back(r_DPD);
+	g_all.push_back(g);
+	m_Nf += 1;	
+	}
+
+//--- case 23                                                                                                                                  
+void CND::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();	
+	std::vector<vec4> quat=m_build->getQuaternion();
+	std::vector<unsigned int> type=m_build->getType();
+	std::vector<vec_int> image=m_build->getImage();	
+	if(image.size()==0&&m_Nf==0)
+		{
+		cout << "***Warning! No inputed images and xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}		
+	BoxSize box=m_build->getBox();   				    	
+	double Lx=double(box.lx), LxINV=1.0/Lx;
+	double Ly=double(box.ly), LyINV=1.0/Ly;		 
+	double Lz=double(box.lz), LzINV=1.0/Lz;		
+	double rmax=0.5*Lx;	
+	double delr=rmax/(5*maxbin);	
+	std::vector<double> sx(quat.size());	
+	std::vector<double> sy(quat.size());	
+	std::vector<double> sz(quat.size());	
+	std::vector<double> rx(pos.size());	
+	std::vector<double> ry(pos.size());
+	std::vector<double> rz(pos.size());
+	for(unsigned int i=0; i<pos.size(); i++) 
+		{			
+		rx[i]=double(pos[i].x+image[i].x*Lx);
+		ry[i]=double(pos[i].y+image[i].y*Ly);
+		rz[i]=double(pos[i].z+image[i].z*Lz);	 
+		vec4 quat4=quat[i];
+		sx[i]=double(2*quat4.y*quat4.w+2*quat4.x*quat4.z);
+		sy[i]=double(2*quat4.z*quat4.w-2*quat4.x*quat4.y);
+		sz[i]=double(quat4.x*quat4.x-quat4.y*quat4.y-quat4.z*quat4.z+quat4.w*quat4.w);		  
+		}
+	double rcut;		
+	if(m_rcut>0.0)
+		rcut=m_rcut;		
+	double beta;		
+	if(m_beta>=0.0&&m_beta<=180.0)
+		beta=(m_beta/180.0)*4.0*atan(1.0);		
+	std::vector<unsigned int> num(pos.size(), 0);
+	std::vector<std::vector<unsigned int> > nb(pos.size(),std::vector <unsigned int>(500,0));	 
+	std::vector<unsigned int> N_score(pos.size(), 0);
+	std::vector<unsigned int> score_s(maxbin, 0);
+	std::vector<double> N_s(maxbin, 0.0);
+	for(unsigned int i=0; i<pos.size(); i++)
+		{
+		for(unsigned int j=0; j<pos.size(); j++)
+			{
+			if(i!=j)
+				{
+				double rxij=rx[i]-rx[j];
+				double ryij=ry[i]-ry[j];
+				double rzij=rz[i]-rz[j];
+				rxij -= Lx*rint(rxij/Lx);
+				ryij -= Ly*rint(ryij/Ly);
+				rzij -= Lz*rint(rzij/Lz);
+				double rijsq=rxij*rxij+ryij*ryij+rzij*rzij;
+				double rij=sqrt(rijsq);		
+				if(rij<rcut) 					
+					{										
+					nb[i][num[i]]=j;
+					num[i] += 1;
+					}
+				}
+			}
+		}
+	for(unsigned int i=0; i<pos.size(); i++)	
+		{
+		unsigned int typei=type[i];
+		if(typei==0)
+			{   
+			N_score[i]=1;
+			for(unsigned int j=0; j<num[i]; j++)
+				{	                			
+				unsigned int typej= type[nb[i][j]];
+				if(typej==0)
+					{
+					N_score[j]=1;				
+					double rxij=rx[i]-rx[nb[i][j]];
+					double ryij=ry[i]-ry[nb[i][j]];
+					double rzij=rz[i]-rz[nb[i][j]];
+					rxij -= Lx*rint(rxij/Lx);
+					ryij -= Ly*rint(ryij/Ly);
+					rzij -= Lz*rint(rzij/Lz);
+					double rijsq=rxij*rxij+ryij*ryij+rzij*rzij;
+					double rij =sqrt(rijsq), rijINV=1.0/rij;			 
+					double sirij=sx[i]*rxij+sy[i]*ryij+sz[i]*rzij;
+					double sjrij=sx[nb[i][j]]*rxij+sy[nb[i][j]]*ryij+sz[nb[i][j]]*rzij;
+					double costhetai= -sirij*rijINV;
+					double costhetaj=  sjrij*rijINV;			 
+					if(costhetai>=cos(beta)&&costhetaj>=cos(beta))
+						{
+						N_score[i] += 1;	
+						}  
+					}	
+				}
+			}
+		}
+	for(unsigned int i=1; i<maxbin; i++)
+		{
+		for(unsigned int j=0; j<pos.size(); j++)
+			{
+			if(N_score[j]==i)
+				{
+				N_s[i] += 1.0;
+				}
+			}
+		score_s[i]=i;	
+		N_s[i]=N_s[i]/double(pos.size());
+		}
+	score_s_all.push_back(score_s);
+	N_s_all.push_back(N_s);
+	m_Nf += 1;	
+	}
+
+//--- case 24
+void MSAD::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image=m_build->getImage();
+	std::vector<vec> Rotangle=m_build->getRotangle();	
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realRotangle; realRotangle.resize(pos.size());	
+	for(unsigned int i=0; i<pos.size(); i++)
+		{
+		realRotangle[i].x=Rotangle[i].x;
+		realRotangle[i].y=Rotangle[i].y;
+		realRotangle[i].z=Rotangle[i].z;
+		}
+	m_Rotangle_all.push_back(realRotangle);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);
+	m_Nf += 1;
+	}
+	
+//--- case 25
+void RMSAD::compute()
+	{	
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image=m_build->getImage();
+	std::vector<vec4> quat=m_build->getQuaternion();
+	std::vector<vec> Rotangle=m_build->getRotangle();
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0&&m_Nf==0)
+		{
+		cout << "***Warning! No inputed image and xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}	
+	std::vector<vec> ori; ori.resize(pos.size());
+	for(unsigned int i=0; i<pos.size(); i++) 
+		{		
+		vec4 quat4=quat[i];
+		ori[i].x=double(2*quat4.y*quat4.w+2*quat4.x*quat4.z);
+		ori[i].y=double(2*quat4.z*quat4.w-2*quat4.x*quat4.y);
+		ori[i].z=double(quat4.x*quat4.x-quat4.y*quat4.y-quat4.z*quat4.z+quat4.w*quat4.w);		  
+		}  	 
+	m_ori_all.push_back(ori);
+	m_Rotangle_all.push_back(Rotangle);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);
+	m_Nf += 1;		
+	}	
+
+//---case 26
+void ISF::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image = m_build->getImage();
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	BoxSize box=m_build->getBox();
+	Lx=double(box.lx);
+	Ly=double(box.ly);
+	Lz=double(box.lz);		
+	for(unsigned int i=0; i<pos.size(); i++)
+		{							
+		realPos[i].x=pos[i].x+image[i].x*Lx;
+		realPos[i].y=pos[i].y+image[i].y*Ly;
+		realPos[i].z=pos[i].z+image[i].z*Lz;		
+		}				
+	m_pos_all.push_back(realPos);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);
+	m_Nf += 1;
+	}
+	
+//--- case 27
+void OACF::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec4> quat=m_build->getQuaternion();
+	std::vector<vec_int> image=m_build->getImage();
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}		
+	std::vector<vec> ori; ori.resize(pos.size());
+	for(unsigned int i=0; i<pos.size(); i++) 
+		{			
+		vec4 quat4=quat[i];
+		ori[i].x=double(2*quat4.y*quat4.w + 2*quat4.x*quat4.z);
+		ori[i].y=double(2*quat4.z*quat4.w - 2*quat4.x*quat4.y);
+		ori[i].z=double(quat4.x*quat4.x - quat4.y*quat4.y - quat4.z*quat4.z + quat4.w*quat4.w);	
+		}  	 
+	m_ori_all.push_back(ori);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);
+	m_Nf += 1;
+	}	
+
+//--- case 28
+void Q4Q6::compute()
+	{
+	std::vector<vec> pos = m_build->getPos();
+	std::vector<vec_int> image = m_build->getImage();
+	std::vector<unsigned int> type = m_build->getType();
+	unsigned int timestep = m_build->getTimeStep();		
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	BoxSize box = m_build->getBox();
+	double Lx=double(box.lx); double LxINV=1.0/Lx; 
+	double Ly=double(box.ly); double LyINV=1.0/Ly;
+	double Lz=double(box.lz); double LzINV=1.0/Lz;
+	for(unsigned int i=0; i<pos.size(); i++)
+		{
+		realPos[i].x=pos[i].x + image[i].x*Lx;
+		realPos[i].y=pos[i].y + image[i].y*Ly;
+		realPos[i].z=pos[i].z + image[i].z*Lz;
+		}
+	double rcut;		
+	if(m_rcut>0.0)
+		rcut=m_rcut;
+	bool Voronoi;
+	Voronoi=m_Voronoi;
+	pos_size=pos.size();
+	unsigned int MaxVer=500;
+	double rtemp;	
+	std::vector<unsigned int> num(pos_size, 0);
+	std::vector<std::vector<unsigned int> > nb(pos_size, std::vector <unsigned int>(MaxVer, 0)); 
+	if(!Voronoi)
+		{
+		for(unsigned int i=0; i<pos_size; i++)
+			{
+			num[i]=0;
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[i].x-realPos[j].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[i].y-realPos[j].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[i].z-realPos[j].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(num[i]<MaxVer)
+							{
+							nb[i][num[i]] = j;
+							num[i] += 1;								
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}
+						}
+					}
+				}
+			}			
+		}
+	else
+		{			
+		for(unsigned int i=0; i<pos_size; i++)
+			{
+			unsigned int CAN=0;
+			std::vector<vec> pp; pp.resize(MaxVer);
+			std::vector<double> ps; ps.resize(MaxVer);
+			std::vector<unsigned int> tag; tag.resize(MaxVer);					
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[j].x - realPos[i].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[j].y - realPos[i].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[j].z - realPos[i].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(CAN<MaxVer)
+							{
+							tag[CAN]=j;
+							ps[CAN]=rtemp;
+							pp[CAN].x=dx;
+							pp[CAN].y=dy;
+							pp[CAN].z=dz;
+							CAN=CAN+1;
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many Voronoi vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}							
+						}
+					}
+				}
+			unsigned int NCAN=CAN;
+			unsigned int tagi;
+			double pxi, pyi, pzi, psi;
+			for(unsigned int kk=0; kk<NCAN; kk++)
+				{
+				for(int k=0; k<NCAN-kk-1; k++) 
+					{
+					if(ps[k]>ps[k+1])  
+						{
+						tagi=tag[k];
+						psi=ps[k];
+						pxi=pp[k].x;
+						pyi=pp[k].y;
+						pzi=pp[k].z;
+						tag[k]=tag[k+1];
+						ps[k]=ps[k+1];
+						pp[k].x=pp[k+1].x;
+						pp[k].y=pp[k+1].y;
+						pp[k].z=pp[k+1].z;
+						tag[k+1]=tagi;
+						ps[k+1]=psi;
+						pp[k+1].x=pxi;
+						pp[k+1].y=pyi;
+						pp[k+1].z=pzi;					 
+						}					
+					}
+				}
+			unsigned int V=0;
+			std::vector<unsigned int> IV; IV.resize(MaxVer);
+			std::vector<unsigned int> JV; JV.resize(MaxVer);
+			std::vector<unsigned int> KV; KV.resize(MaxVer);
+			std::vector<vec> VI; VI.resize(MaxVer);
+			for(unsigned int I=0; I<NCAN-2; I++)
+				{
+				double AI=pp[I].x;
+				double BI=pp[I].y;
+				double CI=pp[I].z;
+				double DI=-ps[I];
+				for(unsigned int J=I+1; J<NCAN-1; J++)
+					{
+					double AJ=pp[J].x;
+					double BJ=pp[J].y;
+					double CJ=pp[J].z;
+					double DJ=-ps[J];
+					double AB=AI*BJ - AJ*BI;
+					double BC=BI*CJ - BJ*CI;
+					double CA=CI*AJ - CJ*AI;
+					double DA=DI*AJ - DJ*AI;
+					double DB=DI*BJ - DJ*BI;
+					double DC=DI*CJ - DJ*CI;
+					for(unsigned int K=J+1; K<NCAN; K++)
+						{
+						double AK=pp[K].x;
+						double BK=pp[K].y;
+						double CK=pp[K].z;
+						double DK=-ps[K];
+						double delta=AK*BC + BK*CA + CK*AB;
+						if(fabs(delta)>1e-6)
+							{
+							double VXIJK=(-DK*BC + BK*DC - CK*DB)/delta;
+							double VYIJK=(-AK*DC - DK*CA + CK*DA)/delta;
+							double VZIJK=( AK*DB - BK*DA - DK*AB)/delta;
+							bool OK=true;
+							for(unsigned int L=0; L<NCAN; L++)
+								{
+								if(L!=I && L!=J && L!=K && OK)
+									{
+									OK=((pp[L].x*VXIJK + pp[L].y*VYIJK + pp[L].z*VZIJK) <= ps[L]);
+									}
+								}
+							if(OK)
+								{
+								IV[V]=I;
+								JV[V]=J;
+								KV[V]=K;
+								VI[V].x=0.5*VXIJK;
+								VI[V].y=0.5*VYIJK;
+								VI[V].z=0.5*VZIJK;	
+								V=V+1;
+								if(V>MaxVer)
+									{
+									cerr << endl << "***Error! Too many Voronoi facets" << endl << endl;
+									throw runtime_error("Error MaxVer dump");											
+									}								 
+								}
+							}
+						}
+					}
+				}
+			unsigned int NV=V;
+			if(NV<3)
+				{
+				cerr << endl << "***Error! Less than 4 Voronoi vertices found" << endl << endl;
+				throw runtime_error("Error NV dump");				
+				}		
+			std::vector<unsigned int> Edges(MaxVer, 0);
+			std::vector<std::vector<unsigned int> > flag_ed(MaxVer, std::vector <unsigned int>(MaxVer, 0)); 			
+			for(unsigned int nv=0; nv<NV; nv++)
+				{
+				Edges[IV[nv]]=Edges[IV[nv]] + 1;		   
+				flag_ed[Edges[IV[nv]]][IV[nv]] = nv;	   
+				Edges[JV[nv]]=Edges[JV[nv]] + 1;		   
+				flag_ed[Edges[JV[nv]]][JV[nv]] = nv;		   
+				Edges[KV[nv]]=Edges[KV[nv]] + 1;		   
+				flag_ed[Edges[KV[nv]]][KV[nv]] = nv;				
+				}
+			for(unsigned int can=0; can<NCAN; can++)
+				{
+				if(Edges[can]!=0)
+					{
+					nb[i][num[i]] = tag[can];
+					num[i] += 1;
+					}
+				}
+			}			
+		}		
+	double phi, phi1, phi2, theta, q4_all_sum, q6_all_sum;		
+	double pi=3.1415926;
+	double qy0=(3.0/16.0)*sqrt(1.0/pi);
+	double qy_1=(15.0/8.0)*sqrt(1.0/(5.0*pi)), qy1=(-15.0/8.0)*sqrt(1.0/(5.0*pi));
+	double qy_2=(15.0/8.0)*sqrt(1.0/(10.0*pi)), qy2=(15.0/8.0)*sqrt(1.0/(10.0*pi));
+	double qy_3=(105.0/8.0)*sqrt(1.0/(35.0*pi)), qy3=(-105.0/8.0)*sqrt(1.0/(35.0*pi));
+	double qy_4=(105.0/16.0)*sqrt(1.0/(70.0*pi)), qy4=(105.0/16.0)*sqrt(1.0/(70.0*pi));			  
+	std::vector<double> q4_local(pos_size, 0.0);
+	std::vector<std::vector<double> > sum_rq4(5, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_iq4(5, std::vector <double>(pos_size, 0.0));
+	std::vector<std::vector<double> > rq4(5, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > iq4(5, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_r_q4(5, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_i_q4(5, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > r_q4(5, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > i_q4(5, std::vector<double>(pos_size, 0.0));			
+	double py0=(1.0/32.0)*sqrt(13.0/pi);
+	double py_1=(1.0/16.0)*sqrt(273.0/(2.0*pi)), py1=(-1.0/16.0)*sqrt(273.0/(2.0*pi));
+	double py_2=(1.0/64.0)*sqrt(1365.0/pi), py2=(1.0/64.0)*sqrt(1365.0/pi);
+	double py_3=(1.0/32.0)*sqrt(1365.0/pi), py3=(-1.0/32.0)*sqrt(1365.0/pi);
+	double py_4=(3.0/32.0)*sqrt(91.0/(2.0*pi)), py4=(3.0/32.0)*sqrt(91.0/(2.0*pi));	
+	double py_5=(3.0/32.0)*sqrt(1001.0/pi), py5=(-3.0/32.0)*sqrt(1001.0/pi);
+	double py_6=(1.0/64.0)*sqrt(3003.0/pi), py6=(1.0/64.0)*sqrt(3003.0/pi);			  
+	std::vector<double> q6_local(pos_size, 0.0);
+	std::vector<std::vector<double> > sum_rq6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_iq6(7, std::vector <double>(pos_size, 0.0));
+	std::vector<std::vector<double> > rq6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > iq6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_r_q6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_i_q6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > r_q6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > i_q6(7, std::vector<double>(pos_size, 0.0));		
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		for(unsigned int j=0; j<num[i]; j++)
+			{
+			double dx=realPos[nb[i][j]].x-realPos[i].x;
+			dx -= Lx*rintf(dx*LxINV);
+			double dy=realPos[nb[i][j]].y-realPos[i].y;
+			dy -= Ly*rintf(dy*LyINV);
+			double dz=realPos[nb[i][j]].z-realPos[i].z;
+			dz -= Lz*rintf(dz*LzINV);
+			rtemp =sqrt(dx*dx+dy*dy+dz*dz);
+			if(dz>(1.0*rtemp)) 
+				theta=acos(1.0);			
+			else if(dz<(-1.0*rtemp)) 
+				theta=acos(-1.0);
+			else theta=acos(dz/rtemp);
+			
+			if(dy>(1.0*rtemp*sin(theta))) 
+				phi1=asin(1.0);
+			else if(dy<(-1.0*rtemp*sin(theta))) 
+				phi1=asin(-1.0);
+			else phi1= asin(dy/(rtemp*sin(theta)));	
+			if(phi1<0.0) phi1 += 2*pi;
+				phi2=pi-phi1;
+			if(phi2<0.0) phi2 += 2*pi;
+			if((rtemp*sin(theta)*cos(phi1)*dx)>=0.0) 
+				phi=phi1;
+			else if((rtemp*sin(theta)*cos(phi1)*dx)<0.0) 
+				phi=phi2;
+			else
+				{
+				cerr << endl << "***Error! Error phi" << endl << endl;
+				throw runtime_error("Error phi dump");					
+				}
+			sum_r_q4[4][i] += ( 1.0*cos(4.0*phi))*(qy_4*(pow(sin(theta), 4)));
+			sum_i_q4[4][i] += (-1.0*sin(4.0*phi))*(qy_4*(pow(sin(theta), 4)));
+			sum_r_q4[3][i] += (-1.0*cos(3.0*phi))*(qy_3*(pow(sin(theta), 3))*cos(theta));
+			sum_i_q4[3][i] += ( 1.0*sin(3.0*phi))*(qy_3*(pow(sin(theta), 3))*cos(theta));
+			sum_r_q4[2][i] += ( 1.0*cos(2.0*phi))*(qy_2*(pow(sin(theta), 2))*(7.0*(pow(cos(theta), 2))-1.0));	
+			sum_i_q4[2][i] += (-1.0*sin(2.0*phi))*(qy_2*(pow(sin(theta), 2))*(7.0*(pow(cos(theta), 2))-1.0));
+			sum_r_q4[1][i] += (-1.0*cos(1.0*phi))*(qy_1*(sin(theta))*(7.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_i_q4[1][i] += ( 1.0*sin(1.0*phi))*(qy_1*(sin(theta))*(7.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_r_q4[0][i] += qy0*(35.0*(pow(cos(theta), 4))-30.0*(pow(cos(theta), 2))+3.0);
+			sum_i_q4[0][i] += 0.0;
+			sum_rq4[0][i] += qy0*(35.0*(pow(cos(theta), 4))-30.0*(pow(cos(theta), 2))+3.0);
+			sum_iq4[0][i] += 0.0;
+			sum_rq4[1][i] += (1.0*cos(1.0*phi))*(qy1*(sin(theta))*(7.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_iq4[1][i] += (1.0*sin(1.0*phi))*(qy1*(sin(theta))*(7.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_rq4[2][i] += (1.0*cos(2.0*phi))*(qy2*(pow(sin(theta), 2))*(7.0*(pow(cos(theta), 2))-1.0));
+			sum_iq4[2][i] += (1.0*sin(2.0*phi))*(qy2*(pow(sin(theta), 2))*(7.0*(pow(cos(theta), 2))-1.0));
+			sum_rq4[3][i] += (1.0*cos(3.0*phi))*(qy3*(pow(sin(theta), 3))*(cos(theta)));
+			sum_iq4[3][i] += (1.0*sin(3.0*phi))*(qy3*(pow(sin(theta), 3))*(cos(theta)));
+			sum_rq4[4][i] += (1.0*cos(4.0*phi))*(qy4*(pow(sin(theta), 4)));
+			sum_iq4[4][i] += (1.0*sin(4.0*phi))*(qy4*(pow(sin(theta), 4)));					
+			
+			sum_r_q6[6][i] += ( 1.0*cos(6.0*phi))*(py_6*(pow(sin(theta), 6)));	
+			sum_i_q6[6][i] += (-1.0*sin(6.0*phi))*(py_6*(pow(sin(theta), 6)));
+			sum_r_q6[5][i] += (-1.0*cos(5.0*phi))*(py_5*(pow(sin(theta), 5))*cos(theta));
+			sum_i_q6[5][i] += ( 1.0*sin(5.0*phi))*(py_5*(pow(sin(theta), 5))*cos(theta));
+			sum_r_q6[4][i] += ( 1.0*cos(4.0*phi))*(py_4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));
+			sum_i_q6[4][i] += (-1.0*sin(4.0*phi))*(py_4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));
+			sum_r_q6[3][i] += (-1.0*cos(3.0*phi))*(py_3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));	
+			sum_i_q6[3][i] += ( 1.0*sin(3.0*phi))*(py_3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_r_q6[2][i] += ( 1.0*cos(2.0*phi))*(py_2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));	
+			sum_i_q6[2][i] += (-1.0*sin(2.0*phi))*(py_2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));				
+			sum_r_q6[1][i] += (-1.0*cos(1.0*phi))*(py_1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));
+			sum_i_q6[1][i] += ( 1.0*sin(1.0*phi))*(py_1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));
+			sum_r_q6[0][i] += py0*(231.0*(pow(cos(theta), 6))-315.0*(pow(cos(theta), 4))+105.0*(pow(cos(theta), 2))-5.0);
+			sum_i_q6[0][i] += 0.0;
+			sum_rq6[0][i] += py0*(231.0*(pow(cos(theta), 6))-315.0*(pow(cos(theta), 4))+105.0*(pow(cos(theta), 2))-5.0);
+			sum_iq6[0][i] += 0.0;			
+			sum_rq6[1][i] += (1.0*cos(1.0*phi))*(py1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));
+			sum_iq6[1][i] += (1.0*sin(1.0*phi))*(py1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));	
+			sum_rq6[2][i] += (1.0*cos(2.0*phi))*(py2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));
+			sum_iq6[2][i] += (1.0*sin(2.0*phi))*(py2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));
+			sum_rq6[3][i] += (1.0*cos(3.0*phi))*(py3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_iq6[3][i] += (1.0*sin(3.0*phi))*(py3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_rq6[4][i] += (1.0*cos(4.0*phi))*(py4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));
+			sum_iq6[4][i] += (1.0*sin(4.0*phi))*(py4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));	
+			sum_rq6[5][i] += (1.0*cos(5.0*phi))*(py5*(pow(sin(theta), 5))*cos(theta));
+			sum_iq6[5][i] += (1.0*sin(5.0*phi))*(py5*(pow(sin(theta), 5))*cos(theta));	
+			sum_rq6[6][i] += (1.0*cos(6.0*phi))*(py6*(pow(sin(theta), 6)));
+			sum_iq6[6][i] += (1.0*sin(6.0*phi))*(py6*(pow(sin(theta), 6)));								
+			}
+		for(unsigned int n=0; n<=4; n++)
+			{
+			r_q4[n][i] = sum_r_q4[n][i]/num[i]; 
+			i_q4[n][i] = sum_i_q4[n][i]/num[i];
+			rq4[n][i] = sum_rq4[n][i]/num[i]; 
+			iq4[n][i] = sum_iq4[n][i]/num[i];
+			}			
+		for(unsigned int m=0; m<=6; m++)
+			{
+			r_q6[m][i] = sum_r_q6[m][i]/num[i]; 
+			i_q6[m][i] = sum_i_q6[m][i]/num[i];
+			rq6[m][i] = sum_rq6[m][i]/num[i]; 
+			iq6[m][i] = sum_iq6[m][i]/num[i];
+			}					
+		}			
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		for(unsigned int n=0; n<=4; n++)
+			{
+			for(unsigned int j=0; j<num[i]; j++)
+				{
+				r_q4[n][i] += r_q4[n][nb[i][j]];
+				i_q4[n][i] += i_q4[n][nb[i][j]];
+				rq4[n][i] += rq4[n][nb[i][j]];
+				iq4[n][i] += iq4[n][nb[i][j]]; 										 
+				}
+			r_q4[n][i]=r_q4[n][i]/(num[i]+1);
+			i_q4[n][i]=i_q4[n][i]/(num[i]+1);
+			rq4[n][i]=rq4[n][i]/(num[i]+1);
+			iq4[n][i]=iq4[n][i]/(num[i]+1);			
+			}
+		
+		for(unsigned int m=0; m<=6; m++)
+			{
+			for(unsigned int j=0; j<num[i]; j++)
+				{								
+				r_q6[m][i] += r_q6[m][nb[i][j]];
+				i_q6[m][i] += i_q6[m][nb[i][j]];
+				rq6[m][i] += rq6[m][nb[i][j]];
+				iq6[m][i] += iq6[m][nb[i][j]]; 										 
+				}
+			r_q6[m][i]=r_q6[m][i]/(num[i]+1);
+			i_q6[m][i]=i_q6[m][i]/(num[i]+1);
+			rq6[m][i]=rq6[m][i]/(num[i]+1);
+			iq6[m][i]=iq6[m][i]/(num[i]+1);	
+			}			
+		}		
+	q4_all_sum=0.0;	
+	q6_all_sum=0.0;
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		double sum_N4=0.0;
+		double sum_P4=0.0;				
+		double sum_N6=0.0;
+		double sum_P6=0.0;
+		for(unsigned int n=0; n<=4; n++)
+			{	
+			sum_N4 += (r_q4[n][i]*r_q4[n][i] + i_q4[n][i]*i_q4[n][i]);
+			sum_P4 += (rq4[n][i]*rq4[n][i] + iq4[n][i]*iq4[n][i]);
+			}			
+		q4_local[i] += (sum_N4 + sum_P4 - (rq4[0][i]*rq4[0][i]+iq4[0][i]*iq4[0][i]));
+		q4_local[i] = sqrt((4*pi/9.0)*q4_local[i]);	
+		q4_all_sum += q4_local[i];
+		if(q4_local[i]>= q4max) q4max=q4_local[i];
+		if(q4_local[i]<= q4min) q4min=q4_local[i];	
+		
+		for(unsigned int m=0; m<=6; m++)
+			{	
+			sum_N6 += (r_q6[m][i]*r_q6[m][i] + i_q6[m][i]*i_q6[m][i]);
+			sum_P6 += (rq6[m][i]*rq6[m][i] + iq6[m][i]*iq6[m][i]);
+			}
+		q6_local[i] += (sum_N6 + sum_P6 - (rq6[0][i]*rq6[0][i]+iq6[0][i]*iq6[0][i]));
+		q6_local[i] = sqrt((4*pi/13.0)*q6_local[i]);
+		q6_all_sum += q6_local[i];
+		
+		if(q6_local[i]>= q6max) q6max=q6_local[i];
+		if(q6_local[i]<= q6min) q6min=q6_local[i];		
+		}
+	q4_all += q4_all_sum/double(pos_size);
+	q4_local_all.push_back(q4_local);		
+	q6_all += q6_all_sum/double(pos_size);
+	q6_local_all.push_back(q6_local);
+	m_Nf += 1;
+	}
+	
+//--- case 29
+void VORONOI::compute()
+	{
+	std::vector<vec> pos = m_build->getPos();
+	std::vector<vec_int> image = m_build->getImage();
+	std::vector<unsigned int> type = m_build->getType();
+	unsigned int timestep = m_build->getTimeStep();		
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	BoxSize box = m_build->getBox();
+	Lx=double(box.lx); LxINV=1.0/Lx; 
+	Ly=double(box.ly); LyINV=1.0/Ly;
+	Lz=double(box.lz); LzINV=1.0/Lz;
+	for(unsigned int i=0; i<pos.size(); i++)
+		{
+		realPos[i].x=pos[i].x + image[i].x*Lx;
+		realPos[i].y=pos[i].y + image[i].y*Ly;
+		realPos[i].z=pos[i].z + image[i].z*Lz;
+		}
+	double rcut;		
+	if(m_rcut>0.0)
+		rcut=m_rcut;		
+	pos_size=pos.size();
+	unsigned int MaxVer=500;
+	double rtemp;	
+	std::vector<unsigned int> num(pos_size, 0);
+	std::vector<std::vector<unsigned int> > nb(pos_size, std::vector <unsigned int>(pos_size, 0)); 
+	std::vector<double> voronoi_local(pos_size, 0.0);			
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		unsigned int CAN=0;
+		std::vector<vec> pp; pp.resize(MaxVer);
+		std::vector<double> ps; ps.resize(MaxVer);
+		std::vector<unsigned int> tag; tag.resize(MaxVer);					
+		for(unsigned int j=0; j<pos_size; j++)
+			{
+			if(i!=j)
+				{
+				double dx=realPos[j].x - realPos[i].x;
+				dx -= Lx*rintf(dx*LxINV);
+				double dy=realPos[j].y - realPos[i].y;
+				dy -= Ly*rintf(dy*LyINV);
+				double dz=realPos[j].z - realPos[i].z;
+				dz -= Lz*rintf(dz*LzINV);
+				rtemp = dx*dx+dy*dy+dz*dz;
+				if(rtemp<(rcut*rcut)) 					
+					{
+					if(CAN<MaxVer)
+						{
+						tag[CAN]=j;
+						ps[CAN]=rtemp;
+						pp[CAN].x=dx;
+						pp[CAN].y=dy;
+						pp[CAN].z=dz;
+						CAN=CAN+1;
+						}
+					else
+						{
+						cerr << endl << "***Error! Too many Voronoi vertices" << endl << endl;
+						throw runtime_error("Error MaxVer dump");									
+						}							
+					}
+				}
+			}
+		unsigned int NCAN=CAN;
+		unsigned int tagi;
+		double pxi, pyi, pzi, psi;
+		for(unsigned int kk=0; kk<NCAN; kk++)
+			{
+			for(int k=0; k<NCAN-kk-1; k++) 
+				{
+				if(ps[k]>ps[k+1])  
+					{
+					tagi=tag[k];
+					psi=ps[k];
+					pxi=pp[k].x;
+					pyi=pp[k].y;
+					pzi=pp[k].z;
+					tag[k]=tag[k+1];
+					ps[k]=ps[k+1];
+					pp[k].x=pp[k+1].x;
+					pp[k].y=pp[k+1].y;
+					pp[k].z=pp[k+1].z;
+					tag[k+1]=tagi;
+					ps[k+1]=psi;
+					pp[k+1].x=pxi;
+					pp[k+1].y=pyi;
+					pp[k+1].z=pzi;					 
+					}					
+				}
+			}
+		unsigned int V=0;
+		std::vector<unsigned int> IV; IV.resize(MaxVer);
+		std::vector<unsigned int> JV; JV.resize(MaxVer);
+		std::vector<unsigned int> KV; KV.resize(MaxVer);
+		std::vector<unsigned int> flagi; flagi.resize(MaxVer);
+		std::vector<unsigned int> flagj; flagj.resize(MaxVer);
+		std::vector<unsigned int> flagk; flagk.resize(MaxVer);				
+		std::vector<vec> VI; VI.resize(MaxVer);
+		for(unsigned int I=0; I<NCAN-2; I++)
+			{
+			double AI=pp[I].x;
+			double BI=pp[I].y;
+			double CI=pp[I].z;
+			double DI=-ps[I];
+			for(unsigned int J=I+1; J<NCAN-1; J++)
+				{
+				double AJ=pp[J].x;
+				double BJ=pp[J].y;
+				double CJ=pp[J].z;
+				double DJ=-ps[J];
+				double AB=AI*BJ - AJ*BI;
+				double BC=BI*CJ - BJ*CI;
+				double CA=CI*AJ - CJ*AI;
+				double DA=DI*AJ - DJ*AI;
+				double DB=DI*BJ - DJ*BI;
+				double DC=DI*CJ - DJ*CI;
+				for(unsigned int K=J+1; K<NCAN; K++)
+					{
+					double AK=pp[K].x;
+					double BK=pp[K].y;
+					double CK=pp[K].z;
+					double DK=-ps[K];
+					double delta=AK*BC + BK*CA + CK*AB;
+					if(fabs(delta)>1e-6)
+						{
+						double VXIJK=(-DK*BC + BK*DC - CK*DB)/delta;
+						double VYIJK=(-AK*DC - DK*CA + CK*DA)/delta;
+						double VZIJK=( AK*DB - BK*DA - DK*AB)/delta;
+						bool OK=true;
+						for(unsigned int L=0; L<NCAN; L++)
+							{
+							if(L!=I && L!=J && L!=K && OK)
+								{
+								OK=((pp[L].x*VXIJK + pp[L].y*VYIJK + pp[L].z*VZIJK) <= ps[L]);
+								}
+							}
+						if(OK)
+							{
+							IV[V]=I;
+							JV[V]=J;
+							KV[V]=K;
+							VI[V].x=0.5*VXIJK;
+							VI[V].y=0.5*VYIJK;
+							VI[V].z=0.5*VZIJK;
+							flagi[V]=I;
+							flagj[V]=J;
+							flagk[V]=K;									
+							V=V+1;
+							if(V>MaxVer)
+								{
+								cerr << endl << "***Error! Too many Voronoi facets" << endl << endl;
+								throw runtime_error("Error MaxVer dump");											
+								}								 
+							}
+						}
+					}
+				}
+			}
+		unsigned int NV=V;
+		if(NV<3)
+			{
+			cerr << endl << "***Error! Less than 4 Voronoi vertices found" << endl << endl;
+			throw runtime_error("Error NV dump");				
+			}		
+		std::vector<unsigned int> Edges(MaxVer, 0);
+		std::vector<std::vector<unsigned int> > flag_ed(MaxVer, std::vector <unsigned int>(MaxVer, 0)); 			
+		for(unsigned int nv=0; nv<NV; nv++)
+			{ 
+			Edges[IV[nv]]=Edges[IV[nv]] + 1;		   
+			flag_ed[Edges[IV[nv]]][IV[nv]] = nv;
+			Edges[JV[nv]]=Edges[JV[nv]] + 1;		   
+			flag_ed[Edges[JV[nv]]][JV[nv]] = nv;		   
+			Edges[KV[nv]]=Edges[KV[nv]] + 1;		   
+			flag_ed[Edges[KV[nv]]][KV[nv]] = nv;				
+			}
+		for(unsigned int can=0; can<NCAN; can++)
+			{
+			if(Edges[can]!=0)
+				{
+				nb[i][num[i]] = tag[can];
+				num[i] += 1;
+				}
+			}
+		for(unsigned int N=0; N<NCAN; N++)
+			{
+			if(Edges[N]!=0)
+				{
+				std::vector<double> VXarea(MaxVer, 0.0);
+				std::vector<double> VYarea(MaxVer, 0.0);
+				std::vector<double> VZarea(MaxVer, 0.0);
+				unsigned int nu=0;
+				unsigned int mu=1;						
+				VXarea[nu]=VI[flag_ed[mu][N]].x;
+				VYarea[nu]=VI[flag_ed[mu][N]].y;
+				VZarea[nu]=VI[flag_ed[mu][N]].z;
+				std::vector<unsigned int> mm(MaxVer, 0);
+				begin:
+				unsigned int FIND_A=flagi[flag_ed[mu][N]];
+				unsigned int FIND_B=flagj[flag_ed[mu][N]];
+				unsigned int FIND_C=flagk[flag_ed[mu][N]];
+				mm[nu]=mu;
+				for(unsigned int m=1; m<=Edges[N]; m++)
+					{
+					bool mok=true;
+					for(unsigned int p=0; p<=nu; p++)
+						{
+						if(m==mm[p]) mok=false;
+						}					
+					if(mok)
+						{
+						bool f1_ok=((flagi[flag_ed[m][N]]==FIND_A) || (flagi[flag_ed[m][N]]==FIND_B) || (flagi[flag_ed[m][N]]==FIND_C));
+						bool f2_ok=((flagj[flag_ed[m][N]]==FIND_A) || (flagj[flag_ed[m][N]]==FIND_B) || (flagj[flag_ed[m][N]]==FIND_C));
+						bool f3_ok=((flagk[flag_ed[m][N]]==FIND_A) || (flagk[flag_ed[m][N]]==FIND_B) || (flagk[flag_ed[m][N]]==FIND_C));
+						bool f_ok=((f1_ok && f2_ok) || (f1_ok && f3_ok) || (f2_ok && f3_ok));
+						if(f_ok && (nu<Edges[N]))
+							{
+							nu=nu+1;
+							mu=m;
+							mm[nu]=m;
+							VXarea[nu]=VI[flag_ed[m][N]].x;
+							VYarea[nu]=VI[flag_ed[m][N]].y;
+							VZarea[nu]=VI[flag_ed[m][N]].z;	
+							goto begin;
+							}
+						}
+					}
+				for(unsigned int II=0; II<Edges[N]-2; II++)
+					{						 
+					double a11=VXarea[0];
+					double a12=VYarea[0];
+					double a13=VZarea[0];
+					double a21=VXarea[II+1];
+					double a22=VYarea[II+1];
+					double a23=VZarea[II+1];	
+					double a31=VXarea[II+2];
+					double a32=VYarea[II+2];
+					double a33=VZarea[II+2];						 
+					double pp=fabs(a11*a22*a33 - a11*a23*a32 - a12*a21*a33 + a12*a23*a31 + a13*a21*a32 - a13*a22*a31);
+					voronoi_local[i] += pp/6.0;
+					}
+				}
+			}
+		}			
+	double voronoi_local_sum=0.0;	
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		voronoi_local_sum += voronoi_local[i];
+		if(voronoi_local[i]>= voronoimax) voronoimax=voronoi_local[i];
+		if(voronoi_local[i]<= voronoimin) voronoimin=voronoi_local[i];	
+		}
+	voronoi_all += voronoi_local_sum;
+	voronoi_local_all.push_back(voronoi_local);
+	m_Nf += 1;
+	}
+
+//--- case 30
+void nonGauPar::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image=m_build->getImage();
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	BoxSize box=m_build->getBox();
+	double Lx=double(box.lx);
+	double Ly=double(box.ly);
+	double Lz=double(box.lz);
+	for(unsigned int i=0; i<pos.size(); i++)
+		{	        
+		realPos[i].x=pos[i].x+image[i].x*Lx;
+		realPos[i].y=pos[i].y+image[i].y*Ly;
+		realPos[i].z=pos[i].z+image[i].z*Lz;		   
+		}
+	m_pos_all.push_back(realPos);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);	
+	m_Nf += 1;
+	}
+
+//--- case 31
+void RnonGauPar::compute()
+	{ 
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image=m_build->getImage();
+	std::vector<vec> Rotangle=m_build->getRotangle();	
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realRotangle; realRotangle.resize(pos.size());	
+	for(unsigned int i=0; i<pos.size(); i++)
+		{ 
+		realRotangle[i].x=Rotangle[i].x;
+		realRotangle[i].y=Rotangle[i].y;
+		realRotangle[i].z=Rotangle[i].z;
+		}
+	m_Rotangle_all.push_back(realRotangle);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);
+	m_Nf += 1;   
+	}
+
+//--- case 32
+void SVH::compute()
+	{ 
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image=m_build->getImage();
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if (image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image and xml files!" << endl;
+		}
+	if (image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	BoxSize box=m_build->getBox();
+	double Lx=double(box.lx);
+	double Ly=double(box.ly);
+	double Lz=double(box.lz);
+	for (unsigned int i=0; i<pos.size(); i++)
+		{
+		realPos[i].x=pos[i].x+image[i].x*Lx;
+		realPos[i].y=pos[i].y+image[i].y*Ly;
+		realPos[i].z=pos[i].z+image[i].z*Lz;
+		}
+	m_pos_all.push_back(realPos);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);
+	m_Nf += 1;
+	}
+	
+//--- case 33
+void RSVH::compute()
+	{ 
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image=m_build->getImage();
+	std::vector<vec4> quat=m_build->getQuaternion();
+	std::vector<vec> Rotangle=m_build->getRotangle();
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image and xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> ori; ori.resize(pos.size());
+	for(unsigned int i=0; i<pos.size(); i++) 
+		{			
+		vec4 quat4=quat[i];
+		ori[i].x=double(2*quat4.y*quat4.w + 2*quat4.x*quat4.z);
+		ori[i].y=double(2*quat4.z*quat4.w - 2*quat4.x*quat4.y);
+		ori[i].z=double(quat4.x*quat4.x - quat4.y*quat4.y - quat4.z*quat4.z + quat4.w*quat4.w);	
+		}
+	std::vector<vec> realRotangle; realRotangle.resize(pos.size());	
+	for(unsigned int i=0; i<pos.size(); i++)
+		{
+		realRotangle[i].x=Rotangle[i].x;
+		realRotangle[i].y=Rotangle[i].y;
+		realRotangle[i].z=Rotangle[i].z;
+		}			
+	m_ori_all.push_back(ori);
+	m_Rotangle_all.push_back(realRotangle);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);
+	m_Nf += 1;
+	}
+	
+//---case 34
+void fpSus::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image=m_build->getImage();
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout<<"***Warning! No inputed image and xml files!"<<endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	BoxSize box=m_build->getBox();
+	Lx=double(box.lx);
+	Ly=double(box.ly);
+	Lz=double(box.lz);
+	for(unsigned int i=0; i<pos.size(); i++)
+		{
+		realPos[i].x=pos[i].x+image[i].x*Lx;
+		realPos[i].y=pos[i].y+image[i].y*Ly;
+		realPos[i].z=pos[i].z+image[i].z*Lz;
+		}
+	m_pos_all.push_back(realPos);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);		
+	m_Nf += 1;
+	}	
+			
+//---case 35
+void RfpSus::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec4> quat=m_build->getQuaternion();
+	std::vector<vec_int> image=m_build->getImage();
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}		
+	std::vector<vec> ori; ori.resize(pos.size());
+	for(unsigned int i=0; i<pos.size(); i++) 
+		{			
+		vec4 quat4=quat[i];
+		ori[i].x=double(2*quat4.y*quat4.w + 2*quat4.x*quat4.z);
+		ori[i].y=double(2*quat4.z*quat4.w - 2*quat4.x*quat4.y);
+		ori[i].z=double(quat4.x*quat4.x - quat4.y*quat4.y - quat4.z*quat4.z + quat4.w*quat4.w);	
+		}  	 
+	m_ori_all.push_back(ori);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);
+	m_Nf += 1;		
+	}	
+
+//---case 36
+void OVLAF::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image = m_build->getImage();
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	BoxSize box=m_build->getBox();
+	Lx=double(box.lx);
+	Ly=double(box.ly);
+	Lz=double(box.lz);		
+	for(unsigned int i=0; i<pos.size(); i++)
+		{							
+		realPos[i].x=pos[i].x+image[i].x*Lx;
+		realPos[i].y=pos[i].y+image[i].y*Ly;
+		realPos[i].z=pos[i].z+image[i].z*Lz;		
+		}				
+	m_pos_all.push_back(realPos);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);
+	m_Nf += 1;
+	}
+
+//---case 37
+void CISF::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image = m_build->getImage();
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	BoxSize box=m_build->getBox();
+	Lx=double(box.lx);
+	Ly=double(box.ly);
+	Lz=double(box.lz);		
+	for(unsigned int i=0; i<pos.size(); i++)
+		{							
+		realPos[i].x=pos[i].x+image[i].x*Lx;
+		realPos[i].y=pos[i].y+image[i].y*Ly;
+		realPos[i].z=pos[i].z+image[i].z*Lz;		
+		}				
+	m_pos_all.push_back(realPos);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);
+	m_Nf += 1;
+	}
+	
+//---case 38
+void CAGEISF::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image = m_build->getImage();
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	BoxSize box=m_build->getBox();	
+	Lx=double(box.lx); LxINV=1.0/Lx; 
+	Ly=double(box.ly); LyINV=1.0/Ly;
+	Lz=double(box.lz); LzINV=1.0/Lz;		
+	for(unsigned int i=0; i<pos.size(); i++)
+		{							
+		realPos[i].x=pos[i].x+image[i].x*Lx;
+		realPos[i].y=pos[i].y+image[i].y*Ly;
+		realPos[i].z=pos[i].z+image[i].z*Lz;		
+		}
+	pos_size=pos.size();
+	unsigned int MaxVer=500;
+	double rtemp;
+	double rcut;		
+	if(m_rcut>0.0)
+		rcut=m_rcut;
+	bool Voronoi;
+	Voronoi=m_Voronoi;		
+	std::vector<unsigned int> num(pos_size, 0);
+	std::vector<std::vector<unsigned int> > nb(pos_size, std::vector <unsigned int>(MaxVer, 0)); 
+	if(!Voronoi)
+		{
+		for(unsigned int i=0; i<pos_size; i++)
+			{	
+			num[i]=0;
+			unsigned int cnum;
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[i].x-realPos[j].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[i].y-realPos[j].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[i].z-realPos[j].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(num[i]<MaxVer)
+							{
+							nb[i][num[i]] = j;
+							num[i] += 1;
+							cnum=num[i];
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}
+						}
+					}
+				}
+			nb[i].resize(cnum);
+			}			
+		}
+	else
+		{			
+		for(unsigned int i=0; i<pos_size; i++)
+			{
+			unsigned int cnum;
+			unsigned int CAN=0;
+			std::vector<vec> pp; pp.resize(MaxVer);
+			std::vector<double> ps; ps.resize(MaxVer);
+			std::vector<unsigned int> tag; tag.resize(MaxVer);					
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[j].x - realPos[i].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[j].y - realPos[i].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[j].z - realPos[i].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(CAN<MaxVer)
+							{
+							tag[CAN]=j;
+							ps[CAN]=rtemp;
+							pp[CAN].x=dx;
+							pp[CAN].y=dy;
+							pp[CAN].z=dz;
+							CAN=CAN+1;
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many Voronoi vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}							
+						}
+					}
+				}
+			unsigned int NCAN=CAN;
+			unsigned int tagi;
+			double pxi, pyi, pzi, psi;
+			for(unsigned int kk=0; kk<NCAN; kk++)
+				{
+				for(int k=0; k<NCAN-kk-1; k++) 
+					{
+					if(ps[k]>ps[k+1])  
+						{
+						tagi=tag[k];
+						psi=ps[k];
+						pxi=pp[k].x;
+						pyi=pp[k].y;
+						pzi=pp[k].z;
+						tag[k]=tag[k+1];
+						ps[k]=ps[k+1];
+						pp[k].x=pp[k+1].x;
+						pp[k].y=pp[k+1].y;
+						pp[k].z=pp[k+1].z;
+						tag[k+1]=tagi;
+						ps[k+1]=psi;
+						pp[k+1].x=pxi;
+						pp[k+1].y=pyi;
+						pp[k+1].z=pzi;					 
+						}					
+					}
+				}
+			unsigned int V=0;
+			std::vector<unsigned int> IV; IV.resize(MaxVer);
+			std::vector<unsigned int> JV; JV.resize(MaxVer);
+			std::vector<unsigned int> KV; KV.resize(MaxVer);
+			std::vector<vec> VI; VI.resize(MaxVer);
+			for(unsigned int I=0; I<NCAN-2; I++)
+				{
+				double AI=pp[I].x;
+				double BI=pp[I].y;
+				double CI=pp[I].z;
+				double DI=-ps[I];
+				for(unsigned int J=I+1; J<NCAN-1; J++)
+					{
+					double AJ=pp[J].x;
+					double BJ=pp[J].y;
+					double CJ=pp[J].z;
+					double DJ=-ps[J];
+					double AB=AI*BJ - AJ*BI;
+					double BC=BI*CJ - BJ*CI;
+					double CA=CI*AJ - CJ*AI;
+					double DA=DI*AJ - DJ*AI;
+					double DB=DI*BJ - DJ*BI;
+					double DC=DI*CJ - DJ*CI;
+					for(unsigned int K=J+1; K<NCAN; K++)
+						{
+						double AK=pp[K].x;
+						double BK=pp[K].y;
+						double CK=pp[K].z;
+						double DK=-ps[K];
+						double delta=AK*BC + BK*CA + CK*AB;
+						if(fabs(delta)>1e-6)
+							{
+							double VXIJK=(-DK*BC + BK*DC - CK*DB)/delta;
+							double VYIJK=(-AK*DC - DK*CA + CK*DA)/delta;
+							double VZIJK=( AK*DB - BK*DA - DK*AB)/delta;
+							bool OK=true;
+							for(unsigned int L=0; L<NCAN; L++)
+								{
+								if(L!=I && L!=J && L!=K && OK)
+									{
+									OK=((pp[L].x*VXIJK + pp[L].y*VYIJK + pp[L].z*VZIJK) <= ps[L]);
+									}
+								}
+							if(OK)
+								{
+								IV[V]=I;
+								JV[V]=J;
+								KV[V]=K;
+								VI[V].x=0.5*VXIJK;
+								VI[V].y=0.5*VYIJK;
+								VI[V].z=0.5*VZIJK;	
+								V=V+1;
+								if(V>MaxVer)
+									{
+									cerr << endl << "***Error! Too many Voronoi facets" << endl << endl;
+									throw runtime_error("Error MaxVer dump");											
+									}								 
+								}
+							}
+						}
+					}
+				}
+			unsigned int NV=V;
+			if(NV<3)
+				{
+				cerr << endl << "***Error! Less than 4 Voronoi vertices found" << endl << endl;
+				throw runtime_error("Error NV dump");				
+				}		
+			std::vector<unsigned int> Edges(MaxVer, 0);
+			std::vector<std::vector<unsigned int> > flag_ed(MaxVer, std::vector <unsigned int>(MaxVer, 0)); 			
+			for(unsigned int nv=0; nv<NV; nv++)
+				{
+				Edges[IV[nv]]=Edges[IV[nv]] + 1;		   
+				flag_ed[Edges[IV[nv]]][IV[nv]] = nv;	   
+				Edges[JV[nv]]=Edges[JV[nv]] + 1;		   
+				flag_ed[Edges[JV[nv]]][JV[nv]] = nv;		   
+				Edges[KV[nv]]=Edges[KV[nv]] + 1;		   
+				flag_ed[Edges[KV[nv]]][KV[nv]] = nv;				
+				}
+			for(unsigned int can=0; can<NCAN; can++)
+				{
+				if(Edges[can]!=0)
+					{					
+					nb[i][num[i]] = tag[can];
+					num[i] += 1;
+					cnum=num[i]; 
+					}
+				}
+			nb[i].resize(cnum);
+			}
+		}
+	m_num_all.push_back(num);
+	m_nb_all.push_back(nb);
+	m_pos_all.push_back(realPos);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);
+	m_Nf += 1;
+	}
+
+//---case 39
+void CAGEMSD::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image = m_build->getImage();
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	BoxSize box=m_build->getBox();	
+	Lx=double(box.lx); LxINV=1.0/Lx; 
+	Ly=double(box.ly); LyINV=1.0/Ly;
+	Lz=double(box.lz); LzINV=1.0/Lz;		
+	for(unsigned int i=0; i<pos.size(); i++)
+		{							
+		realPos[i].x=pos[i].x+image[i].x*Lx;
+		realPos[i].y=pos[i].y+image[i].y*Ly;
+		realPos[i].z=pos[i].z+image[i].z*Lz;		
+		}
+	pos_size=pos.size();
+	unsigned int MaxVer=500;
+	double rtemp;
+	double rcut;		
+	if(m_rcut>0.0)
+		rcut=m_rcut;
+	bool Voronoi;
+	Voronoi=m_Voronoi;		
+	std::vector<unsigned int> num(pos_size, 0);
+	std::vector<std::vector<unsigned int> > nb(pos_size, std::vector <unsigned int>(MaxVer, 0)); 	
+	if(!Voronoi)
+		{		
+		for(unsigned int i=0; i<pos_size; i++)
+			{	
+			num[i]=0;
+			unsigned int cnum;
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[i].x-realPos[j].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[i].y-realPos[j].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[i].z-realPos[j].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(num[i]<MaxVer)
+							{
+							nb[i][num[i]] = j;
+							num[i] += 1;
+							cnum=num[i];
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}
+						}
+					}
+				}
+			nb[i].resize(cnum);
+			}		
+		}
+	else
+		{	
+		for(unsigned int i=0; i<pos_size; i++)
+			{
+			unsigned int cnum;
+			unsigned int CAN=0;
+			std::vector<vec> pp; pp.resize(MaxVer);
+			std::vector<double> ps; ps.resize(MaxVer);
+			std::vector<unsigned int> tag; tag.resize(MaxVer);					
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[j].x - realPos[i].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[j].y - realPos[i].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[j].z - realPos[i].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(CAN<MaxVer)
+							{
+							tag[CAN]=j;
+							ps[CAN]=rtemp;
+							pp[CAN].x=dx;
+							pp[CAN].y=dy;
+							pp[CAN].z=dz;
+							CAN=CAN+1;
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many Voronoi vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}							
+						}
+					}
+				}
+			unsigned int NCAN=CAN;
+			unsigned int tagi;
+			double pxi, pyi, pzi, psi;
+			for(unsigned int kk=0; kk<NCAN; kk++)
+				{
+				for(int k=0; k<NCAN-kk-1; k++) 
+					{
+					if(ps[k]>ps[k+1])  
+						{
+						tagi=tag[k];
+						psi=ps[k];
+						pxi=pp[k].x;
+						pyi=pp[k].y;
+						pzi=pp[k].z;
+						tag[k]=tag[k+1];
+						ps[k]=ps[k+1];
+						pp[k].x=pp[k+1].x;
+						pp[k].y=pp[k+1].y;
+						pp[k].z=pp[k+1].z;
+						tag[k+1]=tagi;
+						ps[k+1]=psi;
+						pp[k+1].x=pxi;
+						pp[k+1].y=pyi;
+						pp[k+1].z=pzi;					 
+						}					
+					}
+				}
+			unsigned int V=0;
+			std::vector<unsigned int> IV; IV.resize(MaxVer);
+			std::vector<unsigned int> JV; JV.resize(MaxVer);
+			std::vector<unsigned int> KV; KV.resize(MaxVer);
+			std::vector<vec> VI; VI.resize(MaxVer);
+			for(unsigned int I=0; I<NCAN-2; I++)
+				{
+				double AI=pp[I].x;
+				double BI=pp[I].y;
+				double CI=pp[I].z;
+				double DI=-ps[I];
+				for(unsigned int J=I+1; J<NCAN-1; J++)
+					{
+					double AJ=pp[J].x;
+					double BJ=pp[J].y;
+					double CJ=pp[J].z;
+					double DJ=-ps[J];
+					double AB=AI*BJ - AJ*BI;
+					double BC=BI*CJ - BJ*CI;
+					double CA=CI*AJ - CJ*AI;
+					double DA=DI*AJ - DJ*AI;
+					double DB=DI*BJ - DJ*BI;
+					double DC=DI*CJ - DJ*CI;
+					for(unsigned int K=J+1; K<NCAN; K++)
+						{
+						double AK=pp[K].x;
+						double BK=pp[K].y;
+						double CK=pp[K].z;
+						double DK=-ps[K];
+						double delta=AK*BC + BK*CA + CK*AB;
+						if(fabs(delta)>1e-6)
+							{
+							double VXIJK=(-DK*BC + BK*DC - CK*DB)/delta;
+							double VYIJK=(-AK*DC - DK*CA + CK*DA)/delta;
+							double VZIJK=( AK*DB - BK*DA - DK*AB)/delta;
+							bool OK=true;
+							for(unsigned int L=0; L<NCAN; L++)
+								{
+								if(L!=I && L!=J && L!=K && OK)
+									{
+									OK=((pp[L].x*VXIJK + pp[L].y*VYIJK + pp[L].z*VZIJK) <= ps[L]);
+									}
+								}
+							if(OK)
+								{
+								IV[V]=I;
+								JV[V]=J;
+								KV[V]=K;
+								VI[V].x=0.5*VXIJK;
+								VI[V].y=0.5*VYIJK;
+								VI[V].z=0.5*VZIJK;	
+								V=V+1;
+								if(V>MaxVer)
+									{
+									cerr << endl << "***Error! Too many Voronoi facets" << endl << endl;
+									throw runtime_error("Error MaxVer dump");											
+									}								 
+								}
+							}
+						}
+					}
+				}
+			unsigned int NV=V;
+			if(NV<3)
+				{
+				cerr << endl << "***Error! Less than 4 Voronoi vertices found" << endl << endl;
+				throw runtime_error("Error NV dump");				
+				}		
+			std::vector<unsigned int> Edges(MaxVer, 0);
+			std::vector<std::vector<unsigned int> > flag_ed(MaxVer, std::vector <unsigned int>(MaxVer, 0)); 			
+			for(unsigned int nv=0; nv<NV; nv++)
+				{
+				Edges[IV[nv]]=Edges[IV[nv]] + 1;		   
+				flag_ed[Edges[IV[nv]]][IV[nv]] = nv;	   
+				Edges[JV[nv]]=Edges[JV[nv]] + 1;		   
+				flag_ed[Edges[JV[nv]]][JV[nv]] = nv;		   
+				Edges[KV[nv]]=Edges[KV[nv]] + 1;		   
+				flag_ed[Edges[KV[nv]]][KV[nv]] = nv;				
+				}
+			for(unsigned int can=0; can<NCAN; can++)
+				{
+				if(Edges[can]!=0)
+					{					
+					nb[i][num[i]] = tag[can];
+					num[i] += 1;
+					cnum=num[i]; 
+					}
+				}
+			nb[i].resize(cnum);
+			}		
+		}
+	m_num_all.push_back(num);
+	m_nb_all.push_back(nb);
+	m_pos_all.push_back(realPos);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);
+	m_Nf += 1;
+	}
+
+//--- case 40
+void RMSD::compute()
+	{	
+	std::vector<vec> pos=m_build->getPos();
+	std::vector<vec_int> image=m_build->getImage();
+	std::vector<vec4> quat=m_build->getQuaternion();
+	std::vector<vec> Rotangle=m_build->getRotangle();
+	std::vector<unsigned int> type=m_build->getType();
+	unsigned int timestep=m_build->getTimeStep();
+	if(image.size()==0&&m_Nf==0)
+		{
+		cout << "***Warning! No inputed image and xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}	
+	std::vector<vec> ori; ori.resize(pos.size());
+	for(unsigned int i=0; i<pos.size(); i++) 
+		{		
+		vec4 quat4=quat[i];
+		ori[i].x=double(2*quat4.y*quat4.w+2*quat4.x*quat4.z);
+		ori[i].y=double(2*quat4.z*quat4.w-2*quat4.x*quat4.y);
+		ori[i].z=double(quat4.x*quat4.x-quat4.y*quat4.y-quat4.z*quat4.z+quat4.w*quat4.w);		  
+		}  	 
+	m_ori_all.push_back(ori);
+	m_Rotangle_all.push_back(Rotangle);
+	m_type_all.push_back(type);
+	delta_t.push_back(timestep);
+	m_Nf += 1;		
+	}	
+
+//--- case 41
+void P2P4::compute()
+	{
+	std::vector<vec> pos = m_build->getPos();
+	std::vector<vec_int> image = m_build->getImage();
+	std::vector<vec4> quat=m_build->getQuaternion();
+	std::vector<unsigned int> type = m_build->getType();
+	unsigned int timestep = m_build->getTimeStep();		
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	std::vector<vec> ori; ori.resize(pos.size());
+	BoxSize box = m_build->getBox();
+	double Lx=double(box.lx); double LxINV=1.0/Lx; 
+	double Ly=double(box.ly); double LyINV=1.0/Ly;
+	double Lz=double(box.lz); double LzINV=1.0/Lz;
+	for(unsigned int i=0; i<pos.size(); i++)
+		{
+		realPos[i].x=pos[i].x + image[i].x*Lx;
+		realPos[i].y=pos[i].y + image[i].y*Ly;
+		realPos[i].z=pos[i].z + image[i].z*Lz;
+		vec4 quat4=quat[i];
+		ori[i].x=double(2*quat4.y*quat4.w + 2*quat4.x*quat4.z);
+		ori[i].y=double(2*quat4.z*quat4.w - 2*quat4.x*quat4.y);
+		ori[i].z=double(quat4.x*quat4.x - quat4.y*quat4.y - quat4.z*quat4.z + quat4.w*quat4.w);			 
+		}
+	pos_size=pos.size();
+	double rcut;		
+	if(m_rcut>0.0)
+		rcut=m_rcut;
+	bool Voronoi;
+	Voronoi=m_Voronoi;
+	unsigned int MaxVer=500;
+	double rtemp;	
+	std::vector<unsigned int> num(pos_size, 0);
+	std::vector<std::vector<unsigned int> > nb(pos_size, std::vector <unsigned int>(pos_size, 0)); 
+	if(!Voronoi)
+		{
+		for(unsigned int i=0; i<pos_size; i++)
+			{
+			num[i]=0;
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[i].x-realPos[j].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[i].y-realPos[j].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[i].z-realPos[j].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(num[i]<MaxVer)
+							{
+							nb[i][num[i]] = j;
+							num[i] += 1;								
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}
+						}
+					}
+				}
+			}			
+		}
+	else
+		{			
+		for(unsigned int i=0; i<pos_size; i++)
+			{
+			unsigned int CAN=0;
+			std::vector<vec> pp; pp.resize(MaxVer);
+			std::vector<double> ps; ps.resize(MaxVer);
+			std::vector<unsigned int> tag; tag.resize(MaxVer);					
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[j].x - realPos[i].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[j].y - realPos[i].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[j].z - realPos[i].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(CAN<MaxVer)
+							{
+							tag[CAN]=j;
+							ps[CAN]=rtemp;
+							pp[CAN].x=dx;
+							pp[CAN].y=dy;
+							pp[CAN].z=dz;
+							CAN=CAN+1;
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many Voronoi vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}							
+						}
+					}
+				}
+			unsigned int NCAN=CAN;
+			unsigned int tagi;
+			double pxi, pyi, pzi, psi;
+			for(unsigned int kk=0; kk<NCAN; kk++)
+				{
+				for(int k=0; k<NCAN-kk-1; k++) 
+					{
+					if(ps[k]>ps[k+1])  
+						{
+						tagi=tag[k];
+						psi=ps[k];
+						pxi=pp[k].x;
+						pyi=pp[k].y;
+						pzi=pp[k].z;
+						tag[k]=tag[k+1];
+						ps[k]=ps[k+1];
+						pp[k].x=pp[k+1].x;
+						pp[k].y=pp[k+1].y;
+						pp[k].z=pp[k+1].z;
+						tag[k+1]=tagi;
+						ps[k+1]=psi;
+						pp[k+1].x=pxi;
+						pp[k+1].y=pyi;
+						pp[k+1].z=pzi;					 
+						}					
+					}
+				}
+			unsigned int V=0;
+			std::vector<unsigned int> IV; IV.resize(MaxVer);
+			std::vector<unsigned int> JV; JV.resize(MaxVer);
+			std::vector<unsigned int> KV; KV.resize(MaxVer);
+			std::vector<vec> VI; VI.resize(MaxVer);
+			for(unsigned int I=0; I<NCAN-2; I++)
+				{
+				double AI=pp[I].x;
+				double BI=pp[I].y;
+				double CI=pp[I].z;
+				double DI=-ps[I];
+				for(unsigned int J=I+1; J<NCAN-1; J++)
+					{
+					double AJ=pp[J].x;
+					double BJ=pp[J].y;
+					double CJ=pp[J].z;
+					double DJ=-ps[J];
+					double AB=AI*BJ - AJ*BI;
+					double BC=BI*CJ - BJ*CI;
+					double CA=CI*AJ - CJ*AI;
+					double DA=DI*AJ - DJ*AI;
+					double DB=DI*BJ - DJ*BI;
+					double DC=DI*CJ - DJ*CI;
+					for(unsigned int K=J+1; K<NCAN; K++)
+						{
+						double AK=pp[K].x;
+						double BK=pp[K].y;
+						double CK=pp[K].z;
+						double DK=-ps[K];
+						double delta=AK*BC + BK*CA + CK*AB;
+						if(fabs(delta)>1e-6)
+							{
+							double VXIJK=(-DK*BC + BK*DC - CK*DB)/delta;
+							double VYIJK=(-AK*DC - DK*CA + CK*DA)/delta;
+							double VZIJK=( AK*DB - BK*DA - DK*AB)/delta;
+							bool OK=true;
+							for(unsigned int L=0; L<NCAN; L++)
+								{
+								if(L!=I && L!=J && L!=K && OK)
+									{
+									OK=((pp[L].x*VXIJK + pp[L].y*VYIJK + pp[L].z*VZIJK) <= ps[L]);
+									}
+								}
+							if(OK)
+								{
+								IV[V]=I;
+								JV[V]=J;
+								KV[V]=K;
+								VI[V].x=0.5*VXIJK;
+								VI[V].y=0.5*VYIJK;
+								VI[V].z=0.5*VZIJK;	
+								V=V+1;
+								if(V>MaxVer)
+									{
+									cerr << endl << "***Error! Too many Voronoi facets" << endl << endl;
+									throw runtime_error("Error MaxVer dump");											
+									}								 
+								}
+							}
+						}
+					}
+				}
+			unsigned int NV=V;
+			if(NV<3)
+				{
+				cerr << endl << "***Error! Less than 4 Voronoi vertices found" << endl << endl;
+				throw runtime_error("Error NV dump");				
+				}		
+			std::vector<unsigned int> Edges(MaxVer, 0);
+			std::vector<std::vector<unsigned int> > flag_ed(MaxVer, std::vector <unsigned int>(MaxVer, 0)); 			
+			for(unsigned int nv=0; nv<NV; nv++)
+				{
+				Edges[IV[nv]]=Edges[IV[nv]] + 1;		   
+				flag_ed[Edges[IV[nv]]][IV[nv]] = nv;	   
+				Edges[JV[nv]]=Edges[JV[nv]] + 1;		   
+				flag_ed[Edges[JV[nv]]][JV[nv]] = nv;		   
+				Edges[KV[nv]]=Edges[KV[nv]] + 1;		   
+				flag_ed[Edges[KV[nv]]][KV[nv]] = nv;				
+				}
+			for(unsigned int can=0; can<NCAN; can++)
+				{
+				if(Edges[can]!=0)
+					{
+					nb[i][num[i]] = tag[can];
+					num[i] += 1;
+					}
+				}
+			}			
+		}	
+	double p2_all_sum, p4_all_sum;
+	std::vector<double> p2_local(pos_size, 0.0);
+	std::vector<double> p4_local(pos_size, 0.0);
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		for(unsigned int j=0; j<num[i]; j++)
+			{
+			double cosalpha=ori[i].x*ori[nb[i][j]].x+ori[i].y*ori[nb[i][j]].y+ori[i].z*ori[nb[i][j]].z;
+			p2_local[i] += 0.5*(3*cosalpha*cosalpha-1);
+			p4_local[i] += 0.125*(35*pow(cosalpha,4)-30*pow(cosalpha,2)+3);		
+			}
+		if(num[i]==0)
+			{
+			p2_local[i]=0.0;
+			p4_local[i]=0.0;		
+			}
+		else
+			{
+			p2_local[i]=p2_local[i]/num[i];
+			p4_local[i]=p4_local[i]/num[i];					
+			}			
+		}
+	p2_all_sum=0.0, p4_all_sum=0.0;
+	for(unsigned int i=0; i<pos_size; i++)
+		{					
+		p2_all_sum += p2_local[i];
+		if(p2_local[i]>= p2max) p2max=p2_local[i];
+		if(p2_local[i]<= p2min) p2min=p2_local[i];
+		p4_all_sum += p4_local[i];
+		if(p4_local[i]>= p4max) p4max=p4_local[i];
+		if(p4_local[i]<= p4min) p4min=p4_local[i];			
+		}	
+	p2_all += p2_all_sum/double(pos_size);
+	p2_local_all.push_back(p2_local);
+	p4_all += p4_all_sum/double(pos_size);
+	p4_local_all.push_back(p4_local);		
+	delta_t.push_back(timestep);
+	m_Nf += 1;
+	}
+
+//--- case 42
+void CRYSTALLINITY::compute()
+	{
+	std::vector<vec> pos = m_build->getPos();
+	std::vector<vec_int> image = m_build->getImage();
+	std::vector<unsigned int> type = m_build->getType();
+	unsigned int timestep = m_build->getTimeStep();		
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	BoxSize box = m_build->getBox();
+	double Lx=double(box.lx); double LxINV=1.0/Lx; 
+	double Ly=double(box.ly); double LyINV=1.0/Ly;
+	double Lz=double(box.lz); double LzINV=1.0/Lz;
+	for(unsigned int i=0; i<pos.size(); i++)
+		{
+		realPos[i].x=pos[i].x + image[i].x*Lx;
+		realPos[i].y=pos[i].y + image[i].y*Ly;
+		realPos[i].z=pos[i].z + image[i].z*Lz;
+		}
+	pos_size=pos.size();
+	double rcut;		
+	if(m_rcut>0.0)
+		rcut=m_rcut;
+	bool Voronoi;
+	Voronoi=m_Voronoi;
+	double refsij;
+	if(m_refsij>0.0)
+		refsij=m_refsij;		
+	unsigned int refnxi;		
+	if(m_refnxi>0)
+		refnxi=m_refnxi;
+	unsigned int MaxVer=500;
+	double rtemp;	
+	std::vector<unsigned int> num(pos_size, 0);
+	std::vector<std::vector<unsigned int> > nb(pos_size, std::vector <unsigned int>(pos_size, 0)); 
+	if(!Voronoi)
+		{
+		for(unsigned int i=0; i<pos_size; i++)
+			{
+			num[i]=0;
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[i].x-realPos[j].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[i].y-realPos[j].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[i].z-realPos[j].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(num[i]<MaxVer)
+							{
+							nb[i][num[i]] = j;
+							num[i] += 1;								
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}
+						}
+					}
+				}
+			}			
+		}
+	else
+		{			
+		for(unsigned int i=0; i<pos_size; i++)
+			{
+			unsigned int CAN=0;
+			std::vector<vec> pp; pp.resize(MaxVer);
+			std::vector<double> ps; ps.resize(MaxVer);
+			std::vector<unsigned int> tag; tag.resize(MaxVer);					
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[j].x - realPos[i].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[j].y - realPos[i].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[j].z - realPos[i].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(CAN<MaxVer)
+							{
+							tag[CAN]=j;
+							ps[CAN]=rtemp;
+							pp[CAN].x=dx;
+							pp[CAN].y=dy;
+							pp[CAN].z=dz;
+							CAN=CAN+1;
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many Voronoi vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}							
+						}
+					}
+				}
+			unsigned int NCAN=CAN;
+			unsigned int tagi;
+			double pxi, pyi, pzi, psi;
+			for(unsigned int kk=0; kk<NCAN; kk++)
+				{
+				for(int k=0; k<NCAN-kk-1; k++) 
+					{
+					if(ps[k]>ps[k+1])  
+						{
+						tagi=tag[k];
+						psi=ps[k];
+						pxi=pp[k].x;
+						pyi=pp[k].y;
+						pzi=pp[k].z;
+						tag[k]=tag[k+1];
+						ps[k]=ps[k+1];
+						pp[k].x=pp[k+1].x;
+						pp[k].y=pp[k+1].y;
+						pp[k].z=pp[k+1].z;
+						tag[k+1]=tagi;
+						ps[k+1]=psi;
+						pp[k+1].x=pxi;
+						pp[k+1].y=pyi;
+						pp[k+1].z=pzi;					 
+						}					
+					}
+				}
+			unsigned int V=0;
+			std::vector<unsigned int> IV; IV.resize(MaxVer);
+			std::vector<unsigned int> JV; JV.resize(MaxVer);
+			std::vector<unsigned int> KV; KV.resize(MaxVer);
+			std::vector<vec> VI; VI.resize(MaxVer);
+			for(unsigned int I=0; I<NCAN-2; I++)
+				{
+				double AI=pp[I].x;
+				double BI=pp[I].y;
+				double CI=pp[I].z;
+				double DI=-ps[I];
+				for(unsigned int J=I+1; J<NCAN-1; J++)
+					{
+					double AJ=pp[J].x;
+					double BJ=pp[J].y;
+					double CJ=pp[J].z;
+					double DJ=-ps[J];
+					double AB=AI*BJ - AJ*BI;
+					double BC=BI*CJ - BJ*CI;
+					double CA=CI*AJ - CJ*AI;
+					double DA=DI*AJ - DJ*AI;
+					double DB=DI*BJ - DJ*BI;
+					double DC=DI*CJ - DJ*CI;
+					for(unsigned int K=J+1; K<NCAN; K++)
+						{
+						double AK=pp[K].x;
+						double BK=pp[K].y;
+						double CK=pp[K].z;
+						double DK=-ps[K];
+						double delta=AK*BC + BK*CA + CK*AB;
+						if(fabs(delta)>1e-6)
+							{
+							double VXIJK=(-DK*BC + BK*DC - CK*DB)/delta;
+							double VYIJK=(-AK*DC - DK*CA + CK*DA)/delta;
+							double VZIJK=( AK*DB - BK*DA - DK*AB)/delta;
+							bool OK=true;
+							for(unsigned int L=0; L<NCAN; L++)
+								{
+								if(L!=I && L!=J && L!=K && OK)
+									{
+									OK=((pp[L].x*VXIJK + pp[L].y*VYIJK + pp[L].z*VZIJK) <= ps[L]);
+									}
+								}
+							if(OK)
+								{
+								IV[V]=I;
+								JV[V]=J;
+								KV[V]=K;
+								VI[V].x=0.5*VXIJK;
+								VI[V].y=0.5*VYIJK;
+								VI[V].z=0.5*VZIJK;	
+								V=V+1;
+								if(V>MaxVer)
+									{
+									cerr << endl << "***Error! Too many Voronoi facets" << endl << endl;
+									throw runtime_error("Error MaxVer dump");											
+									}								 
+								}
+							}
+						}
+					}
+				}
+			unsigned int NV=V;
+			if(NV<3)
+				{
+				cerr << endl << "***Error! Less than 4 Voronoi vertices found" << endl << endl;
+				throw runtime_error("Error NV dump");				
+				}		
+			std::vector<unsigned int> Edges(MaxVer, 0);
+			std::vector<std::vector<unsigned int> > flag_ed(MaxVer, std::vector <unsigned int>(MaxVer, 0)); 			
+			for(unsigned int nv=0; nv<NV; nv++)
+				{
+				Edges[IV[nv]]=Edges[IV[nv]] + 1;		   
+				flag_ed[Edges[IV[nv]]][IV[nv]] = nv;	   
+				Edges[JV[nv]]=Edges[JV[nv]] + 1;		   
+				flag_ed[Edges[JV[nv]]][JV[nv]] = nv;		   
+				Edges[KV[nv]]=Edges[KV[nv]] + 1;		   
+				flag_ed[Edges[KV[nv]]][KV[nv]] = nv;				
+				}
+			for(unsigned int can=0; can<NCAN; can++)
+				{
+				if(Edges[can]!=0)
+					{
+					nb[i][num[i]] = tag[can];
+					num[i] += 1;
+					}
+				}
+			}			
+		}		
+	double phi, phi1, phi2, theta, q6_all_sum;		
+	double pi=3.1415926;	
+	double py0=(1.0/32.0)*sqrt(13.0/pi);
+	double py_1=(1.0/16.0)*sqrt(273.0/(2.0*pi)), py1=(-1.0/16.0)*sqrt(273.0/(2.0*pi));
+	double py_2=(1.0/64.0)*sqrt(1365.0/pi), py2=(1.0/64.0)*sqrt(1365.0/pi);
+	double py_3=(1.0/32.0)*sqrt(1365.0/pi), py3=(-1.0/32.0)*sqrt(1365.0/pi);
+	double py_4=(3.0/32.0)*sqrt(91.0/(2.0*pi)), py4=(3.0/32.0)*sqrt(91.0/(2.0*pi));	
+	double py_5=(3.0/32.0)*sqrt(1001.0/pi), py5=(-3.0/32.0)*sqrt(1001.0/pi);
+	double py_6=(1.0/64.0)*sqrt(3003.0/pi), py6=(1.0/64.0)*sqrt(3003.0/pi);			  
+	std::vector<double> q6_local(pos_size, 0.0);
+	std::vector<std::vector<double> > sum_rq6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_iq6(7, std::vector <double>(pos_size, 0.0));
+	std::vector<std::vector<double> > rq6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > iq6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_r_q6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_i_q6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > r_q6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > i_q6(7, std::vector<double>(pos_size, 0.0));		
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		for(unsigned int j=0; j<num[i]; j++)
+			{
+			double dx=realPos[nb[i][j]].x-realPos[i].x;
+			dx -= Lx*rintf(dx*LxINV);
+			double dy=realPos[nb[i][j]].y-realPos[i].y;
+			dy -= Ly*rintf(dy*LyINV);
+			double dz=realPos[nb[i][j]].z-realPos[i].z;
+			dz -= Lz*rintf(dz*LzINV);
+			rtemp =sqrt(dx*dx+dy*dy+dz*dz);
+			if(dz>(1.0*rtemp)) 
+				theta=acos(1.0);			
+			else if(dz<(-1.0*rtemp)) 
+				theta=acos(-1.0);
+			else theta=acos(dz/rtemp);
+			
+			if(dy>(1.0*rtemp*sin(theta))) 
+				phi1=asin(1.0);
+			else if(dy<(-1.0*rtemp*sin(theta))) 
+				phi1=asin(-1.0);
+			else phi1= asin(dy/(rtemp*sin(theta)));	
+			if(phi1<0.0) phi1 += 2*pi;
+				phi2=pi-phi1;
+			if(phi2<0.0) phi2 += 2*pi;
+			if((rtemp*sin(theta)*cos(phi1)*dx)>=0.0) 
+				phi=phi1;
+			else if((rtemp*sin(theta)*cos(phi1)*dx)<0.0) 
+				phi=phi2;
+			else
+				{
+				cerr << endl << "***Error! Error phi" << endl << endl;
+				throw runtime_error("Error phi dump");					
+				}							
+			sum_r_q6[6][i] += ( 1.0*cos(6.0*phi))*(py_6*(pow(sin(theta), 6)));	
+			sum_i_q6[6][i] += (-1.0*sin(6.0*phi))*(py_6*(pow(sin(theta), 6)));
+			sum_r_q6[5][i] += (-1.0*cos(5.0*phi))*(py_5*(pow(sin(theta), 5))*cos(theta));
+			sum_i_q6[5][i] += ( 1.0*sin(5.0*phi))*(py_5*(pow(sin(theta), 5))*cos(theta));
+			sum_r_q6[4][i] += ( 1.0*cos(4.0*phi))*(py_4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));
+			sum_i_q6[4][i] += (-1.0*sin(4.0*phi))*(py_4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));
+			sum_r_q6[3][i] += (-1.0*cos(3.0*phi))*(py_3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));	
+			sum_i_q6[3][i] += ( 1.0*sin(3.0*phi))*(py_3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_r_q6[2][i] += ( 1.0*cos(2.0*phi))*(py_2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));	
+			sum_i_q6[2][i] += (-1.0*sin(2.0*phi))*(py_2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));				
+			sum_r_q6[1][i] += (-1.0*cos(1.0*phi))*(py_1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));
+			sum_i_q6[1][i] += ( 1.0*sin(1.0*phi))*(py_1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));
+			sum_r_q6[0][i] += py0*(231.0*(pow(cos(theta), 6))-315.0*(pow(cos(theta), 4))+105.0*(pow(cos(theta), 2))-5.0);
+			sum_i_q6[0][i] += 0.0;
+			sum_rq6[0][i] += py0*(231.0*(pow(cos(theta), 6))-315.0*(pow(cos(theta), 4))+105.0*(pow(cos(theta), 2))-5.0);
+			sum_iq6[0][i] += 0.0;			
+			sum_rq6[1][i] += (1.0*cos(1.0*phi))*(py1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));
+			sum_iq6[1][i] += (1.0*sin(1.0*phi))*(py1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));	
+			sum_rq6[2][i] += (1.0*cos(2.0*phi))*(py2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));
+			sum_iq6[2][i] += (1.0*sin(2.0*phi))*(py2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));
+			sum_rq6[3][i] += (1.0*cos(3.0*phi))*(py3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_iq6[3][i] += (1.0*sin(3.0*phi))*(py3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_rq6[4][i] += (1.0*cos(4.0*phi))*(py4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));
+			sum_iq6[4][i] += (1.0*sin(4.0*phi))*(py4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));	
+			sum_rq6[5][i] += (1.0*cos(5.0*phi))*(py5*(pow(sin(theta), 5))*cos(theta));
+			sum_iq6[5][i] += (1.0*sin(5.0*phi))*(py5*(pow(sin(theta), 5))*cos(theta));	
+			sum_rq6[6][i] += (1.0*cos(6.0*phi))*(py6*(pow(sin(theta), 6)));
+			sum_iq6[6][i] += (1.0*sin(6.0*phi))*(py6*(pow(sin(theta), 6)));								
+			}			
+		for(unsigned int m=0; m<=6; m++)
+			{
+			r_q6[m][i] = sum_r_q6[m][i]/num[i]; 
+			i_q6[m][i] = sum_i_q6[m][i]/num[i];
+			rq6[m][i] = sum_rq6[m][i]/num[i]; 
+			iq6[m][i] = sum_iq6[m][i]/num[i];
+			}					
+		}		
+	q6_all_sum=0.0;
+	std::vector<double> factorq6(pos_size, 0.0);
+	std::vector<std::vector<double> > rd6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > id6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > r_d6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > i_d6(7, std::vector<double>(pos_size, 0.0));		
+	for(unsigned int i=0; i<pos_size; i++)
+		{			
+		double sum_N6=0.0;
+		double sum_P6=0.0;	
+		for(unsigned int m=0; m<=6; m++)
+			{	
+			sum_N6 += (r_q6[m][i]*r_q6[m][i] + i_q6[m][i]*i_q6[m][i]);
+			sum_P6 += (rq6[m][i]*rq6[m][i] + iq6[m][i]*iq6[m][i]);
+			}
+		q6_local[i] += (sum_N6 + sum_P6 - (rq6[0][i]*rq6[0][i]+iq6[0][i]*iq6[0][i]));
+		factorq6[i] = sqrt(q6_local[i]);
+		for(unsigned int m=0; m<=6; m++)
+			{
+			rd6[m][i] = rq6[m][i]/factorq6[i]; 
+			id6[m][i] = iq6[m][i]/factorq6[i];				
+			r_d6[m][i] = r_q6[m][i]/factorq6[i]; 
+			i_d6[m][i] = i_q6[m][i]/factorq6[i];
+			}		
+		}
+	unsigned int nsolid=0;
+	std::vector<unsigned int> nxi(pos_size, 0);
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		for(unsigned int j=0; j<num[i]; j++)
+			{
+			double sum_X6=0.0;
+			double sum_Y6=0.0;						
+			for(unsigned int m=0; m<=6; m++)
+				{	
+				sum_X6 += (r_d6[m][i]*r_d6[m][nb[i][j]] + i_d6[m][i]*i_d6[m][nb[i][j]]);
+				sum_Y6 += (rd6[m][i]*rd6[m][nb[i][j]] + id6[m][i]*id6[m][nb[i][j]]);
+				}				
+			double sij = sum_X6 + sum_Y6 - (r_d6[0][i]*r_d6[0][nb[i][j]] + i_d6[0][i]*i_d6[0][nb[i][j]]);
+			if(sij>refsij) nxi[i] += 1;
+			}
+		if(nxi[i]>=refnxi) nsolid += 1;
+		}	
+	cout << "crystallinity=" << double(nsolid)/double(pos_size) << endl;
+	num_all.push_back(num);
+	nxi_all.push_back(nxi);	
+	delta_t.push_back(timestep);		
+	std::vector<unsigned int> score_s(maxbin, 0);
+	std::vector<double> NUM_s(maxbin, 0.0);
+	std::vector<double> NXI_s(maxbin, 0.0);
+	for(unsigned int i=0; i<maxbin; i++)
+		{
+		for(unsigned int j=0; j<pos.size(); j++)
+			{
+			if(num[j]==i) NUM_s[i] += 1.0;
+			if(nxi[j]==i) NXI_s[i] += 1.0;
+			}
+		score_s[i]=i;	
+		NUM_s[i]=NUM_s[i]/double(pos.size());
+		NXI_s[i]=NXI_s[i]/double(pos.size());
+		}
+	score_s_all.push_back(score_s);
+	NUM_s_all.push_back(NUM_s);
+	NXI_s_all.push_back(NXI_s);
+	m_Nf += 1;
+	}
+
+//--- case 43                                                                                                                                  
+void G6_3D::compute()
+	{
+	std::vector<vec> pos=m_build->getPos();	
+	std::vector<unsigned int> type=m_build->getType();
+	std::vector<vec_int> image=m_build->getImage();	
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed images and xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}		
+	BoxSize box=m_build->getBox();   				    	
+	double Lx=double(box.lx), LxINV=1.0/Lx;
+	double Ly=double(box.ly), LyINV=1.0/Ly;		 
+	double Lz=double(box.lz), LzINV=1.0/Lz;			
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	for (unsigned int i=0; i<pos.size(); i++)
+		{
+		realPos[i].x=pos[i].x + image[i].x*Lx;
+		realPos[i].y=pos[i].y + image[i].y*Ly;
+		realPos[i].z=pos[i].z + image[i].z*Lz;		 
+		}
+	pos_size=pos.size();
+	double rcut;		
+	if(m_rcut>0.0)
+		rcut=m_rcut;
+	bool Voronoi;
+	Voronoi=m_Voronoi;		
+	unsigned int MaxVer=500;
+	double rtemp;	
+	std::vector<unsigned int> num(pos_size, 0);
+	std::vector<std::vector<unsigned int> > nb(pos_size, std::vector <unsigned int>(pos_size, 0)); 
+	if(!Voronoi)
+		{
+		for(unsigned int i=0; i<pos_size; i++)
+			{
+			num[i]=0;
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[i].x-realPos[j].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[i].y-realPos[j].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[i].z-realPos[j].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(num[i]<MaxVer)
+							{
+							nb[i][num[i]] = j;
+							num[i] += 1;								
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}
+						}
+					}
+				}
+			}			
+		}
+	else
+		{			
+		for(unsigned int i=0; i<pos_size; i++)
+			{
+			unsigned int CAN=0;
+			std::vector<vec> pp; pp.resize(MaxVer);
+			std::vector<double> ps; ps.resize(MaxVer);
+			std::vector<unsigned int> tag; tag.resize(MaxVer);					
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[j].x - realPos[i].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[j].y - realPos[i].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[j].z - realPos[i].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(CAN<MaxVer)
+							{
+							tag[CAN]=j;
+							ps[CAN]=rtemp;
+							pp[CAN].x=dx;
+							pp[CAN].y=dy;
+							pp[CAN].z=dz;
+							CAN=CAN+1;
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many Voronoi vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}							
+						}
+					}
+				}
+			unsigned int NCAN=CAN;
+			unsigned int tagi;
+			double pxi, pyi, pzi, psi;
+			for(unsigned int kk=0; kk<NCAN; kk++)
+				{
+				for(int k=0; k<NCAN-kk-1; k++) 
+					{
+					if(ps[k]>ps[k+1])  
+						{
+						tagi=tag[k];
+						psi=ps[k];
+						pxi=pp[k].x;
+						pyi=pp[k].y;
+						pzi=pp[k].z;
+						tag[k]=tag[k+1];
+						ps[k]=ps[k+1];
+						pp[k].x=pp[k+1].x;
+						pp[k].y=pp[k+1].y;
+						pp[k].z=pp[k+1].z;
+						tag[k+1]=tagi;
+						ps[k+1]=psi;
+						pp[k+1].x=pxi;
+						pp[k+1].y=pyi;
+						pp[k+1].z=pzi;					 
+						}					
+					}
+				}
+			unsigned int V=0;
+			std::vector<unsigned int> IV; IV.resize(MaxVer);
+			std::vector<unsigned int> JV; JV.resize(MaxVer);
+			std::vector<unsigned int> KV; KV.resize(MaxVer);
+			std::vector<vec> VI; VI.resize(MaxVer);
+			for(unsigned int I=0; I<NCAN-2; I++)
+				{
+				double AI=pp[I].x;
+				double BI=pp[I].y;
+				double CI=pp[I].z;
+				double DI=-ps[I];
+				for(unsigned int J=I+1; J<NCAN-1; J++)
+					{
+					double AJ=pp[J].x;
+					double BJ=pp[J].y;
+					double CJ=pp[J].z;
+					double DJ=-ps[J];
+					double AB=AI*BJ - AJ*BI;
+					double BC=BI*CJ - BJ*CI;
+					double CA=CI*AJ - CJ*AI;
+					double DA=DI*AJ - DJ*AI;
+					double DB=DI*BJ - DJ*BI;
+					double DC=DI*CJ - DJ*CI;
+					for(unsigned int K=J+1; K<NCAN; K++)
+						{
+						double AK=pp[K].x;
+						double BK=pp[K].y;
+						double CK=pp[K].z;
+						double DK=-ps[K];
+						double delta=AK*BC + BK*CA + CK*AB;
+						if(fabs(delta)>1e-6)
+							{
+							double VXIJK=(-DK*BC + BK*DC - CK*DB)/delta;
+							double VYIJK=(-AK*DC - DK*CA + CK*DA)/delta;
+							double VZIJK=( AK*DB - BK*DA - DK*AB)/delta;
+							bool OK=true;
+							for(unsigned int L=0; L<NCAN; L++)
+								{
+								if(L!=I && L!=J && L!=K && OK)
+									{
+									OK=((pp[L].x*VXIJK + pp[L].y*VYIJK + pp[L].z*VZIJK) <= ps[L]);
+									}
+								}
+							if(OK)
+								{
+								IV[V]=I;
+								JV[V]=J;
+								KV[V]=K;
+								VI[V].x=0.5*VXIJK;
+								VI[V].y=0.5*VYIJK;
+								VI[V].z=0.5*VZIJK;	
+								V=V+1;
+								if(V>MaxVer)
+									{
+									cerr << endl << "***Error! Too many Voronoi facets" << endl << endl;
+									throw runtime_error("Error MaxVer dump");											
+									}								 
+								}
+							}
+						}
+					}
+				}
+			unsigned int NV=V;
+			if(NV<3)
+				{
+				cerr << endl << "***Error! Less than 4 Voronoi vertices found" << endl << endl;
+				throw runtime_error("Error NV dump");				
+				}		
+			std::vector<unsigned int> Edges(MaxVer, 0);
+			std::vector<std::vector<unsigned int> > flag_ed(MaxVer, std::vector <unsigned int>(MaxVer, 0)); 			
+			for(unsigned int nv=0; nv<NV; nv++)
+				{
+				Edges[IV[nv]]=Edges[IV[nv]] + 1;		   
+				flag_ed[Edges[IV[nv]]][IV[nv]] = nv;	   
+				Edges[JV[nv]]=Edges[JV[nv]] + 1;		   
+				flag_ed[Edges[JV[nv]]][JV[nv]] = nv;		   
+				Edges[KV[nv]]=Edges[KV[nv]] + 1;		   
+				flag_ed[Edges[KV[nv]]][KV[nv]] = nv;				
+				}
+			for(unsigned int can=0; can<NCAN; can++)
+				{
+				if(Edges[can]!=0)
+					{
+					nb[i][num[i]] = tag[can];
+					num[i] += 1;
+					}
+				}
+			}			
+		}	
+	double phi, phi1, phi2, theta;		
+	double pi=3.1415926;
+	double py0=(1.0/32.0)*sqrt(13.0/pi);
+	double py_1=(1.0/16.0)*sqrt(273.0/(2*pi)), py1=(-1.0/16.0)*sqrt(273.0/(2*pi));
+	double py_2=(1.0/64.0)*sqrt(1365.0/pi), py2=(1.0/64.0)*sqrt(1365.0/pi);
+	double py_3=(1.0/32.0)*sqrt(1365.0/pi), py3=(-1.0/32.0)*sqrt(1365.0/pi);
+	double py_4=(3.0/32.0)*sqrt(91.0/(2*pi)), py4=(3.0/32.0)*sqrt(91.0/(2*pi));	
+	double py_5=(3.0/32.0)*sqrt(1001.0/pi), py5=(-3.0/32.0)*sqrt(1001.0/pi);
+	double py_6=(1.0/64.0)*sqrt(3003.0/pi), py6=(1.0/64.0)*sqrt(3003.0/pi);			  
+	std::vector<double> q6_local(pos_size, 0.0);
+	std::vector<std::vector<double> > sum_r_q6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_i_q6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > r_q6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > i_q6(7, std::vector<double>(pos_size, 0.0));	
+	std::vector<std::vector<double> > sum_rq6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_iq6(7, std::vector <double>(pos_size, 0.0));
+	std::vector<std::vector<double> > rq6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > iq6(7, std::vector<double>(pos_size, 0.0));		
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		for(unsigned int j=0; j<num[i]; j++)
+			{
+			double dx=realPos[nb[i][j]].x-realPos[i].x;
+			dx -= Lx*rintf(dx*LxINV);
+			double dy=realPos[nb[i][j]].y-realPos[i].y;
+			dy -= Ly*rintf(dy*LyINV);
+			double dz=realPos[nb[i][j]].z-realPos[i].z;
+			dz -= Lz*rintf(dz*LzINV);
+			rtemp =sqrt(dx*dx+dy*dy+dz*dz);
+			if(dz>(1.0*rtemp)) 
+				theta=acos(1.0);			
+			else if(dz<(-1.0*rtemp)) 
+				theta=acos(-1.0);
+			else theta=acos(dz/rtemp);
+			
+			if(dy>(1.0*rtemp*sin(theta))) 
+				phi1=asin(1.0);
+			else if(dy<(-1.0*rtemp*sin(theta))) 
+				phi1=asin(-1.0);
+			else phi1= asin(dy/(rtemp*sin(theta)));	
+			if(phi1<0.0) phi1 += 2*pi;
+				phi2=pi-phi1;
+			if(phi2<0.0) phi2 += 2*pi;
+			if((rtemp*sin(theta)*cos(phi1)*dx)>=0.0) 
+				phi=phi1;
+			else if((rtemp*sin(theta)*cos(phi1)*dx)<0.0) 
+				phi=phi2;
+			else
+				{
+				cerr << endl << "***Error! Error phi" << endl << endl;
+				throw runtime_error("Error phi dump");					
+				}
+			sum_r_q6[6][i] += ( 1.0*cos(6.0*phi))*(py_6*(pow(sin(theta), 6)));	
+			sum_i_q6[6][i] += (-1.0*sin(6.0*phi))*(py_6*(pow(sin(theta), 6)));
+			sum_r_q6[5][i] += (-1.0*cos(5.0*phi))*(py_5*(pow(sin(theta), 5))*cos(theta));
+			sum_i_q6[5][i] += ( 1.0*sin(5.0*phi))*(py_5*(pow(sin(theta), 5))*cos(theta));
+			sum_r_q6[4][i] += ( 1.0*cos(4.0*phi))*(py_4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));
+			sum_i_q6[4][i] += (-1.0*sin(4.0*phi))*(py_4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));
+			sum_r_q6[3][i] += (-1.0*cos(3.0*phi))*(py_3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));	
+			sum_i_q6[3][i] += ( 1.0*sin(3.0*phi))*(py_3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_r_q6[2][i] += ( 1.0*cos(2.0*phi))*(py_2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));	
+			sum_i_q6[2][i] += (-1.0*sin(2.0*phi))*(py_2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));				
+			sum_r_q6[1][i] += (-1.0*cos(1.0*phi))*(py_1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));
+			sum_i_q6[1][i] += ( 1.0*sin(1.0*phi))*(py_1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));
+			sum_r_q6[0][i] += py0*(231.0*(pow(cos(theta), 6))-315.0*(pow(cos(theta), 4))+105.0*(pow(cos(theta), 2))-5.0);
+			sum_i_q6[0][i] += 0.0;
+			sum_rq6[0][i] += py0*(231.0*(pow(cos(theta), 6))-315.0*(pow(cos(theta), 4))+105.0*(pow(cos(theta), 2))-5.0);
+			sum_iq6[0][i] += 0.0;			
+			sum_rq6[1][i] += (1.0*cos(1.0*phi))*(py1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));
+			sum_iq6[1][i] += (1.0*sin(1.0*phi))*(py1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));	
+			sum_rq6[2][i] += (1.0*cos(2.0*phi))*(py2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));
+			sum_iq6[2][i] += (1.0*sin(2.0*phi))*(py2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));
+			sum_rq6[3][i] += (1.0*cos(3.0*phi))*(py3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_iq6[3][i] += (1.0*sin(3.0*phi))*(py3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_rq6[4][i] += (1.0*cos(4.0*phi))*(py4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));
+			sum_iq6[4][i] += (1.0*sin(4.0*phi))*(py4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));	
+			sum_rq6[5][i] += (1.0*cos(5.0*phi))*(py5*(pow(sin(theta), 5))*cos(theta));
+			sum_iq6[5][i] += (1.0*sin(5.0*phi))*(py5*(pow(sin(theta), 5))*cos(theta));	
+			sum_rq6[6][i] += (1.0*cos(6.0*phi))*(py6*(pow(sin(theta), 6)));
+			sum_iq6[6][i] += (1.0*sin(6.0*phi))*(py6*(pow(sin(theta), 6)));		
+			}
+		for(unsigned int m=0; m<=6; m++)
+			{
+			r_q6[m][i] = sum_r_q6[m][i]/num[i]; 
+			i_q6[m][i] = sum_i_q6[m][i]/num[i];
+			rq6[m][i] = sum_rq6[m][i]/num[i]; 
+			iq6[m][i] = sum_iq6[m][i]/num[i];
+			}			
+		}
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		for(unsigned int m=0; m<=6; m++)
+			{
+			for(unsigned int j=0; j<num[i]; j++)
+				{								
+				r_q6[m][i] += r_q6[m][nb[i][j]];
+				i_q6[m][i] += i_q6[m][nb[i][j]];
+				rq6[m][i] += rq6[m][nb[i][j]];
+				iq6[m][i] += iq6[m][nb[i][j]]; 										 
+				}
+			r_q6[m][i]=r_q6[m][i]/(num[i]+1);
+			i_q6[m][i]=i_q6[m][i]/(num[i]+1);
+			rq6[m][i]=rq6[m][i]/(num[i]+1);
+			iq6[m][i]=iq6[m][i]/(num[i]+1);	
+			}
+		}
+	double delr=0.5*Lx/maxbin;
+	std::vector<double> r_bin(maxbin, 0.0);	
+	std::vector<double> g_bin(maxbin, 0.0);	
+	std::vector<double> g3D_bin(maxbin, 0.0);
+	for(unsigned int i=0; i<pos.size(); i++)
+		{
+		for(unsigned int j=0; j<pos.size(); j++)
+			{		
+			if(i!=j)
+				{
+				double rxij=realPos[i].x-realPos[j].x;
+				double ryij=realPos[i].y-realPos[j].y;
+				double rzij=realPos[i].z-realPos[j].z;
+				rxij -= Lx*rint(rxij/Lx);
+				ryij -= Ly*rint(ryij/Ly);
+				rzij -= Lz*rint(rzij/Lz);
+				double rij=sqrt(rxij*rxij+ryij*ryij+rzij*rzij);
+				unsigned int bin=rij/delr;					
+				if(bin<maxbin)
+					{
+					double sum_N=0.0;
+					double sum_P=0.0;
+					for(unsigned int m=0; m<=6; m++)
+						{
+						sum_N += (r_q6[m][j]*r_q6[m][i] + i_q6[m][j]*i_q6[m][i]);
+						sum_P += (rq6[m][j]*rq6[m][i] + iq6[m][j]*iq6[m][i]);
+						}						
+					g_bin[bin] += 1.0;
+					g3D_bin[bin] += (sum_N + sum_P - (rq6[0][j]*rq6[0][i]+iq6[0][j]*iq6[0][i]));
+					}					
+				}					
+			}
+		}
+	double constvalue=4.0*pi*pos.size()*LxINV*LyINV*LzINV/3.0;
+	double constvalue_q6=4.0*pi/13.0;
+	for(unsigned int bin=0; bin<maxbin; bin++)
+		{
+		double rlower=double(bin)*delr;
+		double rupper=rlower+delr;
+		double nid=constvalue*(rupper*rupper*rupper-rlower*rlower*rlower);
+		r_bin[bin]=double(bin)*delr;
+		g_bin[bin]=g_bin[bin]/(pos.size()*nid);
+		g3D_bin[bin]=constvalue_q6*g3D_bin[bin]/pos.size();
+		}
+	r_all.push_back(r_bin);
+	g_all.push_back(g_bin);
+	g3D_all.push_back(g3D_bin);
+	m_Nf += 1;	
+	}
+
+//--- case 44
+void W4W6::compute()
+	{
+	std::vector<vec> pos = m_build->getPos();
+	std::vector<vec_int> image = m_build->getImage();
+	std::vector<unsigned int> type = m_build->getType();
+	unsigned int timestep = m_build->getTimeStep();		
+	if(image.size()==0 && m_Nf==0)
+		{
+		cout << "***Warning! No inputed image or xml files!" << endl;
+		}
+	if(image.size()==0)
+		{
+		image.resize(pos.size());
+		}
+	std::vector<vec> realPos; realPos.resize(pos.size());
+	BoxSize box = m_build->getBox();
+	double Lx=double(box.lx); double LxINV=1.0/Lx; 
+	double Ly=double(box.ly); double LyINV=1.0/Ly;
+	double Lz=double(box.lz); double LzINV=1.0/Lz;
+	for(unsigned int i=0; i<pos.size(); i++)
+		{
+		realPos[i].x=pos[i].x + image[i].x*Lx;
+		realPos[i].y=pos[i].y + image[i].y*Ly;
+		realPos[i].z=pos[i].z + image[i].z*Lz;
+		}
+	double rcut;		
+	if(m_rcut>0.0)
+		rcut=m_rcut;
+	bool Voronoi;
+	Voronoi=m_Voronoi;
+	pos_size=pos.size();
+	unsigned int MaxVer=500;
+	double rtemp;	
+	std::vector<unsigned int> num(pos_size, 0);
+	std::vector<std::vector<unsigned int> > nb(pos_size, std::vector <unsigned int>(MaxVer, 0)); 
+	if(!Voronoi)
+		{
+		for(unsigned int i=0; i<pos_size; i++)
+			{
+			num[i]=0;
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[i].x-realPos[j].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[i].y-realPos[j].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[i].z-realPos[j].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(num[i]<MaxVer)
+							{
+							nb[i][num[i]] = j;
+							num[i] += 1;								
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}
+						}
+					}
+				}
+			}			
+		}
+	else
+		{			
+		for(unsigned int i=0; i<pos_size; i++)
+			{
+			unsigned int CAN=0;
+			std::vector<vec> pp; pp.resize(MaxVer);
+			std::vector<double> ps; ps.resize(MaxVer);
+			std::vector<unsigned int> tag; tag.resize(MaxVer);					
+			for(unsigned int j=0; j<pos_size; j++)
+				{
+				if(i!=j)
+					{
+					double dx=realPos[j].x - realPos[i].x;
+					dx -= Lx*rintf(dx*LxINV);
+					double dy=realPos[j].y - realPos[i].y;
+					dy -= Ly*rintf(dy*LyINV);
+					double dz=realPos[j].z - realPos[i].z;
+					dz -= Lz*rintf(dz*LzINV);
+					rtemp = dx*dx+dy*dy+dz*dz;
+					if(rtemp<(rcut*rcut)) 					
+						{
+						if(CAN<MaxVer)
+							{
+							tag[CAN]=j;
+							ps[CAN]=rtemp;
+							pp[CAN].x=dx;
+							pp[CAN].y=dy;
+							pp[CAN].z=dz;
+							CAN=CAN+1;
+							}
+						else
+							{
+							cerr << endl << "***Error! Too many Voronoi vertices" << endl << endl;
+							throw runtime_error("Error MaxVer dump");									
+							}							
+						}	
+					}
+				}
+			unsigned int NCAN=CAN;
+			unsigned int tagi;
+			double pxi, pyi, pzi, psi;
+			for(unsigned int kk=0; kk<NCAN; kk++)
+				{
+				for(int k=0; k<NCAN-kk-1; k++) 
+					{
+					if(ps[k]>ps[k+1])  
+						{
+						tagi=tag[k];
+						psi=ps[k];
+						pxi=pp[k].x;
+						pyi=pp[k].y;
+						pzi=pp[k].z;
+						tag[k]=tag[k+1];
+						ps[k]=ps[k+1];
+						pp[k].x=pp[k+1].x;
+						pp[k].y=pp[k+1].y;
+						pp[k].z=pp[k+1].z;
+						tag[k+1]=tagi;
+						ps[k+1]=psi;
+						pp[k+1].x=pxi;
+						pp[k+1].y=pyi;
+						pp[k+1].z=pzi;					 
+						}					
+					}
+				}
+			unsigned int V=0;
+			std::vector<unsigned int> IV; IV.resize(MaxVer);
+			std::vector<unsigned int> JV; JV.resize(MaxVer);
+			std::vector<unsigned int> KV; KV.resize(MaxVer);
+			std::vector<vec> VI; VI.resize(MaxVer);
+			for(unsigned int I=0; I<NCAN-2; I++)
+				{
+				double AI=pp[I].x;
+				double BI=pp[I].y;
+				double CI=pp[I].z;
+				double DI=-ps[I];
+				for(unsigned int J=I+1; J<NCAN-1; J++)
+					{
+					double AJ=pp[J].x;
+					double BJ=pp[J].y;
+					double CJ=pp[J].z;
+					double DJ=-ps[J];
+					double AB=AI*BJ - AJ*BI;
+					double BC=BI*CJ - BJ*CI;
+					double CA=CI*AJ - CJ*AI;
+					double DA=DI*AJ - DJ*AI;
+					double DB=DI*BJ - DJ*BI;
+					double DC=DI*CJ - DJ*CI;
+					for(unsigned int K=J+1; K<NCAN; K++)
+						{
+						double AK=pp[K].x;
+						double BK=pp[K].y;
+						double CK=pp[K].z;
+						double DK=-ps[K];
+						double delta=AK*BC + BK*CA + CK*AB;
+						if(fabs(delta)>1e-6)
+							{
+							double VXIJK=(-DK*BC + BK*DC - CK*DB)/delta;
+							double VYIJK=(-AK*DC - DK*CA + CK*DA)/delta;
+							double VZIJK=( AK*DB - BK*DA - DK*AB)/delta;
+							bool OK=true;
+							for(unsigned int L=0; L<NCAN; L++)
+								{
+								if(L!=I && L!=J && L!=K && OK)
+									{
+									OK=((pp[L].x*VXIJK + pp[L].y*VYIJK + pp[L].z*VZIJK) <= ps[L]);
+									}
+								}
+							if(OK)
+								{
+								IV[V]=I;
+								JV[V]=J;
+								KV[V]=K;
+								VI[V].x=0.5*VXIJK;
+								VI[V].y=0.5*VYIJK;
+								VI[V].z=0.5*VZIJK;	
+								V=V+1;
+								if(V>MaxVer)
+									{
+									cerr << endl << "***Error! Too many Voronoi facets" << endl << endl;
+									throw runtime_error("Error MaxVer dump");											
+									}								 
+								}
+							}
+						}
+					}
+				}
+			unsigned int NV=V;
+			if(NV<3)
+				{
+				cerr << endl << "***Error! Less than 4 Voronoi vertices found" << endl << endl;
+				throw runtime_error("Error NV dump");				
+				}		
+			std::vector<unsigned int> Edges(MaxVer, 0);
+			std::vector<std::vector<unsigned int> > flag_ed(MaxVer, std::vector <unsigned int>(MaxVer, 0)); 			
+			for(unsigned int nv=0; nv<NV; nv++)
+				{
+				Edges[IV[nv]]=Edges[IV[nv]] + 1;		   
+				flag_ed[Edges[IV[nv]]][IV[nv]] = nv;	   
+				Edges[JV[nv]]=Edges[JV[nv]] + 1;		   
+				flag_ed[Edges[JV[nv]]][JV[nv]] = nv;		   
+				Edges[KV[nv]]=Edges[KV[nv]] + 1;		   
+				flag_ed[Edges[KV[nv]]][KV[nv]] = nv;				
+				}
+			for(unsigned int can=0; can<NCAN; can++)
+				{
+				if(Edges[can]!=0)
+					{
+					nb[i][num[i]] = tag[can];
+					num[i] += 1;
+					}
+				}
+			}			
+		}		
+	double phi, phi1, phi2, theta, q4_all_sum, q6_all_sum, w4_all_sum, w6_all_sum;		
+	double pi=3.1415926;
+	double qy0=(3.0/16.0)*sqrt(1.0/pi);
+	double qy_1=(15.0/8.0)*sqrt(1.0/(5.0*pi)), qy1=(-15.0/8.0)*sqrt(1.0/(5.0*pi));
+	double qy_2=(15.0/8.0)*sqrt(1.0/(10.0*pi)), qy2=(15.0/8.0)*sqrt(1.0/(10.0*pi));
+	double qy_3=(105.0/8.0)*sqrt(1.0/(35.0*pi)), qy3=(-105.0/8.0)*sqrt(1.0/(35.0*pi));
+	double qy_4=(105.0/16.0)*sqrt(1.0/(70.0*pi)), qy4=(105.0/16.0)*sqrt(1.0/(70.0*pi));			  
+	std::vector<double> q4_local(pos_size, 0.0);
+	std::vector<std::vector<double> > sum_rq4(5, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_iq4(5, std::vector <double>(pos_size, 0.0));
+	std::vector<std::vector<double> > rq4(5, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > iq4(5, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_r_q4(5, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_i_q4(5, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > r_q4(5, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > i_q4(5, std::vector<double>(pos_size, 0.0));			
+	double py0=(1.0/32.0)*sqrt(13.0/pi);
+	double py_1=(1.0/16.0)*sqrt(273.0/(2.0*pi)), py1=(-1.0/16.0)*sqrt(273.0/(2.0*pi));
+	double py_2=(1.0/64.0)*sqrt(1365.0/pi), py2=(1.0/64.0)*sqrt(1365.0/pi);
+	double py_3=(1.0/32.0)*sqrt(1365.0/pi), py3=(-1.0/32.0)*sqrt(1365.0/pi);
+	double py_4=(3.0/32.0)*sqrt(91.0/(2.0*pi)), py4=(3.0/32.0)*sqrt(91.0/(2.0*pi));	
+	double py_5=(3.0/32.0)*sqrt(1001.0/pi), py5=(-3.0/32.0)*sqrt(1001.0/pi);
+	double py_6=(1.0/64.0)*sqrt(3003.0/pi), py6=(1.0/64.0)*sqrt(3003.0/pi);			  
+	std::vector<double> q6_local(pos_size, 0.0);
+	std::vector<std::vector<double> > sum_rq6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_iq6(7, std::vector <double>(pos_size, 0.0));
+	std::vector<std::vector<double> > rq6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > iq6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_r_q6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > sum_i_q6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > r_q6(7, std::vector<double>(pos_size, 0.0));
+	std::vector<std::vector<double> > i_q6(7, std::vector<double>(pos_size, 0.0));		
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		for(unsigned int j=0; j<num[i]; j++)
+			{
+			double dx=realPos[nb[i][j]].x-realPos[i].x;
+			dx -= Lx*rintf(dx*LxINV);
+			double dy=realPos[nb[i][j]].y-realPos[i].y;
+			dy -= Ly*rintf(dy*LyINV);
+			double dz=realPos[nb[i][j]].z-realPos[i].z;
+			dz -= Lz*rintf(dz*LzINV);
+			rtemp =sqrt(dx*dx+dy*dy+dz*dz);
+			if(dz>(1.0*rtemp)) 
+				theta=acos(1.0);			
+			else if(dz<(-1.0*rtemp)) 
+				theta=acos(-1.0);
+			else theta=acos(dz/rtemp);
+			
+			if(dy>(1.0*rtemp*sin(theta))) 
+				phi1=asin(1.0);
+			else if(dy<(-1.0*rtemp*sin(theta))) 
+				phi1=asin(-1.0);
+			else phi1= asin(dy/(rtemp*sin(theta)));	
+			if(phi1<0.0) phi1 += 2*pi;
+				phi2=pi-phi1;
+			if(phi2<0.0) phi2 += 2*pi;
+			if((rtemp*sin(theta)*cos(phi1)*dx)>=0.0) 
+				phi=phi1;
+			else if((rtemp*sin(theta)*cos(phi1)*dx)<0.0) 
+				phi=phi2;
+			else
+				{
+				cerr << endl << "***Error! Error phi" << endl << endl;
+				throw runtime_error("Error phi dump");					
+				}
+			sum_r_q4[4][i] += ( 1.0*cos(4.0*phi))*(qy_4*(pow(sin(theta), 4)));
+			sum_i_q4[4][i] += (-1.0*sin(4.0*phi))*(qy_4*(pow(sin(theta), 4)));
+			sum_r_q4[3][i] += (-1.0*cos(3.0*phi))*(qy_3*(pow(sin(theta), 3))*cos(theta));
+			sum_i_q4[3][i] += ( 1.0*sin(3.0*phi))*(qy_3*(pow(sin(theta), 3))*cos(theta));
+			sum_r_q4[2][i] += ( 1.0*cos(2.0*phi))*(qy_2*(pow(sin(theta), 2))*(7.0*(pow(cos(theta), 2))-1.0));	
+			sum_i_q4[2][i] += (-1.0*sin(2.0*phi))*(qy_2*(pow(sin(theta), 2))*(7.0*(pow(cos(theta), 2))-1.0));
+			sum_r_q4[1][i] += (-1.0*cos(1.0*phi))*(qy_1*(sin(theta))*(7.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_i_q4[1][i] += ( 1.0*sin(1.0*phi))*(qy_1*(sin(theta))*(7.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_r_q4[0][i] += qy0*(35.0*(pow(cos(theta), 4))-30.0*(pow(cos(theta), 2))+3.0);
+			sum_i_q4[0][i] += 0.0;
+			sum_rq4[0][i] += qy0*(35.0*(pow(cos(theta), 4))-30.0*(pow(cos(theta), 2))+3.0);
+			sum_iq4[0][i] += 0.0;
+			sum_rq4[1][i] += (1.0*cos(1.0*phi))*(qy1*(sin(theta))*(7.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_iq4[1][i] += (1.0*sin(1.0*phi))*(qy1*(sin(theta))*(7.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_rq4[2][i] += (1.0*cos(2.0*phi))*(qy2*(pow(sin(theta), 2))*(7.0*(pow(cos(theta), 2))-1.0));
+			sum_iq4[2][i] += (1.0*sin(2.0*phi))*(qy2*(pow(sin(theta), 2))*(7.0*(pow(cos(theta), 2))-1.0));
+			sum_rq4[3][i] += (1.0*cos(3.0*phi))*(qy3*(pow(sin(theta), 3))*(cos(theta)));
+			sum_iq4[3][i] += (1.0*sin(3.0*phi))*(qy3*(pow(sin(theta), 3))*(cos(theta)));
+			sum_rq4[4][i] += (1.0*cos(4.0*phi))*(qy4*(pow(sin(theta), 4)));
+			sum_iq4[4][i] += (1.0*sin(4.0*phi))*(qy4*(pow(sin(theta), 4)));					
+			
+			sum_r_q6[6][i] += ( 1.0*cos(6.0*phi))*(py_6*(pow(sin(theta), 6)));	
+			sum_i_q6[6][i] += (-1.0*sin(6.0*phi))*(py_6*(pow(sin(theta), 6)));
+			sum_r_q6[5][i] += (-1.0*cos(5.0*phi))*(py_5*(pow(sin(theta), 5))*cos(theta));
+			sum_i_q6[5][i] += ( 1.0*sin(5.0*phi))*(py_5*(pow(sin(theta), 5))*cos(theta));
+			sum_r_q6[4][i] += ( 1.0*cos(4.0*phi))*(py_4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));
+			sum_i_q6[4][i] += (-1.0*sin(4.0*phi))*(py_4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));
+			sum_r_q6[3][i] += (-1.0*cos(3.0*phi))*(py_3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));	
+			sum_i_q6[3][i] += ( 1.0*sin(3.0*phi))*(py_3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_r_q6[2][i] += ( 1.0*cos(2.0*phi))*(py_2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));	
+			sum_i_q6[2][i] += (-1.0*sin(2.0*phi))*(py_2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));				
+			sum_r_q6[1][i] += (-1.0*cos(1.0*phi))*(py_1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));
+			sum_i_q6[1][i] += ( 1.0*sin(1.0*phi))*(py_1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));
+			sum_r_q6[0][i] += py0*(231.0*(pow(cos(theta), 6))-315.0*(pow(cos(theta), 4))+105.0*(pow(cos(theta), 2))-5.0);
+			sum_i_q6[0][i] += 0.0;
+			sum_rq6[0][i] += py0*(231.0*(pow(cos(theta), 6))-315.0*(pow(cos(theta), 4))+105.0*(pow(cos(theta), 2))-5.0);
+			sum_iq6[0][i] += 0.0;			
+			sum_rq6[1][i] += (1.0*cos(1.0*phi))*(py1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));
+			sum_iq6[1][i] += (1.0*sin(1.0*phi))*(py1*(sin(theta))*(33.0*(pow(cos(theta), 5))-30.0*(pow(cos(theta), 3))+5.0*cos(theta)));	
+			sum_rq6[2][i] += (1.0*cos(2.0*phi))*(py2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));
+			sum_iq6[2][i] += (1.0*sin(2.0*phi))*(py2*(pow(sin(theta), 2))*(33.0*(pow(cos(theta), 4))-18.0*(pow(cos(theta), 2))+1.0));
+			sum_rq6[3][i] += (1.0*cos(3.0*phi))*(py3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_iq6[3][i] += (1.0*sin(3.0*phi))*(py3*(pow(sin(theta), 3))*(11.0*(pow(cos(theta), 3))-3.0*cos(theta)));
+			sum_rq6[4][i] += (1.0*cos(4.0*phi))*(py4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));
+			sum_iq6[4][i] += (1.0*sin(4.0*phi))*(py4*(pow(sin(theta), 4))*(11.0*(pow(cos(theta), 2))-1.0));	
+			sum_rq6[5][i] += (1.0*cos(5.0*phi))*(py5*(pow(sin(theta), 5))*cos(theta));
+			sum_iq6[5][i] += (1.0*sin(5.0*phi))*(py5*(pow(sin(theta), 5))*cos(theta));	
+			sum_rq6[6][i] += (1.0*cos(6.0*phi))*(py6*(pow(sin(theta), 6)));
+			sum_iq6[6][i] += (1.0*sin(6.0*phi))*(py6*(pow(sin(theta), 6)));								
+			}
+		for(unsigned int n=0; n<=4; n++)
+			{
+			r_q4[n][i] = sum_r_q4[n][i]/num[i]; 
+			i_q4[n][i] = sum_i_q4[n][i]/num[i];
+			rq4[n][i] = sum_rq4[n][i]/num[i]; 
+			iq4[n][i] = sum_iq4[n][i]/num[i];
+			}			
+		for(unsigned int m=0; m<=6; m++)
+			{
+			r_q6[m][i] = sum_r_q6[m][i]/num[i]; 
+			i_q6[m][i] = sum_i_q6[m][i]/num[i];
+			rq6[m][i] = sum_rq6[m][i]/num[i]; 
+			iq6[m][i] = sum_iq6[m][i]/num[i];
+			}					
+		}			
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		for(unsigned int n=0; n<=4; n++)
+			{
+			for(unsigned int j=0; j<num[i]; j++)
+				{
+				r_q4[n][i] += r_q4[n][nb[i][j]];
+				i_q4[n][i] += i_q4[n][nb[i][j]];
+				rq4[n][i] += rq4[n][nb[i][j]];
+				iq4[n][i] += iq4[n][nb[i][j]]; 										 
+				}
+			r_q4[n][i]=r_q4[n][i]/(num[i]+1);
+			i_q4[n][i]=i_q4[n][i]/(num[i]+1);
+			rq4[n][i]=rq4[n][i]/(num[i]+1);
+			iq4[n][i]=iq4[n][i]/(num[i]+1);			
+			}
+		
+		for(unsigned int m=0; m<=6; m++)
+			{
+			for(unsigned int j=0; j<num[i]; j++)
+				{								
+				r_q6[m][i] += r_q6[m][nb[i][j]];
+				i_q6[m][i] += i_q6[m][nb[i][j]];
+				rq6[m][i] += rq6[m][nb[i][j]];
+				iq6[m][i] += iq6[m][nb[i][j]]; 										 
+				}
+			r_q6[m][i]=r_q6[m][i]/(num[i]+1);
+			i_q6[m][i]=i_q6[m][i]/(num[i]+1);
+			rq6[m][i]=rq6[m][i]/(num[i]+1);
+			iq6[m][i]=iq6[m][i]/(num[i]+1);	
+			}			
+		}		
+	q4_all_sum=0.0;	
+	q6_all_sum=0.0;
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		double sum_N4=0.0;
+		double sum_P4=0.0;				
+		double sum_N6=0.0;
+		double sum_P6=0.0;
+		for(unsigned int n=0; n<=4; n++)
+			{	
+			sum_N4 += (r_q4[n][i]*r_q4[n][i] + i_q4[n][i]*i_q4[n][i]);
+			sum_P4 += (rq4[n][i]*rq4[n][i] + iq4[n][i]*iq4[n][i]);
+			}			
+		q4_local[i] += (sum_N4 + sum_P4 - (rq4[0][i]*rq4[0][i]+iq4[0][i]*iq4[0][i]));
+		q4_local[i] = sqrt((4*pi/9.0)*q4_local[i]);	
+		q4_all_sum += q4_local[i];
+		if(q4_local[i]>= q4max) q4max=q4_local[i];
+		if(q4_local[i]<= q4min) q4min=q4_local[i];
+		
+		for(unsigned int m=0; m<=6; m++)
+			{	
+			sum_N6 += (r_q6[m][i]*r_q6[m][i] + i_q6[m][i]*i_q6[m][i]);
+			sum_P6 += (rq6[m][i]*rq6[m][i] + iq6[m][i]*iq6[m][i]);
+			}
+		q6_local[i] += (sum_N6 + sum_P6 - (rq6[0][i]*rq6[0][i]+iq6[0][i]*iq6[0][i]));
+		q6_local[i] = sqrt((4*pi/13.0)*q6_local[i]);
+		q6_all_sum += q6_local[i];
+		
+		if(q6_local[i]>= q6max) q6max=q6_local[i];
+		if(q6_local[i]<= q6min) q6min=q6_local[i];		
+		}
+	q4_all += q4_all_sum/double(pos_size);
+	q4_local_all.push_back(q4_local);		
+	q6_all += q6_all_sum/double(pos_size);
+	q6_local_all.push_back(q6_local);
+	std::vector<double> w4_local(pos_size, 0.0);
+	std::vector<double> w6_local(pos_size, 0.0);
+	w4_all_sum=0.0;	
+	w6_all_sum=0.0;
+	int L;
+	L=4;
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		double w4_m1m2m3=0.0;
+		for(int m1=-L; m1<=L; m1++)
+			{
+			for(int m2=-L; m2<=L; m2++)
+				{
+				for(int m3=-L; m3<=L; m3++)					
+					{	
+					if(m1+m2+m3==0)
+						{
+						double CG_0=pow(-1,-m3);
+						unsigned long fac_L=1; 
+						for(unsigned long j=L; j>0; j--) fac_L=fac_L*j;
+						unsigned long fac_3L1=1; 
+						for(unsigned long j=(3*L+1); j>0; j--) fac_3L1=fac_3L1*j;
+						double CG_1=sqrt((double(fac_L)*double(fac_L)*double(fac_L)/double(fac_3L1)));
+						unsigned long fac_L_m1=1;
+						for(unsigned long j=L-m1; j>0; j--) fac_L_m1=fac_L_m1*j;
+						unsigned long fac_Lm1=1;
+						for(unsigned long j=L+m1; j>0; j--) fac_Lm1=fac_Lm1*j;						
+						unsigned long fac_L_m2=1;
+						for(unsigned long j=L-m2; j>0; j--) fac_L_m2=fac_L_m2*j;
+						unsigned long fac_Lm2=1;
+						for(unsigned long j=L+m2; j>0; j--) fac_Lm2=fac_Lm2*j;
+						unsigned long fac_L_m3=1;
+						for(unsigned long j=L-m3; j>0; j--) fac_L_m3=fac_L_m3*j;
+						unsigned long fac_Lm3=1;
+						for(unsigned long j=L+m3; j>0; j--) fac_Lm3=fac_Lm3*j;			
+						double CG_2=sqrt(double(fac_L_m1)*double(fac_Lm1)*double(fac_L_m2)*double(fac_Lm2)*double(fac_L_m3)*double(fac_Lm3));
+//              		 if(i==0) cout << "1.test! L=" << L << "  m1=" << m1 << "  m2=" << m2 << " m3=" << m3 << "  " << fac_L << "  " << fac_3L1 << "  " << fac_L_m1 << "  " << fac_Lm1 << "  " << fac_L_m2 << "  " << fac_Lm2 << "  " << fac_L_m3 << "  " << fac_Lm3 << endl;		
+						int kmin=-100, kmax=100;
+						if(  0>=kmin) kmin=0;				
+						if(-m1>=kmin) kmin=-m1;
+						if( m2>=kmin) kmin= m2;
+						if(   L<=kmax) kmax=L;
+						if(L-m1<=kmax) kmax=L-m1;	
+						if(L+m2<=kmax) kmax=L+m2;	
+//              		 if(i==0) cout << "2.test! L=" << L << "  m1=" << m1 << "  m2=" << m2 << " m3=" << m3 << "  kmin=" << kmin << "  kmax=" << kmax << endl;			
+						double CG_3=0.0;						
+						for(int k=kmin; k<=kmax; k++)
+							{
+							unsigned long fac_k=1;
+							for(unsigned long jj=k; jj>0; jj--) fac_k=fac_k*jj;
+							unsigned long fac_L_k=1;
+							for(unsigned long jj=L-k; jj>0; jj--) fac_L_k=fac_L_k*jj;
+							unsigned long fac_L_m1_k=1;
+							for(unsigned long jj=L-m1-k; jj>0; jj--) fac_L_m1_k=fac_L_m1_k*jj;
+							unsigned long fac_Lm2_k=1;
+							for(unsigned long jj=L+m2-k; jj>0; jj--) fac_Lm2_k=fac_Lm2_k*jj;
+							unsigned long fac_m1k=1;
+							for(unsigned long jj=m1+k; jj>0; jj--) fac_m1k=fac_m1k*jj;
+							unsigned long fac__m2k=1;
+							for(unsigned long jj=-m2+k; jj>0; jj--) fac__m2k=fac__m2k*jj;
+							double CG_3_km1m2m3=pow(-1, k)/(double(fac_k)*double(fac_L_k)*double(fac_L_m1_k)*double(fac_Lm2_k)*double(fac_m1k)*double(fac__m2k));
+							CG_3=CG_3+CG_3_km1m2m3;
+							}
+//              		 if(i==0) cout << "3.test! L=" << L << "  m1=" << m1 << "  m2=" << m2 << " m3=" << m3 << "  CG_0=" << CG_0 << "  CG_1=" << CG_1 << "  CG_2=" << CG_2 << "  CG_3=" << CG_3 << endl;						 
+						double A=0.0, B=0.0, C=0.0, D=0.0, E=0.0, F=0.0;
+						if(m1>=0) 
+							{A= rq4[m1][i]; B= iq4[m1][i];}
+						else 
+							{A=r_q4[-m1][i]; B=i_q4[-m1][i];}
+						if(m2>=0) 
+							{C= rq4[m2][i]; D= iq4[m2][i];}
+						else 
+							{C=r_q4[-m2][i]; D=i_q4[-m2][i];}
+						if(m3>=0) 
+							{E= rq4[m3][i]; F= iq4[m3][i];}
+						else 
+							{E=r_q4[-m3][i]; F=i_q4[-m3][i];}						
+						w4_m1m2m3=w4_m1m2m3+CG_0*CG_1*CG_2*CG_3*((A*C-B*D)*E-(B*C+A*D)*F);
+//						 if(i==0) cout << "4.test! L=" << L << "  m1=" << m1 << "  m2=" << m2 << " m3=" << m3 << "  w6_m1m2m3=" << w6_m1m2m3 << endl;
+						}
+					}
+				}
+			}					
+		w4_local[i]=w4_m1m2m3/pow((q4_local[i]/sqrt(4*pi/9.0)),3);
+		w4_all_sum += w4_local[i];
+		if(w4_local[i]>= w4max) w4max=w4_local[i];
+		if(w4_local[i]<= w4min) w4min=w4_local[i];				
+//		cout << "i=" << i << "  w4_m1m2m3=" << w4_m1m2m3 << "  w4_local[i]=" << w4_local[i] << "  q4_local[i]=" << q4_local[i] <<endl;
+	}		
+	L=6;
+	for(unsigned int i=0; i<pos_size; i++)
+		{
+		double w6_m1m2m3=0.0;
+		for(int m1=-L; m1<=L; m1++)
+			{
+			for(int m2=-L; m2<=L; m2++)
+				{
+				for(int m3=-L; m3<=L; m3++)					
+					{	
+					if(m1+m2+m3==0)
+						{
+						double CG_0=pow(-1,-m3);
+						unsigned long fac_L=1; 
+						for(unsigned long j=L; j>0; j--) fac_L=fac_L*j;
+						unsigned long fac_3L1=1; 
+						for(unsigned long j=(3*L+1); j>0; j--) fac_3L1=fac_3L1*j;
+						double CG_1=sqrt((double(fac_L)*double(fac_L)*double(fac_L)/double(fac_3L1)));
+						unsigned long fac_L_m1=1;
+						for(unsigned long j=L-m1; j>0; j--) fac_L_m1=fac_L_m1*j;
+						unsigned long fac_Lm1=1;
+						for(unsigned long j=L+m1; j>0; j--) fac_Lm1=fac_Lm1*j;						
+						unsigned long fac_L_m2=1;
+						for(unsigned long j=L-m2; j>0; j--) fac_L_m2=fac_L_m2*j;
+						unsigned long fac_Lm2=1;
+						for(unsigned long j=L+m2; j>0; j--) fac_Lm2=fac_Lm2*j;
+						unsigned long fac_L_m3=1;
+						for(unsigned long j=L-m3; j>0; j--) fac_L_m3=fac_L_m3*j;
+						unsigned long fac_Lm3=1;
+						for(unsigned long j=L+m3; j>0; j--) fac_Lm3=fac_Lm3*j;										
+						double CG_2=sqrt(double(fac_L_m1)*double(fac_Lm1)*double(fac_L_m2)*double(fac_Lm2)*double(fac_L_m3)*double(fac_Lm3));
+//                  	 if(i==0) cout << "1.test! L=" << L << "  m1=" << m1 << "  m2=" << m2 << " m3=" << m3 << "  " << fac_L << "  " << fac_3L1 << "  " << fac_L_m1 << "  " << fac_Lm1 << "  " << fac_L_m2 << "  " << fac_Lm2 << "  " << fac_L_m3 << "  " << fac_Lm3 << endl;					
+						int kmin=-100, kmax=100;
+						if(  0>=kmin) kmin=0;				
+						if(-m1>=kmin) kmin=-m1;
+						if( m2>=kmin) kmin= m2;
+						if(   L<=kmax) kmax=L;
+						if(L-m1<=kmax) kmax=L-m1;	
+						if(L+m2<=kmax) kmax=L+m2;	
+//                  	 if(i==0) cout << "2.test! L=" << L << "  m1=" << m1 << "  m2=" << m2 << " m3=" << m3 << "  kmin=" << kmin << "  kmax=" << kmax << endl;						
+						double CG_3=0.0;						
+						for(int k=kmin; k<=kmax; k++)
+							{
+							unsigned long fac_k=1;
+							for(unsigned long jj=k; jj>0; jj--) fac_k=fac_k*jj;
+							unsigned long fac_L_k=1;
+							for(unsigned long jj=L-k; jj>0; jj--) fac_L_k=fac_L_k*jj;
+							unsigned long fac_L_m1_k=1;
+							for(unsigned long jj=L-m1-k; jj>0; jj--) fac_L_m1_k=fac_L_m1_k*jj;
+							unsigned long fac_Lm2_k=1;
+							for(unsigned long jj=L+m2-k; jj>0; jj--) fac_Lm2_k=fac_Lm2_k*jj;
+							unsigned long fac_m1k=1;
+							for(unsigned long jj=m1+k; jj>0; jj--) fac_m1k=fac_m1k*jj;
+							unsigned long fac__m2k=1;
+							for(unsigned long jj=-m2+k; jj>0; jj--) fac__m2k=fac__m2k*jj;
+							double CG_3_km1m2m3=pow(-1, k)/(double(fac_k)*double(fac_L_k)*double(fac_L_m1_k)*double(fac_Lm2_k)*double(fac_m1k)*double(fac__m2k));
+							CG_3=CG_3+CG_3_km1m2m3;
+							}
+//                  	 if(i==0) cout << "3.test! L=" << L << "  m1=" << m1 << "  m2=" << m2 << " m3=" << m3 << "  CG_0=" << CG_0 << "  CG_1=" << CG_1 << "  CG_2=" << CG_2 << "  CG_3=" << CG_3 << endl;									 
+						double A=0.0, B=0.0, C=0.0, D=0.0, E=0.0, F=0.0;
+						if(m1>=0) 
+							{A= rq6[m1][i]; B= iq6[m1][i];}
+						else 
+							{A=r_q6[-m1][i]; B=i_q6[-m1][i];}
+						if(m2>=0) 
+							{C= rq6[m2][i]; D= iq6[m2][i];}
+						else 
+							{C=r_q6[-m2][i]; D=i_q6[-m2][i];}
+						if(m3>=0) 
+							{E= rq6[m3][i]; F= iq6[m3][i];}
+						else 
+							{E=r_q6[-m3][i]; F=i_q6[-m3][i];}
+						w6_m1m2m3=w6_m1m2m3+CG_0*CG_1*CG_2*CG_3*((A*C-B*D)*E-(B*C+A*D)*F);
+//						 if(i==0) cout << "4.test! L=" << L << "  m1=" << m1 << "  m2=" << m2 << " m3=" << m3 << "  w6_m1m2m3=" << w6_m1m2m3 << endl;
+						}
+					}
+				}
+			}					
+		w6_local[i]=w6_m1m2m3/pow((q6_local[i]/sqrt(4*pi/13.0)),3);
+		w6_all_sum += w6_local[i];
+		if(w6_local[i]>= w6max) w6max=w6_local[i];
+		if(w6_local[i]<= w6min) w6min=w6_local[i];	
+//		cout << "i=" << i << "  w6_m1m2m3=" << w6_m1m2m3 << "  w6_local[i]=" << w6_local[i] << "  q6_local[i]=" << q6_local[i] <<endl;
+		}
+	w4_all += w4_all_sum/double(pos_size);
+	w4_local_all.push_back(w4_local);		
+	w6_all += w6_all_sum/double(pos_size);
+	w6_local_all.push_back(w6_local);	
+	m_Nf += 1;		
+	}
 	

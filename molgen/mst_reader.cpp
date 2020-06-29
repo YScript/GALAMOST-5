@@ -51,8 +51,8 @@ mst_reader::mst_reader()
 	m_invariant_data = false;
 	m_variant_data = false;
 	m_if_trajectory = false;
-	m_read_indicator = { {"bond", false}, {"angle", false}, {"box", false}, {"position", false}, {"type", false}, 
-	                     {"image", false}, {"mass", false}, {"velocity", false}, {"force", false}, {"virial", false} };
+	m_read_indicator = { {"bond", false}, {"angle", false}, {"box", false}, {"position", false}, {"type", false}, {"image", false}, {"mass", false}, {"velocity", false}, 
+	                     {"charge", false}, {"body", false}, {"diameter", false}, {"rotangle", false}, {"force", false}, {"virial", false}};
 
 	m_sp = ios::beg;
     m_fname = "XXXXXXXXX";
@@ -64,18 +64,30 @@ void mst_reader::reset_params()
 	m_num_particles_read = false;
 	m_timestep_read = false;
 	m_dimension_read = false;
+	m_bond_read = false;
+	m_angle_read = false;
+	m_box_read = false;	
 	m_position_read = false;
 	m_type_read = false;
 	m_image_read = false;
 	m_mass_read = false;
 	m_velocity_read = false;
-	m_bond_read = false;
-	m_angle_read = false;
-	m_box_read = false;
+	m_charge_read = false;
+	m_body_read = false;
+	m_diameter_read = false;	
+	m_rotangle_read = false;
+	m_force_read = false;	
+	m_virial_read = false;
 	}
 	
 void mst_reader::clear_data()
 	{
+	if (!m_read_indicator["bond"])
+		m_bonds.clear();
+	if (!m_read_indicator["angle"])	
+		m_angles.clear();
+	if (!m_read_indicator["box"])				
+		m_box=BoxSize(0.0, 0.0, 0.0);	
 	if (!m_read_indicator["position"])				
 		m_pos.clear();
 	if (!m_read_indicator["type"])		
@@ -86,16 +98,18 @@ void mst_reader::clear_data()
 		m_mass.clear();
 	if (!m_read_indicator["velocity"])			
 		m_vel.clear();
+	if (!m_read_indicator["charge"])
+		m_charge.clear();
+	if (!m_read_indicator["body"])
+		m_body.clear();
+	if (!m_read_indicator["diameter"])
+		m_diameter.clear();	
+	if (!m_read_indicator["rotangle"])		
+		m_rotangle.clear();
 	if (!m_read_indicator["force"])			
 		m_force.clear();
-	if (!m_read_indicator["virial"])			
-		m_virial.clear();
-	if (!m_read_indicator["bond"])
-		m_bonds.clear();
-	if (!m_read_indicator["angle"])		
-		m_angles.clear();
-	if (!m_read_indicator["box"])				
-		m_box=BoxSize(0.0, 0.0, 0.0);
+	if (!m_read_indicator["virial"])
+		m_virial.clear();	
 	}
 
 
@@ -246,8 +260,35 @@ bool mst_reader::readDataFromMST(const string &fname)
 				reset_params();
 				m_dimension_read=true;
 				continue;
-				}				
-		
+				}	
+
+			if (line.find("bond") != line.npos)
+				{
+				reset_params();
+				m_bond_read=true;	
+				if (m_invariant_data)
+					m_read_indicator["bond"] = true;
+				continue;
+				}
+
+			if (line.find("angle") != line.npos)
+				{				
+				reset_params();
+				m_angle_read=true;
+				if (m_invariant_data)
+					m_read_indicator["angle"] = true;
+				continue;
+				}
+
+			if (line.find("box") != line.npos)
+				{
+				reset_params();
+				m_box_read=true;
+				if (m_invariant_data)
+					m_read_indicator["box"] = true;
+				continue;
+				}
+
 			if (line.find("position") != line.npos)
 				{		
 				reset_params();			
@@ -293,33 +334,60 @@ bool mst_reader::readDataFromMST(const string &fname)
 				continue;
 				}
 				
-			if (line.find("bond") != line.npos)
+			if (line.find("charge") != line.npos)
 				{
 				reset_params();
-				m_bond_read=true;	
+				m_charge_read=true;
 				if (m_invariant_data)
-					m_read_indicator["bond"] = true;
+					m_read_indicator["charge"] = true;
 				continue;
 				}
 
-			if (line.find("angle") != line.npos)
-				{				
+			if (line.find("body") != line.npos)
+				{
 				reset_params();
-				m_angle_read=true;
+				m_body_read=true;
 				if (m_invariant_data)
-					m_read_indicator["angle"] = true;
+					m_read_indicator["body"] = true;
 				continue;
 				}
 
-			if (line.find("box") != line.npos)
+			if (line.find("diameter") != line.npos)
 				{
 				reset_params();
-				m_box_read=true;
+				m_diameter_read=true;
 				if (m_invariant_data)
-					m_read_indicator["box"] = true;
+					m_read_indicator["diameter"] = true;
+				continue;
+				}				
+
+			if (line.find("rotangle") != line.npos)
+				{
+				reset_params();
+				m_rotangle_read=true;
+				if (m_invariant_data)
+					m_read_indicator["rotangle"] = true;
 				continue;
 				}
 				
+			if (line.find("force") != line.npos)
+				{
+				reset_params();
+				m_force_read=true;
+				if (m_invariant_data)
+					m_read_indicator["force"] = true;
+				continue;
+				}
+
+			if (line.find("virial") != line.npos)
+				{
+				reset_params();
+				m_virial_read=true;
+				if (m_invariant_data)
+					m_read_indicator["virial"] = true;
+				continue;
+				}				
+
 			// read data				
 			std::vector<std::string> line_array = split(line, "	");
 			istringstream parser;
@@ -352,6 +420,25 @@ bool mst_reader::readDataFromMST(const string &fname)
 				
 			if (m_dimension_read && line_array.size() >= 1)
 				parser >> m_dimension;		
+				
+			if (m_bond_read && line_array.size() >= 3)
+				{
+				string name;
+				unsigned int a;
+				unsigned int b;
+				parser>> name >> a >> b;
+				m_bonds.push_back(Bond(name, a, b, getBondTypeId(name)));
+				}
+		
+			if (m_angle_read && line_array.size() >= 4)
+				{
+				string name;
+				unsigned int a;
+				unsigned int b;
+				unsigned int c;
+				parser>> name >> a >> b >> c;
+				m_angles.push_back(Angle(name, a, b, c, getAngleTypeId(name)));
+				}					
 				
 			if (m_box_read && line_array.size() >= 3)
 				{
@@ -397,24 +484,47 @@ bool mst_reader::readDataFromMST(const string &fname)
 				m_vel.push_back(vec(vx, vy, vz));
 				}
 				
-			if (m_bond_read && line_array.size() >= 3)
+			if (m_charge_read && line_array.size() >= 1)
 				{
-				string name;
-				unsigned int a;
-				unsigned int b;
-				parser>> name >> a >> b;
-				m_bonds.push_back(Bond(name, a, b, getBondTypeId(name)));
+				double c;
+				parser>> c;
+				m_charge.push_back(c);
 				}
-		
-			if (m_angle_read && line_array.size() >= 4)
+
+			if (m_body_read && line_array.size() >= 1)
 				{
-				string name;
-				unsigned int a;
-				unsigned int b;
-				unsigned int c;
-				parser>> name >> a >> b >> c;
-				m_angles.push_back(Angle(name, a, b, c, getAngleTypeId(name)));
-				}		
+				double b;
+				parser>> b;
+				m_body.push_back(b);
+				}
+
+			if (m_diameter_read && line_array.size() >= 1)
+				{
+				double d;
+				parser>> d;
+				m_diameter.push_back(d);
+				}				
+				
+			if (m_rotangle_read && line_array.size() >= 3)
+				{
+				double rx, ry, rz;
+				parser>> rx >> ry >> rz;
+				m_rotangle.push_back(vec(rx, ry, rz));
+				}	
+				
+			if (m_force_read && line_array.size() >= 3)
+				{
+				double fx, fy, fz;
+				parser>> fx >> fy >> fz;
+				m_force.push_back(vec(fx, fy, fz));
+				}	
+
+			if (m_virial_read && line_array.size() >= 1)
+				{
+				double v;
+				parser>> v;
+				m_virial.push_back(v);
+				}					
 			}
 		}
 		
@@ -461,8 +571,7 @@ bool mst_reader::readDataFromMST(const string &fname)
         cerr << endl << "***Error! No particles defined in type node" << endl << endl;
         throw runtime_error("Error extracting data from galamost_mst file");
         }
-		
-		
+
     if (m_pos.size() != m_num_particles)
         {
         cerr << endl << "***Error! " << m_pos.size() << " positions != " << m_num_particles
@@ -476,6 +585,27 @@ bool mst_reader::readDataFromMST(const string &fname)
              << " the number of particles" << endl << endl;
         throw runtime_error("Error extracting data from galamost_mst file");
         }	
+
+    if (m_image.size() != 0 && m_image.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_image.size() << " images != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }	
+
+    if (m_mass.size() != 0 && m_mass.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_mass.size() << " masses != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }		
+		
+    if (m_vel.size() != 0 && m_vel.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_vel.size() << " velocities != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }		
 		
     if (m_molecule.size() != 0 && m_molecule.size() != m_num_particles)
         {
@@ -483,55 +613,48 @@ bool mst_reader::readDataFromMST(const string &fname)
              << " the number of particles" << endl << endl;
         throw runtime_error("Error extracting data from galamost_mst file");
         }
-		
-    if (m_vel.size() != 0 && m_vel.size() != m_num_particles)
-        {
-        cerr << endl << "***Error! " << m_vel.size() << " velocities != " << m_num_particles
-             << " the number of particles" << endl << endl;
-        throw runtime_error("Error extracting data from galamost_mst file");
-        }
-		
-    if (m_mass.size() != 0 && m_mass.size() != m_num_particles)
-        {
-        cerr << endl << "***Error! " << m_mass.size() << " masses != " << m_num_particles
-             << " the number of particles" << endl << endl;
-        throw runtime_error("Error extracting data from galamost_mst file");
-        }
-		
-    if (m_diameter.size() != 0 && m_diameter.size() != m_num_particles)
-        {
-        cerr << endl << "***Error! " << m_diameter.size() << " diameters != " << m_num_particles
-             << " the number of particles" << endl << endl;
-        throw runtime_error("Error extracting data from galamost_mst file");
-        }
-		
-    if (m_image.size() != 0 && m_image.size() != m_num_particles)
-        {
-        cerr << endl << "***Error! " << m_image.size() << " images != " << m_num_particles
-             << " the number of particles" << endl << endl;
-        throw runtime_error("Error extracting data from galamost_mst file");
-        }
-		
-    if ( m_type.size() != 0 && m_type.size() != m_num_particles)
-        {
-        cerr << endl << "***Error! " << m_type.size() << " type values != " << m_num_particles
-             << " the number of particles" << endl << endl;
-        throw runtime_error("Error extracting data from galamost_mst file");
-        }
-		
-    if (m_body.size() != 0 && m_body.size() != m_num_particles)
-        {
-        cerr << endl << "***Error! " << m_body.size() << " body values != " << m_num_particles
-             << " the number of particles" << endl << endl;
-        throw runtime_error("Error extracting data from galamost_mst file");
-        }	
-		
+
     if (m_charge.size() != 0 && m_charge.size() != m_num_particles)
         {
         cerr << endl << "***Error! " << m_charge.size() << " charge values != " << m_num_particles
              << " the number of particles" << endl << endl;
         throw runtime_error("Error extracting data from galamost_mst file");
         }
+
+    if (m_body.size() != 0 && m_body.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_body.size() << " body values != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }			
+
+    if (m_diameter.size() != 0 && m_diameter.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_diameter.size() << " diameters != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }		
+
+    if (m_rotangle.size() != 0 && m_rotangle.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_rotangle.size() << " rotangle values != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }
+
+    if (m_force.size() != 0 && m_force.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_force.size() << " force values != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }	
+
+    if (m_virial.size() != 0 && m_virial.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_virial.size() << " virial values != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }			
 		
 	//-check bonds, angles and dihedrals
 	for (unsigned int i=0; i<m_bonds.size();i++)
@@ -588,25 +711,28 @@ void mst_reader::outPutInfo()
         cout <<" "<< m_vel.size() << " velocities" << endl;
     if (m_mass.size() > 0)
         cout <<" "<< m_mass.size() << " masses" << endl;
-    if (m_diameter.size() > 0)
-        cout <<" "<< m_diameter.size() << " diameters" << endl;
     cout <<" "<< getNParticleTypes() <<  " particle types" << endl;
-    if (m_body.size() > 0)
-        cout <<" "<< m_body.size() << " particle body values" << endl; 	
-    if (m_bonds.size() > 0)
-        cout <<" "<< m_bonds.size() << " bonds" << endl;
-    if (m_angles.size() > 0)
-        cout <<" "<< m_angles.size() << " angles" << endl;
-    if (m_dihedrals.size() > 0)
-        cout <<" "<< m_dihedrals.size() << " dihedrals" << endl;
+
     if (m_charge.size() > 0)
         cout <<" "<< m_charge.size() << " charges" << endl;
+    if (m_body.size() > 0)
+        cout <<" "<< m_body.size() << " particle body values" << endl; 	
+    if (m_diameter.size() > 0)
+        cout <<" "<< m_diameter.size() << " diameters" << endl;	
+    if (m_rotangle.size() > 0)
+        cout <<" "<< m_rotangle.size() << " rotangles" << endl;		
     if (m_orientation.size() > 0)
         cout <<" "<< m_orientation.size() << " orientations" << endl;
     if (m_quaternion.size() > 0)
         cout <<" "<< m_quaternion.size() << " quaternions" << endl;		
     if (m_molecule.size() > 0)
-        cout <<" "<< m_molecule.size() << " molecules" << endl;	
+        cout <<" "<< m_molecule.size() << " molecules" << endl;		
+    if (m_bonds.size() > 0)
+        cout <<" "<< m_bonds.size() << " bonds" << endl;
+    if (m_angles.size() > 0)
+        cout <<" "<< m_angles.size() << " angles" << endl;
+    if (m_dihedrals.size() > 0)
+        cout <<" "<< m_dihedrals.size() << " dihedrals" << endl;	
 	}
 
 

@@ -1051,7 +1051,7 @@ class RDFBetweenTypes : public Function
 		unsigned int* d_exclusion_list;
 		unsigned int* d_mol_id_per_particle;		
 	};
-
+//--- case 19
 class MSTfileConversion : public Function
     {
     public:
@@ -1089,7 +1089,7 @@ class MSTfileConversion : public Function
 		unsigned int m_nprecision;
 		unsigned int m_nhead;		
 	};	
-	
+//--- case 20	
 class PatchToParticle : public Function
     {
     public:
@@ -1127,6 +1127,2211 @@ class PatchToParticle : public Function
 		bool m_filter_sphere;
 		unsigned int m_Nf;
 	};		
+//--- case 21 
+class SSF : public Function
+    {
+    public:
+        SSF(std::string filename): Function()
+			{
+            m_file.open(filename.c_str(), ios_base::out);
+            if(!m_file.good())
+				{
+				cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+				throw runtime_error("Error SSF dump");
+				}
+            m_Nf=0;
+			m_qnummax=40;
+			}
+        virtual ~SSF()
+			{
+			std::vector<double> q_all_sum(q_all[0].size()*q_all[0].size(), 0.0);
+		    std::vector <double> ssf_all_sum(q_all[0].size()*q_all[0].size(), 0.0);
+			for(unsigned int i=0; i<q_all[0].size(); i++)
+				{	
+				for(unsigned int j=0; j<m_Nf; j++)
+					{
+					q_all_sum[i] += q_all[j][i];
+					ssf_all_sum[i] += ssf_all[j][i];
+					}
+				m_file << q_all_sum[i]/m_Nf << "  " << ssf_all_sum[i]/m_Nf << endl;					 
+				}					
+			cout << "2. Good Luck! Outputting results of the static structure factor (SSF) to 'ssf.log'." << endl;		
+			};
+		void setqnummax(unsigned int qnummax)
+			{
+			m_qnummax=qnummax;
+			}
+        virtual void compute();
+    private:
+        unsigned int m_Nf, pos_size, m_qnummax;
+		double deltat;
+        std::ofstream m_file;
+		std::vector<std::vector<double> > q_all;
+		std::vector<std::vector<double> > ssf_all;
+    };
+
+//--- case 22                                                                                                                                   
+class ADF : public Function
+    {
+    public:
+        ADF(std::string filename): Function()
+			{
+			m_file.open(filename.c_str(), ios_base::out);
+			if(!m_file.good())
+				{
+				cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+				throw runtime_error("Error ADF dump");
+				}
+			m_Nf=0;
+			maxbin=200;
+			m_rcut=1.0;
+			m_beta=90.0;
+			}
+		virtual ~ADF() 
+			{
+			double sum_g_angular=0.0;
+			std::vector<double> r_angular(maxbin, 0.0);
+		    std::vector<double> g_angular(maxbin, 0.0);
+			for(unsigned int i=0; i<maxbin; i++)
+				{	
+				for(unsigned int j=0; j<m_Nf ; j++)
+					{
+					r_angular[i] += r_all[j][i];
+					g_angular[i] += g_all[j][i];				 
+					}
+				sum_g_angular += g_angular[i];				 			 
+				}
+            for(unsigned int i=0; i<maxbin; i++)
+				{			
+				m_file << r_angular[i]/m_Nf << "  " << g_angular[i]/(sum_g_angular) << endl;	
+				}	
+			cout << "3. Good Luck! Outputting results of the angular distribution function (ADF) to 'adf.log'." << endl;			
+			m_file.close();	
+            r_all.clear();
+			g_all.clear();
+			};
+		void setBeta(double beta)
+			{
+			m_beta=beta;
+			}
+		void setRcut(double rcut)
+			{
+			m_rcut=rcut;
+			}		
+		virtual void compute();			
+    private:
+		std::ofstream m_file;
+		unsigned int m_Nf;		
+		unsigned int maxbin;
+		double m_rcut;
+		double m_beta;
+		std::vector<std::vector<double> > r_all;
+		std::vector<std::vector<double> > g_all;
+	};
+
+//--- case 23                                                                                                                                    //1
+class CND : public Function
+    {
+    public:
+        CND(std::string filename): Function()
+			{
+			m_file.open(filename.c_str(), ios_base::out);
+			if(!m_file.good())
+				{
+				cerr<<endl<<"***Error! Error opening dump file "<<filename<<endl<<endl;
+				throw runtime_error("Error CND dump");
+				}
+			m_Nf=0;
+			maxbin=200;
+			m_rcut=1.0;
+			m_beta=90.0;
+			}
+		virtual ~CND() 
+			{
+			std::vector<unsigned int> score_s(maxbin,0);
+		    std::vector <double> N_s(maxbin,0.0);
+			for(unsigned int i=1; i<maxbin; i++)
+				{	
+				for(unsigned int j=0; j<m_Nf ; j++)
+					{
+					score_s[i] += score_s_all[j][i];
+					N_s[i] += N_s_all[j][i];
+					}
+				m_file << score_s[i]/m_Nf << "  " << N_s[i]/m_Nf << endl;					 
+				}				
+			cout << "4. Good Luck! Outputting results of the contact number distribution (CND) to 'cnd.log'." << endl;
+			m_file.close();	
+            score_s_all.clear();
+			N_s_all.clear();
+			};
+		void setBeta(double beta)
+			{
+			m_beta=beta;
+			}
+		void setRcut(double rcut)
+			{
+			m_rcut=rcut;
+			}			
+		virtual void compute();			
+    private:
+		std::ofstream m_file;
+		unsigned int maxbin;
+		unsigned int m_Nf;	
+		double m_rcut;
+	    double m_beta;
+		std::vector<std::vector<unsigned int> > score_s_all;
+		std::vector<std::vector <double> > N_s_all;
+	};
+
+//--- case 24	
+class MSAD : public Function
+    {
+    public:
+        MSAD(std::string filename): Function()
+			{
+            m_file.open(filename.c_str(), ios_base::out);
+            if (!m_file.good())
+				{
+				cerr << endl << "***Error! Error opening dump file" << filename << endl << endl;
+				throw runtime_error("Error MSAD dump");
+				}
+            m_Nf=0;
+			m_dt=0.005;
+			}
+        virtual ~MSAD()
+			{				
+            std::vector<double> msad; msad.reserve(m_Nf);
+			if(m_Nf<=1000)
+				{
+				n_ensemble=0.1*m_Nf;	
+				}				
+            else
+				{
+				n_ensemble=1000;	
+				}
+			pos_size=m_Rotangle_all[0].size();	
+			deltat=(delta_t[1]-delta_t[0])*m_dt;			
+            for(unsigned int i=1; i<m_Nf-n_ensemble; i++)                                                                                   
+				{
+				msad[i]=0.0;
+				unsigned int count=0;
+                for(unsigned int j=i; j<i+n_ensemble; j++)                                                
+					{
+                    for(unsigned int k=0; k<pos_size; k++)
+						{
+//						if(m_type_all[j-i][k]==0)
+							{
+							double dxtheta_t=m_Rotangle_all[j][k].x-m_Rotangle_all[j-i][k].x;
+							double dytheta_t=m_Rotangle_all[j][k].y-m_Rotangle_all[j-i][k].y;
+							double dztheta_t=m_Rotangle_all[j][k].z-m_Rotangle_all[j-i][k].z;
+							msad[i] += dxtheta_t*dxtheta_t + dytheta_t*dytheta_t + dztheta_t*dztheta_t;	
+							count += 1;
+							}
+						}
+					}				
+                msad[i] /= double(count);
+				m_file << i*deltat << "  " << msad[i] << endl;
+				}	
+            cout << "6. Good Luck! Outputting results of the mean square angular displacement (MSAD) to 'msad.log'." << endl;			
+			m_file.close();
+			m_type_all.clear();
+			m_Rotangle_all.clear();	
+            delta_t.clear();
+			msad.clear();
+			};	
+		void setDt(double dt)
+			{
+			m_dt=dt;
+			}		
+        virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size;
+		double deltat;
+		double m_dt;
+        std::ofstream m_file;
+		std::vector<unsigned int> delta_t;
+		std::vector< std::vector<unsigned int> > m_type_all;
+        std::vector<std::vector<vec> > m_Rotangle_all;
+    } ;	
+	
+//--- case 25	
+class RMSAD : public Function
+    {
+    public:
+        RMSAD(std::string filename): Function()
+			{
+            m_file.open(filename.c_str(), ios_base::out);
+            if (!m_file.good())
+				{
+				cerr << endl << "***Error! Error opening dump file" << filename << endl << endl;
+				throw runtime_error("Error RMSAD dump");
+				}
+            m_Nf=0;
+			m_dt=0.005;
+			}
+        virtual ~RMSAD()
+			{				
+            std::vector<double> rotationmsd0; rotationmsd0.reserve(m_Nf);
+			std::vector<double> rotationmsd1; rotationmsd1.reserve(m_Nf);
+			std::vector<double> rotationmsd; rotationmsd.reserve(m_Nf);
+			pos_size=m_ori_all[0].size();	
+			deltat=(delta_t[1]-delta_t[0])*m_dt;
+			if(m_Nf<=1000)
+				{
+				n_ensemble=0.1*m_Nf;	
+				}				
+            else
+				{
+				n_ensemble=1000;	
+				}
+			std::vector<vec> deltaRotation0_t; deltaRotation0_t.resize(pos_size);
+			std::vector<vec> deltaRotation1_t; deltaRotation1_t.resize(pos_size);				
+            for(unsigned int j=0; j<1; j++) 
+				{   
+				for(unsigned int i=0; i<m_Nf; i++) 	
+					{
+					for(unsigned int k=0; k<pos_size; k++)
+						{					
+						double dotproduct=m_Rotangle_all[i][k].x*m_ori_all[j][k].x + m_Rotangle_all[i][k].y*m_ori_all[j][k].y + m_Rotangle_all[i][k].z*m_ori_all[j][k].z;					 
+						deltaRotation0_t[k].x=dotproduct*m_ori_all[j][k].x;	
+						deltaRotation0_t[k].y=dotproduct*m_ori_all[j][k].y;
+						deltaRotation0_t[k].z=dotproduct*m_ori_all[j][k].z;
+						
+						deltaRotation1_t[k].x=m_Rotangle_all[i][k].x - dotproduct*m_ori_all[j][k].x;	
+						deltaRotation1_t[k].y=m_Rotangle_all[i][k].y - dotproduct*m_ori_all[j][k].y;
+						deltaRotation1_t[k].z=m_Rotangle_all[i][k].z - dotproduct*m_ori_all[j][k].z;					
+						}
+					m_Rotation0_all.push_back(deltaRotation0_t);
+					m_Rotation1_all.push_back(deltaRotation1_t);					
+					}
+				}														
+            for(unsigned int i=1; i<m_Nf-n_ensemble; i++)                                                                                   
+				{
+				rotationmsd0[i]=0.0;
+				rotationmsd1[i]=0.0;
+				rotationmsd[i]=0.0;
+				unsigned int count=0;
+                for(unsigned int j=i; j<i+1; j++)                                                
+					{
+                    for(unsigned int k=0; k<pos_size; k++)
+						{
+//						if(m_type_all[i][k]==0)
+							{
+							
+							double dxtheta0_t=m_Rotation0_all[j][k].x-m_Rotation0_all[j-i][k].x;
+							double dytheta0_t=m_Rotation0_all[j][k].y-m_Rotation0_all[j-i][k].y;
+							double dztheta0_t=m_Rotation0_all[j][k].z-m_Rotation0_all[j-i][k].z;
+							rotationmsd0[i] += dxtheta0_t*dxtheta0_t+dytheta0_t*dytheta0_t+dztheta0_t*dztheta0_t;	
+	
+							double dxtheta1_t=m_Rotation1_all[j][k].x-m_Rotation1_all[j-i][k].x;
+							double dytheta1_t=m_Rotation1_all[j][k].y-m_Rotation1_all[j-i][k].y;
+							double dztheta1_t=m_Rotation1_all[j][k].z-m_Rotation1_all[j-i][k].z;
+							rotationmsd1[i] += dxtheta1_t*dxtheta1_t+dytheta1_t*dytheta1_t+dztheta1_t*dztheta1_t;
+							
+							double dxtheta_t=m_Rotangle_all[j][k].x-m_Rotangle_all[j-i][k].x;
+							double dytheta_t=m_Rotangle_all[j][k].y-m_Rotangle_all[j-i][k].y;
+							double dztheta_t=m_Rotangle_all[j][k].z-m_Rotangle_all[j-i][k].z;
+							rotationmsd[i] += dxtheta_t*dxtheta_t+dytheta_t*dytheta_t+dztheta_t*dztheta_t;
+							count += 1;
+							}												
+						}
+					}				
+                rotationmsd0[i] /= double(count);
+				rotationmsd1[i] /= double(count);
+				rotationmsd[i] /= double(count);
+				m_file << i*deltat << "  " << rotationmsd0[i] <<"   "<< rotationmsd1[i] << "  " << rotationmsd[i] << endl;
+				}			
+            cout << "7. Good Luck! Outputting results of the reorientational mean square angular displacement (RMSAD) to 'rmsad.log'."<<endl;			
+			m_file.close();
+			m_ori_all.clear();
+			m_Rotation0_all.clear();
+			m_Rotation1_all.clear();
+			m_Rotangle_all.clear();	
+            delta_t.clear();
+			rotationmsd0.clear();
+			rotationmsd1.clear();
+			rotationmsd.clear();
+			m_type_all.clear();
+			};	
+		void setDt(double dt)
+			{
+			m_dt=dt;
+			}		
+        virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size;
+		double deltat;
+		double m_dt;
+        std::ofstream m_file;
+		std::vector<unsigned int> delta_t;
+		std::vector<std::vector<vec> > m_ori_all;
+		std::vector<std::vector<vec> > m_Rotation0_all;
+		std::vector<std::vector<vec> > m_Rotation1_all;
+		std::vector<std::vector<vec> > m_Rotangle_all;
+		std::vector< std::vector<unsigned int> > m_type_all;
+    } ;
+	
+//--- case 26
+class ISF : public Function
+    {
+    public:
+        ISF(std::string filename): Function()
+        {
+            m_file.open(filename.c_str(), ios_base::out);
+            if(!m_file.good())
+            {
+             cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+             throw runtime_error("Error ISF dump");
+            }
+            m_Nf=0;
+			m_q=6.02;
+			m_dt=0.005;
+        }
+        virtual ~ISF()
+		{						
+            double c=2.0*3.1415926/Lx, cq=m_q/c;
+            int Qnum=int(cq*cq+0.5);
+            for(unsigned int i=0; i<=Qnum; i++)
+            {
+                if(qvec.size()>24) break;
+                for(unsigned int j=0; j<=Qnum; j++)
+                {
+                    if(qvec.size()>24) break;
+                    for(unsigned int k=0; k<=Qnum; k++)
+                    {
+                        unsigned int mm=i*i+j*j+k*k;
+                        if(mm==Qnum)
+                        {
+                         double ic=i*c, jc=j*c, kc=k*c;
+                         qvec.push_back(vec(ic,jc,kc));
+						 qvec.push_back(vec(ic,-jc,kc));
+						 qvec.push_back(vec(ic,jc,-kc));
+						 qvec.push_back(vec(ic,-jc,-kc));							
+                        }
+                        Qcount=qvec.size();
+                        if(qvec.size()>24) break;
+                    }
+                }
+            }				
+            std::vector<double> isf; isf.reserve(m_Nf);
+			if(m_Nf<=1000)
+			{
+			 n_ensemble=0.1*m_Nf;	
+			}				
+            else
+			{
+			 n_ensemble=1000;	
+			}			
+			pos_size=m_pos_all[0].size();
+			deltat=(delta_t[1]-delta_t[0])*m_dt;		
+			for(unsigned int i=1; i<m_Nf-n_ensemble; i++) 
+			{	
+				unsigned int count=0;
+				isf[i]=0.0;				
+				if(Qcount<1) 
+				{
+				cout<<"***Wrong! q number is 0."<<endl; break;
+				}
+				for(unsigned int j=i; j<i+n_ensemble; j++)
+				{
+					for(unsigned int k=0; k<pos_size; k++)
+					{
+//						if(m_type_all[j-i][k]==0)
+						{						
+							double dx=m_pos_all[j][k].x-m_pos_all[j-i][k].x;
+							double dy=m_pos_all[j][k].y-m_pos_all[j-i][k].y;
+							double dz=m_pos_all[j][k].z-m_pos_all[j-i][k].z;
+							for(unsigned int l=0; l<Qcount; l++)
+							{
+							 double theta=qvec[l].x*dx+qvec[l].y*dy+qvec[l].z*dz;
+							 isf[i] += cosf(float(theta));
+                             count += 1;							
+							}						
+						}						
+					}
+				}
+				isf[i] /= double(count);
+				m_file << i*deltat << " " << isf[i] << endl;
+			}
+			cout << "8. Good Luck! Outputting results of the self-part intermediate scattering function (ISF) to 'isf.log'." << endl;
+			m_file.close();	
+			m_type_all.clear();
+	    	m_pos_all.clear();
+			qvec.clear();
+			delta_t.clear();
+			isf.clear();
+        }; 
+		void setDt(double dt)
+		{
+		 m_dt=dt;
+		}
+		void setQ(double q)
+		{
+		 m_q=q;
+		}	
+        virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size, Qcount;
+		double deltat, m_q, Lx, Ly, Lz;
+		double m_dt;
+        std::ofstream m_file;
+		std::vector<vec> qvec;
+		std::vector<unsigned int> delta_t;
+		std::vector< std::vector<unsigned int> > m_type_all;
+        std::vector<std::vector<vec> > m_pos_all;
+    };	
+	
+//--- case 27
+class OACF : public Function
+    {
+    public:
+        OACF(std::string filename): Function()
+		{
+            m_file.open(filename.c_str(), ios_base::out);
+            if (!m_file.good())
+			{
+             cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+             throw runtime_error("Error OACF dump");
+			}
+            m_Nf=0;
+			m_dt=0.005;			
+		}
+        virtual ~OACF()
+		{            
+            std::vector<double> oacf1; oacf1.reserve(m_Nf);
+			std::vector<double> oacf2; oacf2.reserve(m_Nf);
+			std::vector<double> oacf3; oacf3.reserve(m_Nf);
+			std::vector<double> oacf4; oacf4.reserve(m_Nf);
+			if(m_Nf<=1000)
+			{
+			 n_ensemble=0.1*m_Nf;	
+			}				
+            else
+			{
+			 n_ensemble=1000;	
+			}			
+			pos_size=m_ori_all[0].size();
+			deltat=(delta_t[1]-delta_t[0])*m_dt;				
+            for(unsigned int i=1; i<m_Nf-n_ensemble; i++)                                                                                
+            {
+				oacf1[i]=0.0;
+				oacf2[i]=0.0;
+				oacf3[i]=0.0;
+				oacf4[i]=0.0;				
+				unsigned int count=0;
+				double oacfx=0.0;
+                for(unsigned int j=i; j<i+n_ensemble; j++)                                                
+				{
+                    for(unsigned int k=0; k<pos_size; k++)
+					{
+//						if(m_type_all[j-i][k]==0)
+						{
+						 double dotprox=m_ori_all[j][k].x*m_ori_all[j-i][k].x;
+						 double dotproy=m_ori_all[j][k].y*m_ori_all[j-i][k].y;
+						 double dotproz=m_ori_all[j][k].z*m_ori_all[j-i][k].z;
+						 oacfx=dotprox+dotproy+dotproz;
+						 oacf1[i] += oacfx;
+                         oacf2[i] += (3*oacfx*oacfx - 1)/2;
+						 oacf3[i] += (5*oacfx*oacfx*oacfx - 3*oacfx)/2;
+						 oacf4[i] += (35*oacfx*oacfx*oacfx*oacfx - 30*oacfx*oacfx + 3)/8;
+						 count += 1;
+						}
+					}
+                }
+                oacf1[i] /= double(count);
+				oacf2[i] /= double(count);
+                oacf3[i] /= double(count);
+				oacf4[i] /= double(count);				
+				m_file << i*deltat << "  " << oacf1[i] << "  " << oacf2[i] << "  " << oacf3[i] << "  " << oacf4[i] << endl;
+			}
+            cout << "9. Good Luck! Outputting results of the orientational autocorrelation function (OACF) to 'oacf.log'." << endl;			
+			m_file.close();
+			m_type_all.clear();
+			m_ori_all.clear();
+			delta_t.clear();
+			oacf1.clear();
+			oacf2.clear();
+			oacf3.clear();
+			oacf4.clear();			
+		};
+		void setDt(double dt)
+		{
+		 m_dt=dt;
+		}		
+        virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size;
+		double deltat;
+		double m_dt;
+        std::ofstream m_file;
+		std::vector<unsigned int> delta_t;
+		std::vector< std::vector<unsigned int> > m_type_all;
+        std::vector<std::vector<vec> > m_ori_all;
+    } ;
+
+//---case 28
+class Q4Q6 : public Function
+	{
+    public:
+        Q4Q6(std::string filename): Function()
+        {
+            m_file.open(filename.c_str(), ios_base::out);
+            if(!m_file.good())
+            {
+             cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+             throw runtime_error("Error Q4Q6 dump");
+            }			
+            m_Nf=0;
+			maxbin=100;
+			q4_all=0.0;
+			q4max=-1.0;
+			q4min=1.0;
+			q6_all=0.0;
+			q6max=-1.0;
+			q6min=1.0;
+			m_rcut=1.647;
+			m_Voronoi=false;			
+        }
+        virtual ~Q4Q6()
+        {
+			double dq4=(q4max-q4min)/double(maxbin);
+			double dq6=(q6max-q6min)/double(maxbin);
+			std::vector<double> layer4(maxbin+1, 0.0);
+			std::vector<double> layer6(maxbin+1, 0.0);
+			for(unsigned int i=0; i<m_Nf; i++)
+			{	
+				for(unsigned int k=0; k<pos_size; k++)
+				{
+				 unsigned int mth;
+				 mth=int((q4_local_all[i][k]-q4min)/dq4); 
+				 layer4[mth] += 1.0;
+				 unsigned int lth;
+				 lth=int((q6_local_all[i][k]-q6min)/dq6); 
+				 layer6[lth] += 1.0;
+				}
+			}
+			for(unsigned int bin=0; bin<maxbin+1; bin++)
+			{
+				if(bin==0) 
+				 m_file << q4min+bin*dq4 << "  " << layer4[bin]/double(pos_size*m_Nf) << "  " << q6min+bin*dq6 << "  " << layer6[bin]/double(pos_size*m_Nf) << "  " << q4_all/m_Nf << "  " << q6_all/m_Nf << endl;
+				else 
+				 m_file << q4min+bin*dq4 << "  " << layer4[bin]/double(pos_size*m_Nf) << "  " << q6min+bin*dq6 << "  " << layer6[bin]/double(pos_size*m_Nf) << endl;
+			}
+           cout << "10. Good Luck! Outputting results of bond order parameters (Q4Q6) and outputting results to 'q4q6.log'." << endl;			
+			m_file.close();	
+			q4_local_all.clear();
+			q6_local_all.clear();
+     	}
+		void setVoronoi(bool Voronoi)
+		{
+		 m_Voronoi = Voronoi;
+		}
+		void setRcut(double rcut)
+		{
+		 m_rcut=rcut;
+		}		
+        virtual void compute();
+    private:
+        std::ofstream m_file;
+		bool m_Voronoi;
+        unsigned int m_Nf, pos_size, maxbin;
+		double m_rcut;
+		double q4_all, q4max, q4min, q6_all, q6max, q6min;
+		std::vector<std::vector<double> > q4_local_all;
+		std::vector<std::vector<double> > q6_local_all;
+	};
+
+//---case 29
+class VORONOI : public Function
+	{
+    public:
+        VORONOI(std::string filename): Function()
+        {
+            m_file.open(filename.c_str(), ios_base::out);
+            if(!m_file.good())
+            {
+             cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+             throw runtime_error("Error VORONOI dump");
+            }			
+            m_Nf=0;
+			m_rcut=1.647;
+			maxbin=100;
+			voronoimax=0.0;
+			voronoimin=9.0;
+			voronoi_all=0.0;
+        }
+        virtual ~VORONOI()
+        {			
+			double dv=(voronoimax-voronoimin)/double(maxbin);
+			std::vector<double> layer(maxbin+1, 0.0);
+			for(unsigned int i=0; i<m_Nf; i++)
+			{	
+				for(unsigned int k=0; k<pos_size; k++)
+				{
+				 unsigned int lth;
+				 lth=int((voronoi_local_all[i][k]-voronoimin)/dv); 
+				 layer[lth] += 1.0;
+				}
+			}
+			for(unsigned int bin=0; bin<maxbin+1; bin++)
+			{
+				if(bin==0)
+				 m_file << "  " << voronoimin+bin*dv << "  " << layer[bin]/double(pos_size*m_Nf) << "  " << voronoi_all/m_Nf << "  " << Lx*Ly*Lz<< endl;
+				else
+				 m_file << "  " << voronoimin+bin*dv << "  " << layer[bin]/double(pos_size*m_Nf) << endl;
+			}
+           cout << "11. Good Luck! Outputting results of the volume of the Voronoi cells (VORONOI) and outputting results to 'voronoi.log'." << endl;				
+			m_file.close();	
+			voronoi_local_all.clear();		
+     	}
+		void setRcut(double rcut)
+		{
+		 m_rcut=rcut;
+		}		
+        virtual void compute();
+    private:
+        std::ofstream m_file;
+		bool Voronoi;
+        unsigned int m_Nf, pos_size, maxbin;
+		double m_rcut;
+		double Lx, Ly, Lz, LxINV, LyINV, LzINV;
+		double voronoi_all, voronoimax, voronoimin;
+		std::vector<std::vector<double> > voronoi_local_all;
+	};
+
+//--- case 30
+class nonGauPar: public Function
+    {
+    public:
+        nonGauPar(std::string filename): Function()
+		{
+            m_file.open(filename.c_str(), ios_base::out);
+            if (!m_file.good())
+			{
+             cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+             throw runtime_error("Error nonGauPar dump");
+			}
+            m_Nf=0;
+			m_dt=0.005;
+		}
+        virtual ~nonGauPar()
+		{
+			std::ofstream msd_file;
+			msd_file.open("msd.log", ios_base::app);
+			if (!msd_file.good())
+			{
+			 cerr << endl << "***Error! Error opening dump file." << endl << endl;
+			 throw runtime_error("Error rave dump");
+			}
+			std::vector<double> msd, msd2; msd.resize(m_Nf); msd2.resize(m_Nf);
+			std::vector<double> alpha2t; alpha2t.resize(m_Nf);
+			if(m_Nf<=1000)
+			{
+			 n_ensemble=0.1*m_Nf;	
+			}				
+            else
+			{
+			 n_ensemble=1000;	
+			}			
+			pos_size=m_pos_all[0].size();
+			deltat=(delta_t[1]-delta_t[0])*m_dt;									
+            for(unsigned int i=1; i<m_Nf-n_ensemble; i++)
+			{
+				unsigned int count=0;
+				double r2modul=0.0;
+                for(unsigned int j=i; j<i+n_ensemble; j++)
+				{
+                    for(unsigned int k=0; k<pos_size; k++)
+					{
+//						if(m_type_all[j-i][k]==0)
+						{
+						 double dx=m_pos_all[j][k].x-m_pos_all[j-i][k].x;
+						 double dy=m_pos_all[j][k].y-m_pos_all[j-i][k].y;
+						 double dz=m_pos_all[j][k].z-m_pos_all[j-i][k].z;
+						 r2modul=dx*dx+dy*dy+dz*dz;
+						 msd[i] += r2modul;
+						 msd2[i]+= r2modul*r2modul;	
+						 count += 1;
+						}
+					}
+				}
+                msd[i] /= double(count); 
+				msd2[i] /= double(count);
+				alpha2t[i]=0.6*msd2[i]/(msd[i]*msd[i])-1;
+                m_file << i*deltat << "  " << alpha2t[i] << endl;
+			}
+			cout << "12. Good Luck! Outputting results of the non-Gaussian parameter (NGP) to 'nongaupar.log'." << endl;
+            m_file.close();
+			msd_file.close();
+			m_type_all.clear();
+			m_pos_all.clear();
+			delta_t.clear();
+			msd.clear();
+			msd2.clear();
+			alpha2t.clear();
+		}
+		void setDt(double dt)
+		{
+		 m_dt=dt;
+		}		
+        virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size;
+		double deltat;
+		double m_dt;
+        std::ofstream m_file;
+		std::vector<unsigned int> delta_t;
+		std::vector< std::vector<unsigned int> > m_type_all;
+        std::vector<std::vector<vec> > m_pos_all;
+    };
+
+//--- case 31
+class RnonGauPar: public Function
+    {
+    public:
+        RnonGauPar(std::string filename): Function()
+		{
+            m_file.open(filename.c_str(), ios_base::out);
+            if (!m_file.good())
+			{
+             cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+             throw runtime_error("Error RnonGauPar dump");
+			}
+            m_Nf=0;
+			m_dt=0.005;
+		}
+        virtual ~RnonGauPar()
+		{
+			std:: ofstream msad_file;
+			msad_file.open("msad.log", ios_base::app);
+			if (!msad_file.good())
+			{
+			 cerr << endl << "***Error! Error opening dump file." << endl << endl;
+			 throw runtime_error("Error rave dump");
+			}
+			std::vector<double> msad, msad2; msad.resize(m_Nf); msad2.resize(m_Nf);
+			std::vector<double> Ralpha2t; Ralpha2t.resize(m_Nf);				
+			if(m_Nf<=1000)
+			{
+			 n_ensemble=0.1*m_Nf;	
+			}				
+            else
+			{
+			 n_ensemble=1000;	
+			}			
+            pos_size=m_Rotangle_all[0].size();
+			deltat=(delta_t[1]-delta_t[0])*m_dt;								
+            for(unsigned int i=1; i<m_Nf-n_ensemble; i++)
+			{
+				unsigned int count=0;
+				double theta2modul=0.0;
+				msad2[i]=0.0;
+                for(unsigned int j=i; j<i+n_ensemble; j++)
+				{
+                    for(unsigned int k=0; k<pos_size; k++)
+					{
+//						if(m_type_all[j-i][k]==0)
+						{									
+						 double dxtheta_t=m_Rotangle_all[j][k].x-m_Rotangle_all[j-i][k].x;
+						 double dytheta_t=m_Rotangle_all[j][k].y-m_Rotangle_all[j-i][k].y;
+						 double dztheta_t=m_Rotangle_all[j][k].z-m_Rotangle_all[j-i][k].z;
+						 theta2modul=dxtheta_t*dxtheta_t + dytheta_t*dytheta_t + dztheta_t*dztheta_t;
+						 msad[i] += theta2modul;
+						 msad2[i] += theta2modul*theta2modul;
+						 count += 1;
+						}
+					}
+				}
+                msad[i] /= double(count);
+				msad2[i] /= double(count);
+				Ralpha2t[i]=0.60*msad2[i]/(msad[i]*msad[i])-1;
+                m_file << i*deltat << "  "<< Ralpha2t[i] << endl;
+			}
+			cout << "13. Good Luck! Outputting results of the rotational non-Gaussian parameter RNGP to 'rnongaupar.log'." << endl;
+            m_file.close();
+			m_type_all.clear();
+			msad_file.close();
+			m_Rotangle_all.clear();
+			delta_t.clear();
+			msad.clear();
+			msad2.clear();
+			Ralpha2t.clear();
+		}
+		void setDt(double dt)
+		{
+		 m_dt=dt;
+		}		
+        virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size;
+		double deltat;
+		double m_dt;
+        std::ofstream m_file;
+		std::vector<unsigned int> delta_t;
+		std::vector< std::vector<unsigned int> > m_type_all;
+        std::vector<std::vector<vec> > m_Rotangle_all;
+    };	
+	
+//--- case 32
+class SVH : public Function
+    {
+    public:	
+       	SVH(std::string filename): Function()
+		{
+            m_file.open(filename.c_str(), ios_base::out);
+            if(!m_file.good())
+			{
+             cerr << endl << "***Error! Error opening dump file" << filename << endl << endl;
+             throw runtime_error("Error SVH dump");
+			}			
+            m_Nf=0;
+			m_dt=0.005;
+		}
+        virtual ~SVH()
+		{
+			std::vector< std::vector<double> > rt;
+			pos_size=m_pos_all[0].size();
+			deltat=(delta_t[1]-delta_t[0])*m_dt;
+			if(m_Nf<=1000)
+			{
+			 n_ensemble=0.1*m_Nf;	
+			}				
+            else
+			{
+			 n_ensemble=1000;	
+			}	
+			unsigned int num_t=0;			
+			std::vector<unsigned int> delta_time;
+			for(unsigned int i=0; i!=10; i++)
+			{
+				for(unsigned int j=1; j!=10; j++)
+				{
+					unsigned int deltatime=j*pow(10,i);
+					if((n_ensemble+deltatime)<m_Nf)
+					{
+					 delta_time.push_back(deltatime);
+					 num_t += 1;
+					}					
+				}			
+			}
+			double maxdelr=0.0, mindelr=100.0;
+			std::vector<unsigned int> count; count.resize(num_t);
+			std::vector<double> m; m.resize(num_t);	
+            for(unsigned int i=0; i!=num_t; i++)
+			{
+                unsigned int delt=delta_time[i];
+				if((n_ensemble+delt)<m_Nf)
+				{
+					double r2temp=0.0;
+					count[i]=0, m[i]=0.0;
+					std::vector<double> r; r.resize(n_ensemble*pos_size);
+					for(unsigned int j=0; j!=n_ensemble; j++)
+					{
+						for(unsigned int k=0; k!=pos_size; k++)
+						{
+//							if(m_type_all[i][k]==0)
+							{
+								double dx=m_pos_all[j+delt][k].x-m_pos_all[j][k].x; 
+								double dy=m_pos_all[j+delt][k].y-m_pos_all[j][k].y;
+								double dz=m_pos_all[j+delt][k].z-m_pos_all[j][k].z;
+								double delr=sqrt(dx*dx + dy*dy + dz*dz);
+								r[count[i]]=delr;
+								r2temp += dx*dx + dy*dy + dz*dz;
+								if(delr>=maxdelr)
+								{
+								 maxdelr=delr;	
+								}					
+								if(delr<=mindelr)
+								{
+								 mindelr=delr;	
+								}						
+								count[i] += 1;																
+							}					
+						}
+					}
+					rt.push_back(r);
+					r.clear();
+					m[i]=1.5*count[i]/r2temp;										
+				} 
+				else
+				{	
+				 cerr << endl << "***Error! Error delta_time" << endl;
+				 throw runtime_error("Error delta_time dump");				 
+				}				
+			}
+			double delr=0.01;	
+			cout << delr << " " << (maxdelr-mindelr)/1000.0 << maxdelr << " " << mindelr << endl;	
+			
+			std::vector< std::vector<double> > nlayer;
+            for(unsigned int i=0; i!=num_t; i++)
+			{	
+				std::vector<double> layer(n_ensemble*pos_size, 0.0);
+                for(unsigned int j=0; j!=count[i]; j++)
+				{   
+				 unsigned int lth=int(rt[i][j]/delr); 
+				 layer[lth] += 1.0;
+				}				
+				nlayer.push_back(layer);
+				layer.clear();	
+                for(unsigned int j=0; j!=count[i]; j++)
+				{
+				 nlayer[i][j] /= double(count[i]);					
+                }				
+			}
+			
+			m_file << "r";
+			for(unsigned int i=0; i!=num_t; i++)
+			{	
+			 m_file << "  t=" << deltat*delta_time[i];
+			}
+			m_file << endl;	
+            for(unsigned int j=1; j!=n_ensemble*pos_size; j++)
+			{				
+				double r1=delr*j;			
+				if(r1<=100.0)
+				{						
+					m_file << r1;
+					for(unsigned int i=0; i!=num_t; i++)
+					{	
+					 m_file << "  " << nlayer[i][j]/delr;
+					}
+					m_file << endl;				
+				}
+			}										
+			cout << "14. Good Luck! Outputting results of the self van Hove fucntion (VHF) to 'selfvhf.log'." << endl;			
+			m_file.close();	
+			m_pos_all.clear();
+		}
+		void setDt(double dt)
+		{
+		 m_dt=dt;
+		}			
+		virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size;
+		double deltat;
+		double m_dt;
+        std::ofstream m_file;
+		std::vector<unsigned int> delta_t;				
+        std::vector<std::vector<vec> > m_pos_all;
+		std::vector<std::vector<unsigned int> > m_type_all;
+    };
+	
+//--- case 33
+class RSVH : public Function
+    {
+    public:	
+       	RSVH(std::string filename): Function()
+		{
+            m_file.open(filename.c_str(), ios_base::out);
+            if(!m_file.good())
+			{
+             cerr << endl << "***Error! Error opening dump file" << filename << endl << endl;
+             throw runtime_error("Error RSVH dump");
+			}			
+            m_Nf=0;
+			m_dt=0.005;
+		}
+        virtual ~RSVH()
+		{
+			std::vector< std::vector<double> > thetat;
+			pos_size=m_ori_all[0].size();
+			deltat=(delta_t[1]-delta_t[0])*m_dt;
+			if(m_Nf<=1000)
+			{
+			 n_ensemble=0.1*m_Nf;	
+			}				
+            else
+			{
+			 n_ensemble=1000;	
+			}			
+			unsigned int num_t=0;			
+			std::vector<unsigned int> delta_time;
+			for(unsigned int i=0; i!=10; i++)
+			{
+				for(unsigned int j=1; j!=10; j++)
+				{
+					unsigned int deltatime=j*pow(10,i);
+					if((n_ensemble+deltatime)<m_Nf)
+					{
+					 delta_time.push_back(deltatime);
+					 num_t += 1;
+					}					
+				}			
+			}
+			double maxdeltheta=0.0, mindeltheta=100.0;
+			std::vector<unsigned int> count; count.resize(num_t);
+			std::vector<double> m; m.resize(num_t);									
+            for(unsigned int i=0; i!=num_t; i++)
+			{
+                unsigned int delt=delta_time[i];
+				if((n_ensemble+delt)<m_Nf)
+				{
+					double r2temp=0.0;
+					count[i]=0, m[i]=0.0;
+					std::vector<double> theta; theta.resize(n_ensemble*pos_size);
+					for(unsigned int j=0; j!=n_ensemble; j++)
+					{
+						for(unsigned int k=0; k!=pos_size; k++)
+						{
+//							if(m_type_all[i][k]==0)
+							{
+								double dotprox=m_ori_all[j+delt][k].x*m_ori_all[j][k].x; 
+								double dotproy=m_ori_all[j+delt][k].y*m_ori_all[j][k].y;
+								double dotproz=m_ori_all[j+delt][k].z*m_ori_all[j][k].z;
+								double dotpro=dotprox+dotproy+dotproz;
+								double deltheta;
+								if(fabs(dotpro)<1.0)
+								{
+								 deltheta=acos(dotpro);	
+								}							
+								else if(dotpro>=1.0)
+								{
+								 deltheta=0.0;	
+								}						
+								else
+								{
+								 deltheta=3.1415926;	
+								}							 						 
+								theta[count[i]]=deltheta;
+								double dxtheta_t=m_Rotangle_all[j+delt][k].x-m_Rotangle_all[j][k].x;
+								double dytheta_t=m_Rotangle_all[j+delt][k].y-m_Rotangle_all[j][k].y;
+								double dztheta_t=m_Rotangle_all[j+delt][k].z-m_Rotangle_all[j][k].z;
+								r2temp += dxtheta_t*dxtheta_t + dytheta_t*dytheta_t + dztheta_t*dztheta_t;					
+								if(deltheta>=maxdeltheta)
+								{
+								 maxdeltheta=deltheta;	
+								}					
+								if(deltheta<=mindeltheta)
+								{
+								 mindeltheta=deltheta;	
+								}						
+								count[i] += 1;																
+							}																				
+						}
+					}
+					thetat.push_back(theta);
+					theta.clear();
+					m[i]=1.5*count[i]/r2temp;										
+				} 
+				else
+				{	
+				 cerr << endl << "***Error! Error delta_time" << endl;
+				 throw runtime_error("Error delta_time dump");				 
+				}				
+			}
+			double dtheta=0.005;
+			cout << dtheta << " " << (maxdeltheta-mindeltheta)/1000.0 << "  " << maxdeltheta << " " << mindeltheta << endl;	
+
+			std::vector< std::vector<double> > nlayer;
+            for(unsigned int i=0; i!=num_t; i++)
+			{	
+				std::vector<double> layer(n_ensemble*pos_size, 0.0);
+                for(unsigned int j=0; j!=count[i]; j++)
+				{   
+				 unsigned int lth=int(thetat[i][j]/dtheta); 
+				 layer[lth] += 1.0;
+				}				
+				nlayer.push_back(layer);
+				layer.clear();			
+                for(unsigned int j=0; j!=count[i]; j++)
+				{
+				 nlayer[i][j] /= double(count[i]);					
+                }				
+			}
+			m_file << "theta";
+			for(unsigned int i=0; i!=num_t; i++)
+			{	
+			 m_file << "  t=" << m_dt*delta_time[i];
+			}
+			m_file << endl;				
+            for(unsigned int j=1; j!=n_ensemble*pos_size; j++)
+			{
+				double theta1=dtheta*j;				
+				if(theta1<=3.1415926)
+				{						
+					m_file << theta1;
+					for(unsigned int i=0; i!=num_t; i++)
+					{	
+					 m_file << "  " << nlayer[i][j]/dtheta;
+					}
+					m_file << endl;				
+				}
+			}										
+			cout << "15. Good Luck! Outputting results of the rotational self van Hove fucntion to 'rselfvhf.log'." << endl;			
+			m_file.close();	
+			m_ori_all.clear();
+			m_Rotangle_all.clear();
+			nlayer.clear();
+		}
+		void setDt(double dt)
+		{
+		 m_dt=dt;
+		}			
+		virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size;
+		double deltat;
+		double m_dt;
+        std::ofstream m_file;
+		std::vector<unsigned int> delta_t;
+        std::vector<std::vector<vec> > m_ori_all;
+		std::vector<std::vector<vec> > m_Rotangle_all;
+		std::vector<std::vector<unsigned int> > m_type_all;
+    };	
+	
+//-- case 34
+class fpSus : public Function
+    {
+    public:
+       	fpSus(std::string filename): Function()
+        {
+            m_file.open(filename.c_str(), ios_base::out);
+            if (!m_file.good())
+			{
+            cerr<<endl<<"***Error! Error opening dump file."<<filename<<endl<<endl;
+            throw runtime_error("Error fpSus dump");
+			}
+            m_Nf=0;
+			m_q=6.02;
+			m_dt=0.005;
+		}
+        virtual ~fpSus()
+		{
+		    std::vector<double> isf; isf.resize(m_Nf);
+			std::vector<double> SQISF; SQISF.resize(m_Nf);
+			std::vector<double> chi4t; chi4t.resize(m_Nf);
+			if(m_Nf<=1000)
+			{
+			 n_ensemble=0.1*m_Nf;	
+			}				
+            else
+			{
+			 n_ensemble=1000;	
+			}
+			pos_size=m_pos_all[0].size();
+			deltat=(delta_t[1]-delta_t[0])*m_dt;
+            double c=2.0*3.1415926/Lx, cq=m_q/c;
+            int Qnum=int(cq*cq+0.5);
+            for(unsigned int i=0; i<=Qnum; i++)
+            {
+                if(qvec.size()>24) break;
+                for(unsigned int j=0; j<=Qnum; j++)
+                {
+                    if(qvec.size()>24) break;
+                    for(unsigned int k=0; k<=Qnum; k++)
+                    {
+                        unsigned int mm=i*i+j*j+k*k;
+                        if(mm==Qnum)
+                        {
+                         double ic=i*c, jc=j*c, kc=k*c;
+                         qvec.push_back(vec(ic,jc,kc));
+						 qvec.push_back(vec(ic,-jc,kc));
+						 qvec.push_back(vec(ic,jc,-kc));
+						 qvec.push_back(vec(ic,-jc,-kc));							
+                        }
+                        Qcount=qvec.size();
+                        if(qvec.size()>24) break;
+                    }
+                }
+            }
+			
+			for(unsigned int i=1; i<m_Nf-n_ensemble; i++) 
+			{	
+				unsigned int count=0;
+				isf[i]=0.0;
+				SQISF[i]=0.0;
+				if(Qcount<1) 
+				{
+				 cout<<"***Wrong! q number is 0."<<endl; break;
+				}
+				for(unsigned int j=i; j<i+n_ensemble; j++)
+				{    	 
+					
+					for(unsigned int l=0; l<Qcount; l++)
+					{
+						double cos_qdr_all=0.0;
+						for(unsigned int k=0; k<pos_size; k++)
+						{
+						 double dx=m_pos_all[j][k].x-m_pos_all[j-i][k].x;
+						 double dy=m_pos_all[j][k].y-m_pos_all[j-i][k].y;
+						 double dz=m_pos_all[j][k].z-m_pos_all[j-i][k].z;
+						 double theta=qvec[l].x*dx+qvec[l].y*dy+qvec[l].z*dz;	
+						 cos_qdr_all += cosf(float(theta));     
+						}
+						cos_qdr_all /= double(pos_size);
+						isf[i] += cos_qdr_all;
+						SQISF[i] += cos_qdr_all*cos_qdr_all;	
+						count += 1;					
+					}
+				}
+				isf[i] /= double(count);			
+				SQISF[i] /= double(count);
+				chi4t[i]=pos_size*(SQISF[i]-isf[i]*isf[i]);
+				m_file << deltat*i << "  " << chi4t[i] << "  "<< isf[i] <<endl;				
+			}								
+			cout<<"16. Good Luck! Outputting results of the four-point susceptibility to 'fpsus.log'."<<endl;
+			m_file.close();
+			m_pos_all.clear();
+			isf.clear();
+			SQISF.clear();
+			chi4t.clear();			
+		};
+		void setDt(double dt)
+		{
+		 m_dt=dt;
+		}
+		void setQ(double q)
+		{
+		 m_q=q;
+		}		
+        virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size, Qcount;
+		double deltat, Lx, Ly, Lz;
+		double m_q;
+		double m_dt;
+		std::ofstream m_file;
+		std::vector<unsigned int> delta_t;
+		std::vector<vec> qvec;
+        std::vector<std::vector<vec> > m_pos_all;
+		std::vector<std::vector<unsigned int> > m_type_all;
+    };	
+	
+//-- case 35
+class RfpSus : public Function
+    {
+    public:
+       	RfpSus(std::string filename): Function()
+        {
+            m_file.open(filename.c_str(), ios_base::out);
+            if (!m_file.good())
+			{
+            cerr<<endl<<"***Error! Error opening dump file."<<filename<<endl<<endl;
+            throw runtime_error("Error RfpSus dump");
+			}
+            m_Nf=0;
+			m_dt=0.005;
+		}
+        virtual ~RfpSus()
+		{
+            std::vector<double> oacf1; oacf1.reserve(m_Nf);
+			std::vector<double> oacf2; oacf2.reserve(m_Nf);
+            std::vector<double> sqoacf1; sqoacf1.reserve(m_Nf);
+			std::vector<double> sqoacf2; sqoacf2.reserve(m_Nf);
+			std::vector<double> chi4t_1; chi4t_1.resize(m_Nf);
+			std::vector<double> chi4t_2; chi4t_2.resize(m_Nf);
+			if(m_Nf<=1000)
+			{
+			 n_ensemble=0.1*m_Nf;	
+			}				
+            else
+			{
+			 n_ensemble=1000;	
+			}
+			pos_size=m_ori_all[0].size();
+			deltat=(delta_t[1]-delta_t[0])*m_dt;
+			
+            for(unsigned int i=1; i<m_Nf-n_ensemble; i++)                                                                                
+            {
+				oacf1[i]=0.0;
+				oacf2[i]=0.0;
+				sqoacf1[i]=0.0;
+				sqoacf2[i]=0.0;				
+				unsigned int count=0;
+                for(unsigned int j=i; j<i+n_ensemble; j++)                                                
+				{
+					double ori_ijt1_all=0.0;
+					double ori_ijt2_all=0.0;
+                    for(unsigned int k=0; k<pos_size; k++)
+					{
+					 double dotprox=m_ori_all[j][k].x*m_ori_all[j-i][k].x;
+					 double dotproy=m_ori_all[j][k].y*m_ori_all[j-i][k].y;
+					 double dotproz=m_ori_all[j][k].z*m_ori_all[j-i][k].z;
+					 double oacfx=dotprox+dotproy+dotproz;
+					 ori_ijt1_all +=  oacfx;
+					 ori_ijt2_all +=  (3*oacfx*oacfx - 1)/2;
+					}
+					ori_ijt1_all /= double(pos_size);
+					ori_ijt2_all /= double(pos_size);
+					oacf1[i] += ori_ijt1_all;
+					sqoacf1[i] += ori_ijt1_all*ori_ijt1_all;
+					oacf2[i] += ori_ijt2_all;
+					sqoacf2[i] += ori_ijt2_all*ori_ijt2_all;					
+					count += 1;					
+                }
+                oacf1[i] /= double(count);
+				oacf2[i] /= double(count);				
+                sqoacf1[i] /= double(count);
+				sqoacf2[i] /= double(count);
+				chi4t_1[i]=pos_size*(sqoacf1[i]-oacf1[i]*oacf1[i]);
+				chi4t_2[i]=pos_size*(sqoacf2[i]-oacf2[i]*oacf2[i]);
+				m_file << deltat*i << "  " << chi4t_1[i] << "  " << chi4t_2[i] << "  "<< oacf1[i] << "  "<< oacf2[i] <<endl;						
+			}
+			cout<<"17. Good Luck! Outputting results of the rotaional four-point susceptibility to 'rfpsus.log'."<<endl;
+			m_file.close();
+			m_ori_all.clear();
+			oacf1.clear();
+			oacf2.clear();
+			sqoacf1.clear();
+			sqoacf1.clear();
+			chi4t_1.clear();
+			chi4t_2.clear();
+		};
+		void setDt(double dt)
+		{
+		 m_dt=dt;
+		}		
+        virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size;
+		double deltat;
+		double m_dt;
+        std::ofstream m_file;
+		std::vector<unsigned int> delta_t;
+		std::vector< std::vector<unsigned int> > m_type_all;
+        std::vector<std::vector<vec> > m_ori_all;
+    };
+	
+//--- case 36
+class OVLAF : public Function
+    {
+    public:
+        OVLAF(std::string filename): Function()
+        {
+            m_file.open(filename.c_str(), ios_base::out);
+            if(!m_file.good())
+            {
+             cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+             throw runtime_error("Error OVLAF dump");
+            }
+            m_Nf=0;
+			m_dt=0.005;
+			m_a=0.30;
+        }
+        virtual ~OVLAF()
+		{										
+            std::vector<double> ovlaf; ovlaf.reserve(m_Nf);
+			if(m_Nf<=1000)
+			{
+			 n_ensemble=0.1*m_Nf;	
+			}				
+            else
+			{
+			 n_ensemble=1000;	
+			}			
+			pos_size=m_pos_all[0].size();
+			deltat=(delta_t[1]-delta_t[0])*m_dt;			
+			for(unsigned int i=1; i<m_Nf-n_ensemble; i++) 
+			{	
+				unsigned int count=0;
+				ovlaf[i]=0.0;				
+				for(unsigned int j=i; j<i+n_ensemble; j++)
+				{
+					for(unsigned int k=0; k<pos_size; k++)
+					{
+//						if(m_type_all[i][k]==0)
+						{				
+							double dx=m_pos_all[j][k].x-m_pos_all[j-i][k].x;
+							double dy=m_pos_all[j][k].y-m_pos_all[j-i][k].y;
+							double dz=m_pos_all[j][k].z-m_pos_all[j-i][k].z;
+							double r2modul=dx*dx+dy*dy+dz*dz;
+							if(r2modul<=m_a*m_a)
+							{
+							 ovlaf[i] += 1.0;	 
+							}
+							else
+							{
+							 ovlaf[i] += 0.0;
+							}
+                            count += 1;												
+						}						
+					}
+				}
+				ovlaf[i] /= double(count);
+				m_file << i*deltat << " " << ovlaf[i] << endl;
+			}
+			cout << "18. Good Luck! Outputting results of the self-part overlap function (OVLAF) to 'ovlaf.log'." << endl;
+			m_file.close();	
+			m_type_all.clear();
+	    	m_pos_all.clear();
+			delta_t.clear();
+			ovlaf.clear();
+        }; 
+		void setDt(double dt)
+		{
+		 m_dt=dt;
+		}
+		void setA(double a)
+		{
+		 m_a=a;
+		}		
+        virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size;
+		double deltat, Lx, Ly, Lz;
+		double m_dt;
+		double m_a;
+        std::ofstream m_file;
+		std::vector<unsigned int> delta_t;
+		std::vector< std::vector<unsigned int> > m_type_all;
+        std::vector<std::vector<vec> > m_pos_all;
+    };
+
+//--- case 37
+class CISF : public Function
+    {
+    public:
+        CISF(std::string filename): Function()
+        {
+            m_file.open(filename.c_str(), ios_base::out);
+            if(!m_file.good())
+            {
+             cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+             throw runtime_error("Error CISF dump");
+            }
+            m_Nf=0;
+			m_dt=0.005;
+			m_q=6.02;
+        }
+        virtual ~CISF()
+		{						
+            double c=2.0*3.1415926/Lx, cq=m_q/c;
+            int Qnum=int(cq*cq+0.5);
+            for(unsigned int i=0; i<=Qnum; i++)
+            {
+                if(qvec.size()>48) break;
+                for(unsigned int j=0; j<=Qnum; j++)
+                {
+                    if(qvec.size()>48) break;
+                    for(unsigned int k=0; k<=Qnum; k++)
+                    {
+                        unsigned int mm=i*i+j*j+k*k;
+                        if(mm==Qnum)
+                        {
+                         double ic=i*c, jc=j*c, kc=k*c;
+                         qvec.push_back(vec(ic,jc,kc));
+						 qvec.push_back(vec(ic,-jc,kc));
+						 qvec.push_back(vec(ic,jc,-kc));
+						 qvec.push_back(vec(ic,-jc,-kc));							
+                        }
+                        Qcount=qvec.size();
+                        if(qvec.size()>48) break;
+                    }
+                }
+            }				
+            std::vector<double> cisf; cisf.reserve(m_Nf);
+			std::vector<double> cssf; cssf.reserve(m_Nf);
+			if(m_Nf<=1000)
+			{
+			 n_ensemble=0.1*m_Nf;			 
+			}				
+            else
+			{
+			 n_ensemble=1000;	
+			}			
+			pos_size=m_pos_all[0].size();
+			deltat=(delta_t[1]-delta_t[0])*m_dt;
+			std::vector<unsigned int> pow_time; pow_time.push_back(1);
+			for(unsigned int i=0; i<1000; i++)
+			{
+				unsigned int pow_num = pow(10, i*0.01)+0.50;
+				unsigned int num_t=pow_time.size();
+				if(pow_num<m_Nf-n_ensemble && pow_time[num_t-1]!=pow_num)
+				{
+				 pow_time.push_back(pow_num);					
+				}				
+			}													
+			for(unsigned int ii=0; ii<pow_time.size(); ii++) 
+			{
+				unsigned int i=pow_time[ii];
+				unsigned int count=0;
+				cisf[i]=0.0;
+				cssf[i]=0.0;
+				if(Qcount<1) 
+				{
+				 cout << "***Wrong! q number is 0." << endl; break;
+				}
+				for(unsigned int j=i; j<i+n_ensemble; j++)
+				{
+					for(unsigned int l=0; l<Qcount; l++)
+					{						
+						double cos_qrt_all=0.0;
+						double cos_qr0_all=0.0;
+						double sin_qrt_all=0.0;
+						double sin_qr0_all=0.0;						
+						for(unsigned int k=0; k<pos_size; k++)
+						{												
+//							if(m_type_all[i][k]==0)
+							{												
+							 cos_qrt_all += cosf(qvec[l].x*(m_pos_all[j][k].x)+qvec[l].y*(m_pos_all[j][k].y)+qvec[l].z*(m_pos_all[j][k].z));
+							 cos_qr0_all += cosf(qvec[l].x*(m_pos_all[j-i][k].x)+qvec[l].y*(m_pos_all[j-i][k].y)+qvec[l].z*(m_pos_all[j-i][k].z));
+							 sin_qrt_all += sinf(qvec[l].x*(m_pos_all[j][k].x)+qvec[l].y*(m_pos_all[j][k].y)+qvec[l].z*(m_pos_all[j][k].z));
+							 sin_qr0_all += sinf(qvec[l].x*(m_pos_all[j-i][k].x)+qvec[l].y*(m_pos_all[j-i][k].y)+qvec[l].z*(m_pos_all[j-i][k].z));							 
+							}						
+						}
+						cisf[i] += cos_qrt_all*cos_qr0_all + sin_qrt_all*sin_qr0_all;						
+						cssf[i] += cos_qr0_all*cos_qr0_all + sin_qr0_all*sin_qr0_all;
+						count += 1;
+					}
+				}
+				cisf[i] /= double(count);
+				cssf[i] /= double(count);
+				m_file << i*deltat << " " << cisf[i]/cssf[i] << endl;
+			}
+					
+			cout << "19. Good Luck! Outputting results of the coherent intermediate scattering function (CISF) to 'cisf.log'." << endl;
+			m_file.close();	
+			m_type_all.clear();
+	    	m_pos_all.clear();
+			qvec.clear();
+			delta_t.clear();
+			cisf.clear();			
+        }; 
+		void setDt(double dt)
+		{
+		 m_dt=dt;
+		}
+		void setQ(double q)
+		{
+		 m_q=q;
+		}		
+        virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size, Qcount;
+		double deltat, m_q, Lx, Ly, Lz;
+		double m_dt;		
+        std::ofstream m_file;
+		std::vector<vec> qvec;
+		std::vector<unsigned int> delta_t;
+		std::vector<std::vector<unsigned int> > m_type_all;
+        std::vector<std::vector<vec> > m_pos_all;
+    };
+
+//--- case 38
+class CAGEISF : public Function
+    {
+    public:
+        CAGEISF(std::string filename): Function()
+        {
+            m_file.open(filename.c_str(), ios_base::out);
+            if(!m_file.good())
+            {
+             cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+             throw runtime_error("Error CAGEIS dump");
+            }
+            m_Nf=0;
+			m_dt=0.005;			
+			m_q=6.02;
+			m_rcut=1.65;
+			m_Voronoi=false;
+			
+        }
+        virtual ~CAGEISF()
+		{						
+            double c=2.0*3.1415926/Lx, cq=m_q/c;
+            int Qnum=int(cq*cq+0.5);
+            for(unsigned int i=0; i<=Qnum; i++)
+            {
+                if(qvec.size()>24) break;
+                for(unsigned int j=0; j<=Qnum; j++)
+                {
+                    if(qvec.size()>24) break;
+                    for(unsigned int k=0; k<=Qnum; k++)
+                    {
+                        unsigned int mm=i*i+j*j+k*k;
+                        if(mm==Qnum)
+                        {
+                         double ic=i*c, jc=j*c, kc=k*c;
+                         qvec.push_back(vec(ic,jc,kc));
+						 qvec.push_back(vec(ic,-jc,kc));
+						 qvec.push_back(vec(ic,jc,-kc));
+						 qvec.push_back(vec(ic,-jc,-kc));							
+                        }
+                        Qcount=qvec.size();
+                        if(qvec.size()>24) break;
+                    }
+                }
+            }				
+            std::vector<double> cageisf; cageisf.reserve(m_Nf);
+			if(m_Nf<=1000)
+			{
+			 n_ensemble=0.1*m_Nf;	
+			}				
+            else
+			{
+			 n_ensemble=1000;	
+			}			
+			pos_size=m_pos_all[0].size();
+			deltat=(delta_t[1]-delta_t[0])*m_dt;	
+			for(unsigned int i=1; i<m_Nf-n_ensemble; i++) 
+			{	
+				unsigned int count=0;
+				cageisf[i]=0.0;				
+				if(Qcount<1) 
+				{
+				cout<<"***Wrong! q number is 0."<<endl; break;
+				}
+				for(unsigned int j=i; j<i+n_ensemble; j++)
+				{
+					for(unsigned int k=0; k<pos_size; k++)
+					{
+//						if(m_type_all[i][k]==0)
+						{
+							double nbdx=0.0, nbdy=0.0, nbdz=0.0;
+							for(unsigned int n=0; n<m_num_all[j-i][k]; n++)
+							{
+							 unsigned int nb=m_nb_all[j-i][k][n];
+							 nbdx += m_pos_all[j][nb].x - m_pos_all[j-i][nb].x;
+							 nbdy += m_pos_all[j][nb].y - m_pos_all[j-i][nb].y;
+							 nbdz += m_pos_all[j][nb].z - m_pos_all[j-i][nb].z;
+							}			
+							double dx=m_pos_all[j][k].x-m_pos_all[j-i][k].x-nbdx/m_num_all[j-i][k];
+							double dy=m_pos_all[j][k].y-m_pos_all[j-i][k].y-nbdy/m_num_all[j-i][k];
+							double dz=m_pos_all[j][k].z-m_pos_all[j-i][k].z-nbdz/m_num_all[j-i][k];								
+							for(unsigned int l=0; l<Qcount; l++)
+							{
+							 double theta=qvec[l].x*dx+qvec[l].y*dy+qvec[l].z*dz;
+							 cageisf[i] += cosf(float(theta));
+                             count += 1;							
+							}						
+						}						
+					}
+				}
+				cageisf[i] /= double(count);
+				m_file << i*deltat << " " << cageisf[i] << endl;
+			}
+			cout << "21. Good Luck! Outputting results of the cage-relative self-part intermediate scattering function (CAGEISF) to 'cageisf.log'." << endl;
+			m_file.close();	
+			m_type_all.clear();
+	    	m_pos_all.clear();
+			qvec.clear();
+			delta_t.clear();
+			cageisf.clear();
+        };
+		void setDt(double dt)
+		{
+		 m_dt=dt;
+		}
+		void setQ(double q)
+		{
+		 m_q=q;
+		}
+		void setVoronoi(bool Voronoi)
+		{
+		 m_Voronoi = Voronoi;
+		}
+		void setRcut(double rcut)
+		{
+		 m_rcut=rcut;
+		}		
+        virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size, Qcount;
+		double deltat, m_rcut, m_q, Lx, Ly, Lz, LxINV, LyINV, LzINV;
+		double m_dt;
+		bool m_Voronoi;
+        std::ofstream m_file;
+		std::vector<vec> qvec;
+		std::vector<unsigned int> delta_t;
+		std::vector< std::vector<unsigned int> > m_type_all;
+		std::vector< std::vector<unsigned int> > m_num_all;
+		std::vector< std::vector<std::vector<unsigned int> > > m_nb_all;	
+        std::vector<std::vector<vec> > m_pos_all;
+    };
+
+//--- case 39
+class CAGEMSD : public Function
+    {
+    public:
+        CAGEMSD(std::string filename): Function()
+        {
+            m_file.open(filename.c_str(), ios_base::out);
+            if(!m_file.good())
+            {
+             cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+             throw runtime_error("Error CAGEMSD dump");
+            }
+            m_Nf=0;
+			m_dt=0.005;
+			m_rcut=1.65;
+			m_Voronoi=false;
+			
+        }
+        virtual ~CAGEMSD()
+		{						
+            std::vector<double> cagemsd; cagemsd.reserve(m_Nf);
+			if(m_Nf<=1000) 				
+			{
+			 n_ensemble=0.1*m_Nf;
+            }					
+            else 
+			{
+			 n_ensemble=1000;		
+			}					
+            pos_size=m_pos_all[0].size();
+			deltat=(delta_t[1]-delta_t[0])*m_dt;			
+            for(unsigned int i=1; i<m_Nf-n_ensemble; i++)                                                                                   
+            {
+				cagemsd[i]=0.0;
+				unsigned int count=0;
+                for(unsigned int j=i; j<i+n_ensemble; j++)                                                
+				{
+                    for(unsigned int k=0; k<pos_size; k++)
+					{
+//						if(m_type_all[i][k]==0)
+						{
+							double nbdx=0.0, nbdy=0.0, nbdz=0.0;
+							for(unsigned int n=0; n<m_num_all[j-i][k]; n++)
+							{
+							 unsigned int nb=m_nb_all[j-i][k][n];
+//							 if(i==1 && j==1) cout <<"  i="<< i <<"  j="<< j <<"  k="<< k <<"  m_num_all[j-i][k]="<< m_num_all[j-i][k] <<"  nb="<< nb << endl;
+							 nbdx += m_pos_all[j][nb].x - m_pos_all[j-i][nb].x;
+							 nbdy += m_pos_all[j][nb].y - m_pos_all[j-i][nb].y;
+							 nbdz += m_pos_all[j][nb].z - m_pos_all[j-i][nb].z;
+							}										
+							double dx=m_pos_all[j][k].x-m_pos_all[j-i][k].x-nbdx/m_num_all[j-i][k];
+							double dy=m_pos_all[j][k].y-m_pos_all[j-i][k].y-nbdy/m_num_all[j-i][k];
+							double dz=m_pos_all[j][k].z-m_pos_all[j-i][k].z-nbdz/m_num_all[j-i][k];							
+							cagemsd[i] += dx*dx + dy*dy + dz*dz;	
+							count += 1;						
+						}						
+					}	
+                }
+				cagemsd[i] /= double(count);
+				m_file << i*deltat << "  " << cagemsd[i] << endl;
+			}
+
+            cout << "21. Good Luck! Outputting results of the cage-relative mean square displacement CAGEMSD to 'cagemsd.log'." << endl;			
+			m_file.close();
+			delta_t.clear();
+			m_type_all.clear();
+			m_pos_all.clear();
+			cagemsd.clear();
+        };
+		void setDt(double dt)
+		{
+		 m_dt=dt;
+		}
+		void setVoronoi(bool Voronoi)
+		{
+		 m_Voronoi = Voronoi;
+		}
+		void setRcut(double rcut)
+		{
+		 m_rcut=rcut;
+		}		
+        virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size;
+		double deltat, m_rcut, Lx, Ly, Lz, LxINV, LyINV, LzINV;
+		double m_dt;
+		bool m_Voronoi;
+        std::ofstream m_file;
+		std::vector<unsigned int> delta_t;
+		std::vector< std::vector<unsigned int> > m_type_all;
+		std::vector< std::vector<unsigned int> > m_num_all;
+		std::vector< std::vector<std::vector<unsigned int> > > m_nb_all;	
+        std::vector<std::vector<vec> > m_pos_all;
+    };	
+
+//--- case 40	
+class RMSD : public Function
+    {
+    public:
+        RMSD(std::string filename): Function()
+		{
+            m_file.open(filename.c_str(), ios_base::out);
+            if (!m_file.good())
+			{
+             cerr << endl << "***Error! Error opening dump file" << filename << endl << endl;
+             throw runtime_error("Error RMSD dump");
+			}
+            m_Nf=0;
+			m_dt=0.005;
+		}
+        virtual ~RMSD()
+		{				
+            std::vector<double> rotationmsd0; rotationmsd0.reserve(m_Nf);
+			std::vector<double> rotationmsd1; rotationmsd1.reserve(m_Nf);
+			std::vector<double> rotationmsd; rotationmsd.reserve(m_Nf);
+			pos_size=m_ori_all[0].size();	
+			deltat=(delta_t[1]-delta_t[0])*m_dt;
+			if(m_Nf<=1000)
+			{
+			 n_ensemble=0.1*m_Nf;	
+			}				
+            else
+			{
+			 n_ensemble=1000;	
+			}
+			std::vector<vec> deltaRotation0_t; deltaRotation0_t.resize(pos_size);
+			std::vector<vec> deltaRotation1_t; deltaRotation1_t.resize(pos_size);				
+            for(unsigned int j=0; j<1; j++) 
+			{   
+				for(unsigned int i=0; i<m_Nf; i++) 	
+				{
+					for(unsigned int k=0; k<pos_size; k++)
+					{					
+					 double dotproduct=m_Rotangle_all[i][k].x*m_ori_all[j][k].x + m_Rotangle_all[i][k].y*m_ori_all[j][k].y + m_Rotangle_all[i][k].z*m_ori_all[j][k].z;					 
+					 deltaRotation0_t[k].x=dotproduct*m_ori_all[j][k].x;	
+					 deltaRotation0_t[k].y=dotproduct*m_ori_all[j][k].y;
+					 deltaRotation0_t[k].z=dotproduct*m_ori_all[j][k].z;
+					 
+					 deltaRotation1_t[k].x=m_Rotangle_all[i][k].x - dotproduct*m_ori_all[j][k].x;	
+					 deltaRotation1_t[k].y=m_Rotangle_all[i][k].y - dotproduct*m_ori_all[j][k].y;
+					 deltaRotation1_t[k].z=m_Rotangle_all[i][k].z - dotproduct*m_ori_all[j][k].z;					
+					}
+					m_Rotation0_all.push_back(deltaRotation0_t);
+					m_Rotation1_all.push_back(deltaRotation1_t);					
+				}
+			}														
+            for(unsigned int i=1; i<m_Nf-n_ensemble; i++)                                                                                   
+            {
+				rotationmsd0[i]=0.0;
+				rotationmsd1[i]=0.0;
+				rotationmsd[i]=0.0;
+				unsigned int count=0;
+                for(unsigned int j=i; j<i+1; j++)                                                
+				{
+                    for(unsigned int k=0; k<pos_size; k++)
+					{
+//						if(m_type_all[i][k]==0)
+						{
+						
+						 double dxtheta0_t=m_Rotation0_all[j][k].x-m_Rotation0_all[j-i][k].x;
+						 double dytheta0_t=m_Rotation0_all[j][k].y-m_Rotation0_all[j-i][k].y;
+						 double dztheta0_t=m_Rotation0_all[j][k].z-m_Rotation0_all[j-i][k].z;
+						 rotationmsd0[i] += dxtheta0_t*dxtheta0_t+dytheta0_t*dytheta0_t+dztheta0_t*dztheta0_t;	
+
+						 double dxtheta1_t=m_Rotation1_all[j][k].x-m_Rotation1_all[j-i][k].x;
+						 double dytheta1_t=m_Rotation1_all[j][k].y-m_Rotation1_all[j-i][k].y;
+						 double dztheta1_t=m_Rotation1_all[j][k].z-m_Rotation1_all[j-i][k].z;
+						 rotationmsd1[i] += dxtheta1_t*dxtheta1_t+dytheta1_t*dytheta1_t+dztheta1_t*dztheta1_t;
+					 	
+						 double dxtheta_t=m_Rotangle_all[j][k].x-m_Rotangle_all[j-i][k].x;
+						 double dytheta_t=m_Rotangle_all[j][k].y-m_Rotangle_all[j-i][k].y;
+						 double dztheta_t=m_Rotangle_all[j][k].z-m_Rotangle_all[j-i][k].z;
+						 rotationmsd[i] += dxtheta_t*dxtheta_t+dytheta_t*dytheta_t+dztheta_t*dztheta_t;
+						 count += 1;
+						}												
+					}
+                }				
+                rotationmsd0[i] /= double(count);
+				rotationmsd1[i] /= double(count);
+				rotationmsd[i] /= double(count);
+				m_file << i*deltat << "  " << rotationmsd0[i] <<"   "<< rotationmsd1[i] << "  " << rotationmsd[i] << endl;
+			}			
+            cout << "22. Good Luck! Outputting results of the rotaional mean square displacement (RMSD) to 'rmsd.log'."<<endl;			
+			m_file.close();
+			m_ori_all.clear();
+			m_Rotation0_all.clear();
+			m_Rotation1_all.clear();
+			m_Rotangle_all.clear();	
+            delta_t.clear();
+			rotationmsd0.clear();
+			rotationmsd1.clear();
+			rotationmsd.clear();
+			m_type_all.clear();
+		};
+		void setDt(double dt)
+		{
+		 m_dt=dt;
+		}		
+        virtual void compute();
+    private:
+        unsigned int m_Nf, n_ensemble, pos_size;
+		double deltat;
+		double m_dt;
+        std::ofstream m_file;
+		std::vector<unsigned int> delta_t;
+		std::vector<std::vector<vec> > m_ori_all;
+		std::vector<std::vector<vec> > m_Rotation0_all;
+		std::vector<std::vector<vec> > m_Rotation1_all;
+		std::vector<std::vector<vec> > m_Rotangle_all;
+		std::vector< std::vector<unsigned int> > m_type_all;
+    } ;
+	
+//---case 41
+class P2P4 : public Function
+	{
+    public:
+        P2P4(std::string filename): Function()
+        {
+            m_file.open(filename.c_str(), ios_base::out);
+            if(!m_file.good())
+            {
+             cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+             throw runtime_error("Error P2P4 dump");
+            }			
+            m_Nf=0;
+			m_rcut=1.0;
+			m_Voronoi=false;
+			maxbin=100;
+			p2_all=0.0;
+			p2max=1.0;
+			p2min=-1.0;
+			p4_all=0.0;
+			p4max=1.0;
+			p4min=-1.0;
+        }
+        virtual ~P2P4()
+        {
+			double dp2=(p2max-p2min)/double(maxbin);
+			double dp4=(p4max-p4min)/double(maxbin);
+			std::vector<double> layer2(maxbin+1, 0.0);
+			std::vector<double> layer4(maxbin+1, 0.0);
+			for(unsigned int i=0; i<m_Nf; i++)
+			{	
+				for(unsigned int k=0; k<pos_size; k++)
+				{
+//				 if(k==27) cout << p2_local_all[i][k] << "  " << p2min << "  " << dp2 << "    " <<  p4_local_all[i][k] << "  " << p4min << "  " << dp4 << endl;
+				 unsigned int mth;
+				 mth=int((p2_local_all[i][k]-p2min)/dp2); 
+				 layer2[mth] += 1.0;
+				 unsigned int lth;
+				 lth=int((p4_local_all[i][k]-p4min)/dp4); 
+				 layer4[lth] += 1.0;
+				}
+			}
+			for(unsigned int bin=0; bin<maxbin+1; bin++)
+			{
+				if(bin==0) 
+				 m_file << p2min+bin*dp2 << "  " << layer2[bin]/double(pos_size*m_Nf) << "  " << p4min+bin*dp4 << "  " << layer4[bin]/double(pos_size*m_Nf) << "  " << p2_all/m_Nf << "  " << p4_all/m_Nf << endl;
+				else 
+				 m_file << p2min+bin*dp2 << "  " << layer2[bin]/double(pos_size*m_Nf) << "  " << p4min+bin*dp4 << "  " << layer4[bin]/double(pos_size*m_Nf) << endl;
+			}		
+			m_file.close();	
+			p2_local_all.clear();
+			p4_local_all.clear();	
+     	}
+		void setVoronoi(bool Voronoi)
+		{
+		 m_Voronoi = Voronoi;
+		}
+		void setRcut(double rcut)
+		{
+		 m_rcut=rcut;
+		}		
+        virtual void compute();
+    private:
+        std::ofstream m_file;
+		bool m_Voronoi;
+        unsigned int m_Nf, pos_size, maxbin;
+		double m_rcut, p2_all, p2max, p2min, p4_all, p4max, p4min;
+		std::vector<std::vector<double> > p2_local_all, p4_local_all;
+		std::vector<unsigned int> delta_t;
+	};
+
+//---case 42
+class CRYSTALLINITY : public Function
+	{
+    public:
+        CRYSTALLINITY(std::string filename): Function()
+        {
+            m_file.open(filename.c_str(), ios_base::out);
+            if(!m_file.good())
+            {
+             cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+             throw runtime_error("Error CRYSTALLINITY dump");
+            }			
+            m_Nf=0;
+			m_rcut=1.5;
+			m_Voronoi=true;
+			maxbin=100;
+			m_refsij=0.6;
+			m_refnxi=8;
+        }
+        virtual ~CRYSTALLINITY()
+        {
+			std::vector<unsigned int> score_s(maxbin,0);
+		    std::vector <double> NUM_s(maxbin,0.0);
+			std::vector <double> NXI_s(maxbin,0.0);
+			for(unsigned int i=0; i<maxbin; i++)
+			{	
+				for(unsigned int j=0; j<m_Nf ; j++)
+				{
+                 score_s[i] += score_s_all[j][i];
+				 NUM_s[i] += NUM_s_all[j][i];
+				 NXI_s[i] += NXI_s_all[j][i];
+				}
+				m_file << score_s[i]/m_Nf << "  " << NUM_s[i]/m_Nf << "  " << NXI_s[i]/m_Nf << endl;					 
+			}				
+			m_file.close();	
+			num_all.clear();
+			nxi_all.clear();
+			NUM_s_all.clear();
+			NXI_s_all.clear();			
+     	}
+		void setVoronoi(bool Voronoi)
+		{
+		 m_Voronoi = Voronoi;
+		}
+		void setRcut(double rcut)
+		{
+		 m_rcut=rcut;
+		}
+		void setRefsij(double refsij)
+		{
+		 m_refsij=refsij;
+		}
+		void setRefnxi(unsigned int refnxi)
+		{
+		 m_refnxi=refnxi;
+		}	
+        virtual void compute();
+    private:
+        std::ofstream m_file;
+		bool m_Voronoi;
+        unsigned int m_Nf, pos_size, maxbin, m_refnxi;
+		double m_rcut, m_refsij;
+		std::vector<std::vector<unsigned int> > num_all;
+		std::vector<std::vector<unsigned int> > nxi_all;		
+		std::vector<unsigned int> delta_t;
+		std::vector<std::vector<unsigned int> > score_s_all;
+		std::vector<std::vector <double> > NUM_s_all;
+		std::vector<std::vector <double> > NXI_s_all;
+	};
+
+//--- case 43                                                                                                                                   
+class G6_3D : public Function
+    {
+    public:
+        G6_3D(std::string filename): Function()
+		{
+			m_file.open(filename.c_str(), ios_base::out);
+			if(!m_file.good())
+			{
+			 cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+			 throw runtime_error("Error G6_3D dump");
+			}
+			m_Nf=0;
+			m_rcut=1.647;
+			m_Voronoi=true;
+			maxbin=1000;
+		}
+		virtual ~G6_3D() 
+		{
+			std::vector<double> r_sum(maxbin, 0.0);
+			std::vector<double> g_sum(maxbin, 0.0);
+			std::vector<double> g3D_sum(maxbin, 0.0);			
+			for(unsigned int i=0; i<maxbin; i++)
+			{	
+				unsigned int count=0;
+				for(unsigned int j=0; j<m_Nf ; j++)
+				{
+	             r_sum[i] += r_all[j][i];
+				 g_sum[i] += g_all[j][i];
+				 g3D_sum[i] += g3D_all[j][i];			 
+				 count += 1;
+				}
+				m_file << r_sum[i]/count << "  "  << g_sum[i]/count << "  "  << g3D_sum[i]/count << "  " << g3D_sum[i]/g_sum[i] << endl;				
+			}  			
+			cout << "25. Good Luck! Outputting results of the spatial correlation  function of bond orintational order (G6_3D) to 'g6_3D.log'." << endl;		
+			m_file.close();	
+            r_all.clear();
+			g_all.clear();
+			g3D_all.clear();			
+			
+		};
+		void setVoronoi(bool Voronoi)
+		{
+		 m_Voronoi = Voronoi;
+		}
+		void setRcut(double rcut)
+		{
+		 m_rcut=rcut;
+		}		
+		virtual void compute();			
+    private:
+		std::ofstream m_file;
+		bool m_Voronoi;
+		unsigned int m_Nf, pos_size, maxbin;
+		double m_rcut;		
+		std::vector<std::vector<double> > r_all;
+		std::vector<std::vector<double> > g_all;
+		std::vector<std::vector<double> > g3D_all;	
+	};
+
+//---case 44
+class W4W6 : public Function
+	{
+    public:
+        W4W6(std::string filename): Function()
+        {
+            m_file.open(filename.c_str(), ios_base::out);
+            if(!m_file.good())
+            {
+             cerr << endl << "***Error! Error opening dump file " << filename << endl << endl;
+             throw runtime_error("Error W4W6 dump");
+            }			
+            m_Nf=0;
+			maxbin=100;
+			q4_all=0.0;
+			w4_all=0.0;
+			q4max=-1.0;
+			w4max=-1.0;
+			q4min=1.0;
+			w4min=1.0;
+			q6_all=0.0;
+			w6_all=0.0;
+			q6max=-1.0;
+			w6max=-1.0;
+			q6min=1.0;
+			w6min=1.0;
+			m_rcut=1.647;
+			m_Voronoi=false;			
+        }	
+        virtual ~W4W6()
+        {
+			double dw4=(w4max-w4min)/double(maxbin);			
+			double dw6=(w6max-w6min)/double(maxbin);			
+			std::vector<double> layer4(maxbin+1, 0.0);
+			std::vector<double> layer6(maxbin+1, 0.0);
+			for(unsigned int i=0; i<m_Nf; i++)
+			{	
+				for(unsigned int k=0; k<pos_size; k++)
+				{
+				 unsigned int mth;
+				 mth=int((w4_local_all[i][k]-w4min)/dw4); 
+				 layer4[mth] += 1.0;
+				 unsigned int lth;
+				 lth=int((w6_local_all[i][k]-w6min)/dw6); 
+				 layer6[lth] += 1.0;
+				}
+			}
+			for(unsigned int bin=0; bin<maxbin+1; bin++)
+			{
+				if(bin==0) 
+				 m_file << w4min+bin*dw4 << "  " << layer4[bin]/double(pos_size*m_Nf) << "  " << w6min+bin*dw6 << "  " << layer6[bin]/double(pos_size*m_Nf) << "  " << w4_all/m_Nf << "  " << w6_all/m_Nf << endl;
+				else 
+				 m_file << w4min+bin*dw4 << "  " << layer4[bin]/double(pos_size*m_Nf) << "  " << w6min+bin*dw6 << "  " << layer6[bin]/double(pos_size*m_Nf) << endl;
+			}
+            cout << "26. Good Luck! Outputting results of bond order parameters (W4W6) and outputting results to 'w4w6.log'." << endl;
+			m_file.close();	
+			q4_local_all.clear();
+			q6_local_all.clear();
+     	}
+		void setVoronoi(bool Voronoi)
+		{
+		 m_Voronoi = Voronoi;
+		}
+		void setRcut(double rcut)
+		{
+		 m_rcut=rcut;
+		}
+        virtual void compute();
+    private:
+        std::ofstream m_file;
+		bool m_Voronoi;
+        unsigned int m_Nf, pos_size, maxbin;
+		double m_rcut;
+		double q4_all, q4max, q4min, q6_all, q6max, q6min;
+		double w4_all, w4max, w4min, w6_all, w6max, w6min;		
+		std::vector<std::vector<double> > q4_local_all, w4_local_all;
+		std::vector<std::vector<double> > q6_local_all, w6_local_all;
+	};
+
 	
 #endif
 
