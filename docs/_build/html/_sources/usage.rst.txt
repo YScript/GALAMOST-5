@@ -1,7 +1,7 @@
 Usage
 =====
 
-With a prepared script, you could run gamst MD engine for abstaining trajectory.
+With a prepared script, you could run gamst MD engine for obtaining trajectory.
 
    Examples::
    

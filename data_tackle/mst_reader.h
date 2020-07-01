@@ -214,6 +214,7 @@ class mst_reader
         const std::vector< vec >& getOrientation() const { return m_orientation; }
         const std::vector< vec4 >& getQuaternion() const { return m_quaternion; }
         const std::vector< vec >& getInert() const { return m_inert; }
+        const std::vector< vec >& getRotation() const { return m_rotation; }		
         const std::vector< unsigned int >& getCris() const { return m_cris; }
         const std::vector< unsigned int >& getInit() const { return m_init; }
 		const std::vector<vec>& getRotangle() const {return m_rotangle;}		
@@ -243,25 +244,26 @@ class mst_reader
         std::vector< vec > m_pos;           
         std::vector< vec_int > m_image;     
         std::vector< vec > m_vel;           
-        std::vector< double > m_mass;       
-        std::vector< double > m_diameter;   
+        std::vector< double > m_mass;        
         std::vector< unsigned int > m_type; 
         std::vector< unsigned int > m_body; 
-        std::vector< double > m_charge;     
+        std::vector< double > m_charge;
+        std::vector< double > m_diameter;		
         std::vector< unsigned int > m_init;       
         std::vector< unsigned int > m_cris; 
         std::vector< vec > m_force;		
         std::vector< double > m_virial;
-
-        std::vector< vec > m_inert;               
+              
         std::vector< Bond > m_bonds;              
         std::vector< Angle > m_angles;            
         std::vector< Dihedral > m_dihedrals;      
         std::vector< Dihedral > m_vsites;                         
 
         std::vector< vec > m_orientation;         
-        std::vector< vec4 > m_quaternion;         
-        std::vector<vec> m_rotangle; 	
+        std::vector< vec4 > m_quaternion;
+        std::vector< vec > m_inert; 		
+        std::vector<vec> m_rotangle;
+        std::vector<vec> m_rotation; 		
         std::vector< str_vec6 > m_asphere;
         std::vector< str_vec6 > m_patch;
         std::vector< str_vec6 > m_patch_num;		
@@ -279,6 +281,8 @@ class mst_reader
 		bool m_dimension_read;
 		bool m_bond_read;
 		bool m_angle_read;
+		bool m_dihedral_read;
+		bool m_vsite_read;		
 		bool m_box_read;		
 		bool m_position_read;
 		bool m_type_read;
@@ -289,8 +293,17 @@ class mst_reader
 		bool m_body_read;
 		bool m_diameter_read;		
 		bool m_rotangle_read;
-		bool m_virial_read;	
-		bool m_force_read;		
+		bool m_force_read;
+		bool m_virial_read;			
+		bool m_molecule_read;
+		bool m_init_read;
+		bool m_cris_read;
+		bool m_orientation_read;
+		bool m_quaternion_read;	
+		bool m_rotation_read;
+		bool m_inert_read;
+		bool m_asphere_read;
+		bool m_patch_read;		
 		std::map< std::string, bool > m_read_indicator;
 		ifstream::pos_type m_sp;
 		std::string m_object_name;

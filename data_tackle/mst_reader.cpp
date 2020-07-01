@@ -51,9 +51,10 @@ mst_reader::mst_reader()
 	m_invariant_data = false;
 	m_variant_data = false;
 	m_if_trajectory = false;
-	m_read_indicator = { {"bond", false}, {"angle", false}, {"box", false}, {"position", false}, {"type", false}, {"image", false}, {"mass", false}, {"velocity", false}, 
-	                     {"charge", false}, {"body", false}, {"diameter", false}, {"rotangle", false}, {"force", false}, {"virial", false}};
-
+	m_read_indicator = {{"bond", false}, {"angle", false}, {"dihedral", false}, {"vsite", false}, {"box", false}, {"position", false}, {"type", false},
+						{"image", false}, {"mass", false}, {"velocity", false}, {"charge", false}, {"body", false}, {"diameter", false}, {"rotangle", false},
+						{"force", false}, {"virial", false}, {"molecule", false}, {"init", false}, {"cris", false}, {"orientation", false}, {"quaternion", false}, 
+						{"rotation", false}, {"inert", false}, {"asphere", false}, {"patch", false} };
 	m_sp = ios::beg;
     m_fname = "XXXXXXXXX";
 	m_object_name = "mst_reader";
@@ -66,6 +67,8 @@ void mst_reader::reset_params()
 	m_dimension_read = false;
 	m_bond_read = false;
 	m_angle_read = false;
+	m_dihedral_read = false;
+	m_vsite_read = false;		
 	m_box_read = false;	
 	m_position_read = false;
 	m_type_read = false;
@@ -78,6 +81,15 @@ void mst_reader::reset_params()
 	m_rotangle_read = false;
 	m_force_read = false;	
 	m_virial_read = false;
+	m_molecule_read = false;
+	m_init_read = false;
+	m_cris_read = false;
+	m_orientation_read = false;
+	m_quaternion_read = false;	
+	m_rotation_read = false;
+	m_inert_read = false;
+	m_asphere_read = false;
+	m_patch_read = false;		
 	}
 	
 void mst_reader::clear_data()
@@ -86,6 +98,10 @@ void mst_reader::clear_data()
 		m_bonds.clear();
 	if (!m_read_indicator["angle"])	
 		m_angles.clear();
+	if (!m_read_indicator["dihedral"])
+		m_dihedrals.clear();
+	if (!m_read_indicator["vsite"])	
+		m_vsites.clear();	
 	if (!m_read_indicator["box"])				
 		m_box=BoxSize(0.0, 0.0, 0.0);	
 	if (!m_read_indicator["position"])				
@@ -109,7 +125,25 @@ void mst_reader::clear_data()
 	if (!m_read_indicator["force"])			
 		m_force.clear();
 	if (!m_read_indicator["virial"])
-		m_virial.clear();	
+		m_virial.clear();
+	if (!m_read_indicator["molecule"])		
+		m_molecule.clear();
+	if (!m_read_indicator["init"])			
+		m_init.clear();
+	if (!m_read_indicator["cris"])			
+		m_cris.clear();
+	if (!m_read_indicator["orientation"])
+		m_orientation.clear();
+	if (!m_read_indicator["quaternion"])
+		m_quaternion.clear();
+	if (!m_read_indicator["rotation"])
+		m_rotation.clear();	
+	if (!m_read_indicator["inert"])		
+		m_inert.clear();
+	if (!m_read_indicator["asphere"])			
+		m_asphere.clear();
+	if (!m_read_indicator["patch"])
+		m_patch.clear();		
 	}
 
 
@@ -279,6 +313,24 @@ bool mst_reader::readDataFromMST(const string &fname)
 					m_read_indicator["angle"] = true;
 				continue;
 				}
+				
+			if (line.find("dihedral") != line.npos)
+				{				
+				reset_params();
+				m_dihedral_read=true;
+				if (m_invariant_data)
+					m_read_indicator["dihedral"] = true;
+				continue;
+				}
+
+			if (line.find("vsite") != line.npos)
+				{				
+				reset_params();
+				m_vsite_read=true;
+				if (m_invariant_data)
+					m_read_indicator["vsite"] = true;
+				continue;
+				}				
 
 			if (line.find("box") != line.npos)
 				{
@@ -386,7 +438,88 @@ bool mst_reader::readDataFromMST(const string &fname)
 				if (m_invariant_data)
 					m_read_indicator["virial"] = true;
 				continue;
-				}				
+				}
+
+			if (line.find("molecule") != line.npos)
+				{
+				reset_params();
+				m_molecule_read=true;
+				if (m_invariant_data)
+					m_read_indicator["molecule"] = true;
+				continue;
+				}
+
+			if (line.find("init") != line.npos)
+				{
+				reset_params();
+				m_init_read=true;
+				if (m_invariant_data)
+					m_read_indicator["init"] = true;
+				continue;
+				}	
+
+			if (line.find("cris") != line.npos)
+				{
+				reset_params();
+				m_cris_read=true;
+				if (m_invariant_data)
+					m_read_indicator["cris"] = true;
+				continue;
+				}	
+
+			if (line.find("orientation") != line.npos)
+				{
+				reset_params();
+				m_orientation_read=true;
+				if (m_invariant_data)
+					m_read_indicator["orientation"] = true;
+				continue;
+				}	
+
+			if (line.find("quaternion") != line.npos)
+				{
+				reset_params();
+				m_quaternion_read=true;
+				if (m_invariant_data)
+					m_read_indicator["quaternion"] = true;
+				continue;
+				}	
+
+			if (line.find("rotation") != line.npos)
+				{
+				reset_params();
+				m_rotation_read=true;
+				if (m_invariant_data)
+					m_read_indicator["rotation"] = true;
+				continue;
+				}	
+
+			if (line.find("inert") != line.npos)
+				{
+				reset_params();
+				m_inert_read=true;
+				if (m_invariant_data)
+					m_read_indicator["inert"] = true;
+				continue;
+				}	
+
+			if (line.find("asphere") != line.npos)
+				{
+				reset_params();
+				m_asphere_read=true;
+				if (m_invariant_data)
+					m_read_indicator["asphere"] = true;
+				continue;
+				}	
+
+			if (line.find("patch") != line.npos)
+				{
+				reset_params();
+				m_patch_read=true;
+				if (m_invariant_data)
+					m_read_indicator["patch"] = true;
+				continue;
+				}					
 
 			// read data				
 			std::vector<std::string> line_array = split(line, "	");
@@ -415,13 +548,13 @@ bool mst_reader::readDataFromMST(const string &fname)
 
 				}
 				
-			if (m_timestep_read && line_array.size() >= 1)
+			if (m_timestep_read && line_array.size() == 1)
 				parser >> m_timestep;
 				
-			if (m_dimension_read && line_array.size() >= 1)
+			if (m_dimension_read && line_array.size() == 1)
 				parser >> m_dimension;		
 				
-			if (m_bond_read && line_array.size() >= 3)
+			if (m_bond_read && line_array.size() == 3)
 				{
 				string name;
 				unsigned int a;
@@ -430,7 +563,7 @@ bool mst_reader::readDataFromMST(const string &fname)
 				m_bonds.push_back(Bond(name, a, b, getBondTypeId(name)));
 				}
 		
-			if (m_angle_read && line_array.size() >= 4)
+			if (m_angle_read && line_array.size() == 4)
 				{
 				string name;
 				unsigned int a;
@@ -438,16 +571,38 @@ bool mst_reader::readDataFromMST(const string &fname)
 				unsigned int c;
 				parser>> name >> a >> b >> c;
 				m_angles.push_back(Angle(name, a, b, c, getAngleTypeId(name)));
+				}
+
+			if (m_dihedral_read && line_array.size() == 5)
+				{
+				string name;
+				unsigned int a;
+				unsigned int b;
+				unsigned int c;
+				unsigned int d;				
+				parser>> name >> a >> b >> c >> d;
+				m_dihedrals.push_back(Dihedral(name, a, b, c, d, getDihedralTypeId(name)));
+				}
+		
+			if (m_vsite_read && line_array.size() == 5)
+				{
+				string name;
+				unsigned int a;
+				unsigned int b;
+				unsigned int c;
+				unsigned int d;				
+				parser>> name >> a >> b >> c >> d;
+				m_vsites.push_back(Dihedral(name, a, b, c, d, getVsiteTypeId(name)));
 				}					
 				
-			if (m_box_read && line_array.size() >= 3)
+			if (m_box_read && line_array.size() == 3)
 				{
 				double lx, ly, lz;
 				parser>> lx >> ly >> lz;
 				m_box = BoxSize(lx, ly, lz);
 				}
 				
-			if (m_position_read && line_array.size() >= 3)
+			if (m_position_read && line_array.size() == 3)
 				{
 				double px, py, pz;				
 				parser>> px >> py >> pz;
@@ -455,7 +610,7 @@ bool mst_reader::readDataFromMST(const string &fname)
 				m_pos.push_back(vec(px, py, pz));
 				}
 
-			if (m_type_read && line_array.size() >= 1)
+			if (m_type_read && line_array.size() == 1)
 				{
 				// cout<<line_array[0]<<endl;
 				string type;
@@ -463,68 +618,139 @@ bool mst_reader::readDataFromMST(const string &fname)
 				m_type.push_back(getTypeId(type));
 				}
 				
-			if (m_image_read && line_array.size() >= 3)
+			if (m_image_read && line_array.size() == 3)
 				{
 				int ix, iy, iz;
 				parser>> ix >> iy >> iz;
 				m_image.push_back(vec_int(ix, iy, iz));
 				}
 				
-			if (m_mass_read && line_array.size() >= 1)
+			if (m_mass_read && line_array.size() == 1)
 				{
 				double mass;
 				parser>> mass;
 				m_mass.push_back(mass);
 				}
 				
-			if (m_velocity_read && line_array.size() >= 3)
+			if (m_velocity_read && line_array.size() == 3)
 				{
 				double vx, vy, vz;
 				parser>> vx >> vy >> vz;
 				m_vel.push_back(vec(vx, vy, vz));
 				}
 				
-			if (m_charge_read && line_array.size() >= 1)
+			if (m_charge_read && line_array.size() == 1)
 				{
 				double c;
 				parser>> c;
 				m_charge.push_back(c);
 				}
 
-			if (m_body_read && line_array.size() >= 1)
+			if (m_body_read && line_array.size() == 1)
 				{
-				double b;
+				int b;
 				parser>> b;
-				m_body.push_back(b);
+				if (b == -1)
+					m_body.push_back(NO_BODY);
+				else
+					m_body.push_back(b);
 				}
 
-			if (m_diameter_read && line_array.size() >= 1)
+			if (m_diameter_read && line_array.size() == 1)
 				{
 				double d;
 				parser>> d;
 				m_diameter.push_back(d);
 				}				
 				
-			if (m_rotangle_read && line_array.size() >= 3)
+			if (m_rotangle_read && line_array.size() == 3)
 				{
 				double rx, ry, rz;
 				parser>> rx >> ry >> rz;
 				m_rotangle.push_back(vec(rx, ry, rz));
 				}	
 				
-			if (m_force_read && line_array.size() >= 3)
+			if (m_force_read && line_array.size() == 3)
 				{
 				double fx, fy, fz;
 				parser>> fx >> fy >> fz;
 				m_force.push_back(vec(fx, fy, fz));
 				}	
 
-			if (m_virial_read && line_array.size() >= 1)
+			if (m_virial_read && line_array.size() == 1)
 				{
 				double v;
 				parser>> v;
 				m_virial.push_back(v);
-				}					
+				}
+
+			if (m_molecule_read && line_array.size() == 1)
+				{
+				int mol;
+				parser>> mol;
+				if (mol == -1)
+					m_molecule.push_back(NO_INDEX);
+				else
+					m_molecule.push_back(mol);
+				}
+
+			if (m_init_read && line_array.size() == 1)
+				{
+				unsigned int init;
+				parser>> init;
+				m_init.push_back(init);
+				}
+
+			if (m_cris_read && line_array.size() == 1)
+				{
+				unsigned int cris;
+				parser>> cris;
+				m_cris.push_back(cris);
+				}
+
+			if (m_orientation_read && line_array.size() == 3)
+				{
+				double x, y, z;
+				parser>> x >> y >> z;
+				m_orientation.push_back(vec(x, y, z));
+				}	
+
+			if (m_quaternion_read && line_array.size() == 4)
+				{
+				double x, y, z, w;
+				parser>> x >> y >> z >> w;
+				m_quaternion.push_back(vec4(x, y, z, w));
+				}
+				
+			if (m_rotation_read && line_array.size() == 3)
+				{
+				double x, y, z;
+				parser>> x >> y >> z;
+				m_rotation.push_back(vec(x, y, z));
+				}
+
+			if (m_inert_read && line_array.size() == 3)
+				{
+				double x, y, z;
+				parser>> x >> y >> z;
+				m_inert.push_back(vec(x, y, z));
+				}
+
+			if (m_asphere_read && line_array.size() == 7)
+				{
+				string na;
+				double x, y, z, w, m, n;
+				parser>> na >> x >> y >> z >> w >> m >> n;
+				m_asphere.push_back(str_vec6(na, x, y, z, w, m, n));
+				}
+
+			if (m_patch_read && line_array.size() == 5)
+				{
+				string na;
+				double x, y, z, w;
+				parser>> na >> x >> y >> z >> w;
+				m_patch.push_back(str_vec6(na, x, y, z, w, 0.0, 0.0));
+				}				
 			}
 		}
 		
@@ -654,7 +880,49 @@ bool mst_reader::readDataFromMST(const string &fname)
         cerr << endl << "***Error! " << m_virial.size() << " virial values != " << m_num_particles
              << " the number of particles" << endl << endl;
         throw runtime_error("Error extracting data from galamost_mst file");
-        }			
+        }
+
+    if (m_init.size() != 0 && m_init.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_init.size() << " init values != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }
+
+    if (m_cris.size() != 0 && m_cris.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_cris.size() << " cris values != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }
+
+    if (m_orientation.size() != 0 && m_orientation.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_orientation.size() << " orientation values != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }
+
+    if (m_quaternion.size() != 0 && m_quaternion.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_orientation.size() << " quaternion values != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }
+
+    if (m_rotation.size() != 0 && m_rotation.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_rotation.size() << " rotation values != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }
+
+    if (m_inert.size() != 0 && m_inert.size() != m_num_particles)
+        {
+        cerr << endl << "***Error! " << m_inert.size() << " inert values != " << m_num_particles
+             << " the number of particles" << endl << endl;
+        throw runtime_error("Error extracting data from galamost_mst file");
+        }		
 		
 	//-check bonds, angles and dihedrals
 	for (unsigned int i=0; i<m_bonds.size();i++)
@@ -705,14 +973,14 @@ void mst_reader::outPutInfo()
     // notify the user of what we have accomplished
     cout <<"--- galamost mst file read summary" << endl;
     cout <<" "<< getNParticles() << " particles at timestep " << m_timestep << endl;
+    cout <<" "<< getNParticleTypes() <<  " particle types" << endl;	
+
     if (m_image.size() > 0)
         cout <<" "<< m_image.size() << " images" << endl;
     if (m_vel.size() > 0)
         cout <<" "<< m_vel.size() << " velocities" << endl;
     if (m_mass.size() > 0)
         cout <<" "<< m_mass.size() << " masses" << endl;
-    cout <<" "<< getNParticleTypes() <<  " particle types" << endl;
-
     if (m_charge.size() > 0)
         cout <<" "<< m_charge.size() << " charges" << endl;
     if (m_body.size() > 0)
@@ -721,20 +989,37 @@ void mst_reader::outPutInfo()
         cout <<" "<< m_diameter.size() << " diameters" << endl;	
     if (m_rotangle.size() > 0)
         cout <<" "<< m_rotangle.size() << " rotangles" << endl;		
-    if (m_orientation.size() > 0)
-        cout <<" "<< m_orientation.size() << " orientations" << endl;
-    if (m_quaternion.size() > 0)
-        cout <<" "<< m_quaternion.size() << " quaternions" << endl;		
+    if (m_force.size() > 0)
+        cout <<" "<< m_force.size() << " forces" << endl;	
+    if (m_virial.size() > 0)
+        cout <<" "<< m_virial.size() << " virials" << endl;	
     if (m_molecule.size() > 0)
-        cout <<" "<< m_molecule.size() << " molecules" << endl;		
+        cout <<" "<< m_molecule.size() << " molecules" << endl;
+    if (m_init.size() > 0)
+        cout <<" "<< m_init.size() << " inits" << endl;
+    if (m_cris.size() > 0)
+        cout <<" "<< m_cris.size() << " crises" << endl;
+    if (m_quaternion.size() > 0)
+        cout <<" "<< m_quaternion.size() << " quaternions" << endl;
+    if (m_orientation.size() > 0)
+        cout <<" "<< m_orientation.size() << " orientations" << endl;	
+    if (m_rotation.size() > 0)
+        cout <<" "<< m_rotation.size() << " rotations" << endl;	
+    if (m_inert.size() > 0)
+        cout <<" "<< m_inert.size() << " inerts" << endl;	
+    if (m_asphere.size() > 0)
+        cout <<" "<< m_asphere.size() << " aspheres" << endl;	
+    if (m_patch.size() > 0)
+        cout <<" "<< m_patch.size() << " patches" << endl;		
     if (m_bonds.size() > 0)
         cout <<" "<< m_bonds.size() << " bonds" << endl;
     if (m_angles.size() > 0)
         cout <<" "<< m_angles.size() << " angles" << endl;
     if (m_dihedrals.size() > 0)
-        cout <<" "<< m_dihedrals.size() << " dihedrals" << endl;	
+        cout <<" "<< m_dihedrals.size() << " dihedrals" << endl;
+    if (m_vsites.size() > 0)
+        cout <<" "<< m_vsites.size() << " vsites" << endl;		
 	}
-
 
 unsigned int mst_reader::getTypeId(const std::string& name) 
     {

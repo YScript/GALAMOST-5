@@ -214,15 +214,15 @@ However, this rule does not include topological relevant information, including 
         <span class="n">box</span>
                 <span class="mf">10.0</span>    <span class="mf">10.0</span>    <span class="mf">10.0</span>
         <span class="n">position</span>
-                <span class="o">-</span><span class="mi">1</span> <span class="mi">2</span> <span class="o">-</span><span class="mi">1</span>
-                <span class="o">-</span><span class="mi">2</span> <span class="mi">3</span> <span class="mi">0</span>
-                <span class="o">-</span><span class="mi">1</span> <span class="mi">4</span> <span class="mi">1</span>
-                <span class="o">-</span><span class="mi">1</span> <span class="mi">5</span> <span class="mi">2</span>
+                <span class="o">-</span><span class="mi">1</span>  <span class="mi">2</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="o">-</span><span class="mi">2</span>  <span class="mi">3</span>  <span class="mi">0</span>
+                <span class="o">-</span><span class="mi">1</span>  <span class="mi">4</span>  <span class="mi">1</span>
+                <span class="o">-</span><span class="mi">1</span>  <span class="mi">5</span>  <span class="mi">2</span>
         <span class="n">velocity</span>
-                <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span>
-                <span class="mi">1</span> <span class="mi">0</span> <span class="mi">0</span>
-                <span class="mi">3</span> <span class="o">-</span><span class="mi">2</span> <span class="mi">1</span>
-                <span class="mi">0</span> <span class="mi">1</span> <span class="mi">1</span>
+                <span class="mi">1</span>  <span class="mi">2</span>  <span class="mi">3</span>
+                <span class="mi">1</span>  <span class="mi">0</span>  <span class="mi">0</span>
+                <span class="mi">3</span> <span class="o">-</span><span class="mi">2</span>  <span class="mi">1</span>
+                <span class="mi">0</span>  <span class="mi">1</span>  <span class="mi">1</span>
         <span class="nb">type</span>
                 <span class="n">A</span>
                 <span class="n">B</span>
@@ -235,53 +235,55 @@ However, this rule does not include topological relevant information, including 
                 <span class="mf">1.0</span>
 </pre></div>
 </div>
-<p>The file could include the nodes of bond, angle, dihedral …</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># bond with &#39;bond type, the index of particle i, j&#39;.</span>
-           <span class="n">bond</span>
-                   <span class="n">polymer</span> <span class="mi">0</span> <span class="mi">1</span>
-                   <span class="n">polymer</span> <span class="mi">1</span> <span class="mi">2</span>
-                   <span class="n">polymer</span> <span class="mi">2</span> <span class="mi">3</span>
+<p>The file could include more information, such as bond, angle, dihedral …</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="c1"># bond with &#39;bond type (string), particle index i (int), j (int)&#39;.</span>
+            <span class="n">bond</span>
+                    <span class="n">polymer</span> <span class="mi">0</span> <span class="mi">1</span>
+                    <span class="n">polymer</span> <span class="mi">1</span> <span class="mi">2</span>
+                    <span class="n">polymer</span> <span class="mi">2</span> <span class="mi">3</span>
 
-<span class="c1"># angle with &#39;angle type, the index of particle i, j, k&#39;.</span>
-           <span class="n">angle</span>
-                   <span class="n">theta</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span>
-                   <span class="n">theta</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span>
+ <span class="c1"># angle with &#39;angle type (string), particle index i (int), j (int), k (int)&#39;.</span>
+            <span class="n">angle</span>
+                    <span class="n">theta</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span>
+                    <span class="n">theta</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span>
 
-<span class="c1"># dihedral with &#39;dihedral type, the index of particle i, j, k, l&#39;.</span>
-           <span class="n">dihedral</span>
-                   <span class="n">phi</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span>
-</pre></div>
-</div>
-<p>The other nodes of XML …</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="c1"># the diameter of particles in float type.</span>
+ <span class="c1"># dihedral with &#39;dihedral type (string), particle index i (int), j (int), k (int), l (int)&#39;.</span>
+            <span class="n">dihedral</span>
+                    <span class="n">phi</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span>
+
+ <span class="c1"># virial site with &#39;vsite type (string), particle index i (int), j (int), k (int), l (int)&#39;.</span>
+            <span class="n">vsite</span>
+                    <span class="n">v</span> <span class="mi">3</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span>
+
+ <span class="c1"># the diameter of particles with float type.</span>
             <span class="n">diameter</span>
                     <span class="mf">1.0</span>
                     <span class="mf">1.0</span>
                     <span class="mf">1.0</span>
                     <span class="mf">1.0</span>
 
- <span class="c1"># the charge of particles in float type.</span>
+ <span class="c1"># the charge of particles with float type.</span>
             <span class="n">charge</span>
-                    <span class="mf">1.333</span>
-                    <span class="mf">1.333</span>
+                     <span class="mf">1.333</span>
+                     <span class="mf">1.333</span>
                     <span class="o">-</span><span class="mf">1.333</span>
                     <span class="o">-</span><span class="mf">1.333</span>
 
- <span class="c1"># the body index of particles in int type, -1 for non-body particles.</span>
+ <span class="c1"># the body index of particles with int type, -1 for non-body particles.</span>
             <span class="n">body</span>
                     <span class="o">-</span><span class="mi">1</span>
                     <span class="o">-</span><span class="mi">1</span>
-                    <span class="mi">0</span>
-                    <span class="mi">0</span>
+                     <span class="mi">0</span>
+                     <span class="mi">0</span>
 
- <span class="c1"># the image in x, y, and z directions of particles in int3 type.</span>
+ <span class="c1"># the image in x, y, and z directions of particles with int type.</span>
             <span class="n">image</span>
                     <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
                     <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
                     <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
                     <span class="mi">0</span> <span class="mi">0</span> <span class="mi">0</span>
 
- <span class="c1"># the velocity in x, y, and z directions of particles in float3 type.</span>
+ <span class="c1"># the velocity in x, y, and z directions of particles with float type.</span>
             <span class="n">velocity</span>
                      <span class="mf">3.768</span>     <span class="o">-</span><span class="mf">2.595</span>    <span class="o">-</span><span class="mf">1.874</span>
                     <span class="o">-</span><span class="mf">3.988</span>     <span class="o">-</span><span class="mf">1.148</span>     <span class="mf">2.800</span>
@@ -289,49 +291,56 @@ However, this rule does not include topological relevant information, including 
                      <span class="mf">2.441</span>     <span class="o">-</span><span class="mf">1.859</span>    <span class="o">-</span><span class="mf">1.039</span>
 
 
- <span class="c1"># the orientation vector (x, y, z) of particles in float3 type.</span>
+ <span class="c1"># the orientation vector (x, y, z) of particles with float type.</span>
             <span class="n">orientation</span>
                     <span class="o">-</span><span class="mf">0.922</span>     <span class="mf">0.085</span>     <span class="mf">0.376</span>
                     <span class="o">-</span><span class="mf">0.411</span>    <span class="o">-</span><span class="mf">0.637</span>    <span class="o">-</span><span class="mf">0.651</span>
                      <span class="mf">0.293</span>     <span class="mf">0.892</span>    <span class="o">-</span><span class="mf">0.342</span>
                     <span class="o">-</span><span class="mf">0.223</span>     <span class="mf">0.084</span>     <span class="mf">0.970</span>
 
- <span class="c1"># the quaternion vector (x, y, z, w) of particles in float4 type.</span>
+ <span class="c1"># the quaternion vector (x, y, z, w) of particles with float type.</span>
             <span class="n">quaternion</span>
                      <span class="mf">0.369</span>   <span class="mf">0.817</span>  <span class="o">-</span><span class="mf">0.143</span>   <span class="mf">0.418</span>
                     <span class="o">-</span><span class="mf">0.516</span>  <span class="o">-</span><span class="mf">0.552</span>   <span class="mf">0.653</span>   <span class="mf">0.024</span>
                     <span class="o">-</span><span class="mf">0.521</span>  <span class="o">-</span><span class="mf">0.002</span>   <span class="mf">0.131</span>   <span class="mf">0.843</span>
                     <span class="o">-</span><span class="mf">0.640</span>   <span class="mf">0.159</span>  <span class="o">-</span><span class="mf">0.048</span>  <span class="o">-</span><span class="mf">0.749</span>
 
- <span class="c1"># the angular velocity of rotation in x, y, and z directions of particles in float3 type.</span>
+ <span class="c1"># the angular velocity of rotation in x, y, and z directions of particles with float type.</span>
             <span class="n">rotation</span>
                     <span class="o">-</span><span class="mf">0.640</span>    <span class="mf">0.571</span>   <span class="o">-</span><span class="mf">0.512</span>
                     <span class="o">-</span><span class="mf">0.744</span>    <span class="mf">0.346</span>    <span class="mf">0.569</span>
-                    <span class="mf">0.620</span>   <span class="o">-</span><span class="mf">0.086</span>    <span class="mf">0.779</span>
+                     <span class="mf">0.620</span>   <span class="o">-</span><span class="mf">0.086</span>    <span class="mf">0.779</span>
                     <span class="o">-</span><span class="mf">0.542</span>    <span class="mf">0.319</span>   <span class="o">-</span><span class="mf">0.776</span>
 
-<span class="c1"># the moment of inertia in x, y, and z directions of particles in float3 type.</span>
+<span class="c1"># the moment of inertia in x, y, and z directions of particles with float type.</span>
             <span class="n">inert</span>
                     <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">3.0</span>
                     <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">3.0</span>
                     <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">3.0</span>
                     <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">3.0</span>
 
-<span class="c1"># the initiator indication of particles in int type, 1 for initiator.</span>
-            <span class="n">h_init</span>
+<span class="c1"># the rotated angles of in x, y, and z directions of particles with float type.</span>
+            <span class="n">rotangle</span>
+                    <span class="mf">9.478</span>    <span class="o">-</span><span class="mf">1.677</span>    <span class="mf">8.239</span>
+                    <span class="mf">8.908</span>    <span class="o">-</span><span class="mf">1.214</span>    <span class="mf">8.086</span>
+                    <span class="mf">9.011</span>    <span class="o">-</span><span class="mf">0.653</span>    <span class="mf">7.600</span>
+                    <span class="mf">8.993</span>    <span class="o">-</span><span class="mf">0.488</span>    <span class="mf">8.331</span>
+
+<span class="c1"># the initiator indication of particles with int type, 1 for initiator.</span>
+            <span class="n">init</span>
                     <span class="mi">0</span>
                     <span class="mi">1</span>
                     <span class="mi">0</span>
                     <span class="mi">1</span>
 
-<span class="c1"># the crosslinking number of particles in int type, 0 for reactable monomer.</span>
-            <span class="n">h_cris</span>
+<span class="c1"># the crosslinking number of particles with int type, 0 for reactable monomer.</span>
+            <span class="n">cris</span>
                     <span class="mi">0</span>
                     <span class="mi">0</span>
                     <span class="mi">0</span>
                     <span class="mi">0</span>
 
-<span class="c1"># the molecule index of particles in int type.</span>
+<span class="c1"># the molecule index of particles with int type, -1 for free particles.</span>
             <span class="n">molecule</span>
                     <span class="mi">0</span>
                     <span class="mi">0</span>
@@ -339,24 +348,29 @@ However, this rule does not include topological relevant information, including 
                     <span class="mi">1</span>
 </pre></div>
 </div>
-<p>The nodes of anisotropic particle attribute …</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># the particle patch attribute with &#39;particle type, patch number&#39;</span>
-<span class="c1"># followd by &#39;patch type, patch size, patch position vector in x, y, z directions&#39;.</span>
-            <span class="n">Patches</span>
+<p>The attribute of anisotropic particles …</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># the particle patch attribute with &#39;particle type (string), patch number (int)&#39;</span>
+<span class="c1"># followd by &#39;patch type(string), patch size (float),</span>
+<span class="c1"># patch position vector in x, y, z directions (float)&#39;.</span>
+            <span class="n">patch</span>
                     <span class="n">B</span> <span class="mi">2</span>
                     <span class="n">p1</span> <span class="mi">60</span>  <span class="mi">0</span>    <span class="mi">0</span>    <span class="mi">1</span>
                     <span class="n">p1</span> <span class="mi">60</span>  <span class="mi">0</span>    <span class="mi">0</span>   <span class="o">-</span><span class="mi">1</span>
 
-<span class="c1"># the patch-patch interaction parameter with &#39;patch type, patch type, gamma_epsilon, alpha&#39;.</span>
-            <span class="n">PatchParams</span>
+<span class="c1"># the patch-patch interaction parameter with &#39;patch type (string), patch type (string),</span>
+<span class="c1"># gamma_epsilon (float), alpha (float)&#39;.</span>
+            <span class="n">patch_param</span>
                     <span class="n">p1</span> <span class="n">p1</span> <span class="mf">88.0</span> <span class="mf">0.5</span>
 
-<span class="c1"># the particle shape attribute with &#39;particle type, diameter a, diameter b, diameter c,</span>
-<span class="c1"># epsion a, epsion b, epsion c&#39;. The a, b, c are along x, y, z directions in body frame,</span>
+<span class="c1"># the particle shape attribute with &#39;particle type(string), diameter a, diameter b, diameter c,</span>
+<span class="c1"># epsion a, epsion b, epsion c (float)&#39;. The a, b, c are along x, y, z directions in body frame,</span>
 <span class="c1"># respectively.</span>
-            <span class="n">Aspheres</span>
+            <span class="n">asphere</span>
                     <span class="n">A</span> <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">3.0</span> <span class="mf">3.0</span> <span class="mf">3.0</span>
                     <span class="n">B</span> <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">3.0</span> <span class="mf">1.0</span> <span class="mf">1.0</span> <span class="mf">0.2</span>
+
+<span class="c1"># the end of file.</span>
+    <span class="n">mst_end</span>
 </pre></div>
 </div>
 </div></blockquote>
@@ -403,6 +417,7 @@ two classes, i.e. invariant data and variant data. The invarant data is only out
                 <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
                 <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
                 <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+<span class="n">frame_end</span>
 <span class="n">frame</span>   <span class="mi">1</span>
         <span class="n">timestep</span>
                 <span class="mi">10000</span>
@@ -416,6 +431,7 @@ two classes, i.e. invariant data and variant data. The invarant data is only out
                 <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
                 <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
                 <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+<span class="n">frame_end</span>
 <span class="n">frame</span>   <span class="mi">2</span>
         <span class="n">timestep</span>
                 <span class="mi">20000</span>
@@ -429,6 +445,7 @@ two classes, i.e. invariant data and variant data. The invarant data is only out
                 <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
                 <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
                 <span class="mi">0</span>       <span class="mi">0</span>       <span class="mi">0</span>
+<span class="n">frame_end</span>
 </pre></div>
 </div>
 </div></blockquote>
