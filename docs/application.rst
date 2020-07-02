@@ -92,7 +92,7 @@ An example is given::
 			-38.4958248509   -72.5053675968     0.0000000000
 			-36.7877222908   -72.2183386015     0.0000000000
 			-37.3931991693   -73.8411133084     0.0000000000 
-	
+	mst_end	
 
 3. For molgen script to generate a two-dimensional configuration file, a specification of two dimensions 
 and box size in Z direction as 0.0 is necessary. Such as::
