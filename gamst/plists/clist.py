@@ -91,25 +91,33 @@ class clist:
 		self.rcut = rcut
 #		print(self.rcut)
 		self.info=info
-		self.dim = np.asarray([int(info.box[0]/rcut), int(info.box[1]/rcut), int(info.box[2]/rcut)], dtype=np.int32)
-		self.width = np.asarray([info.box[0]/float(self.dim[0]), info.box[1]/float(self.dim[1]), info.box[2]/float(self.dim[2])], dtype=np.float32)
+		self.box = np.asarray([info.box[0], info.box[1], info.box[2]], dtype=np.float32)
+		self.dim = np.asarray([int(self.box[0]/rcut), int(self.box[1]/rcut), int(self.box[2]/rcut)], dtype=np.int32)
+		self.width = np.asarray([self.box[0]/float(self.dim[0]), self.box[1]/float(self.dim[1]), self.box[2]/float(self.dim[2])], dtype=np.float32)
 		self.inv_width = np.asarray([1.0/self.width[0], 1.0/self.width[1], 1.0/self.width[2]], dtype=np.float32)
-		self.box_low_boundary = np.asarray([-info.box[0]/2.0, -info.box[1]/2.0, -info.box[2]/2.0], dtype=np.float32)
+		self.box_low_boundary = np.asarray([-self.box[0]/2.0, -self.box[1]/2.0, -self.box[2]/2.0], dtype=np.float32)
 		self.ncell = self.dim[0]*self.dim[1]*self.dim[2]
 		self.cell_adj = np.zeros([self.ncell, 27], dtype = np.int32)
 		self.nmax = self.info.npa//self.ncell
 		self.nmax = self.nmax + 8 - (self.nmax & 7)
 		self.cell_list = np.zeros([self.ncell, self.nmax, 4], dtype = np.float32)
-
 		self.cell_size = np.zeros(self.ncell, dtype = np.int32)
-		self.d_cell_size = cuda.to_device(self.cell_size)
-		
 		self.situation = np.zeros(3, dtype = np.int32)
-		self.d_situation = cuda.to_device(self.situation)
-
 		self.block_size = 64
 		
-# build cell map	
+		#--- build cell map
+		self.build_cell_map()
+		
+		#--- device arrays	
+		self.d_situation = cuda.to_device(self.situation)	
+		self.d_dim = cuda.to_device(self.dim)
+		self.d_inv_width = cuda.to_device(self.inv_width)
+		self.d_box_low_boundary = cuda.to_device(self.box_low_boundary)
+		self.d_cell_size = cuda.to_device(self.cell_size)		
+		self.d_cell_list = cuda.to_device(self.cell_list)
+		self.d_cell_adj = cuda.to_device(self.cell_adj)	
+
+	def build_cell_map(self):
 		for z in range(0, self.dim[2]):
 			for y in range(0, self.dim[1]):
 				for x in range(0, self.dim[0]):
@@ -134,16 +142,54 @@ class clist:
 								self.cell_adj[cell_id][offset] = neigh_cell_id
 								offset += 1
 		for cell_id in range(0, self.ncell):
-			self.cell_adj[cell_id]=np.sort(self.cell_adj[cell_id])
+			self.cell_adj[cell_id]=np.sort(self.cell_adj[cell_id])		
+		
+	def update_cell_data(self):		
+		self.box[0] = self.info.box[0]
+		self.box[1] = self.info.box[1]		
+		self.box[2] = self.info.box[2]
+
+		dim0 = int(self.box[0]/self.rcut)
+		dim1 = int(self.box[1]/self.rcut)			
+		dim2 = int(self.box[2]/self.rcut)
+		
+		if dim0 != self.dim[0] or dim1 != self.dim[1] or dim2 != self.dim[2]:
+			self.dim[0] = dim0
+			self.dim[1] = dim1
+			self.dim[2] = dim2
+			
+			self.ncell = self.dim[0]*self.dim[1]*self.dim[2]
+			self.cell_adj = np.zeros([self.ncell, 27], dtype = np.int32)
+			self.cell_list = np.zeros([self.ncell, self.nmax, 4], dtype = np.float32)		
+			self.cell_size = np.zeros(self.ncell, dtype = np.int32)
+			
+			#--- build cell map
+			self.build_cell_map()
+			#--- device arrays	
+			self.d_cell_size = cuda.to_device(self.cell_size)
+			self.d_cell_list = cuda.to_device(self.cell_list)
+			self.d_cell_adj = cuda.to_device(self.cell_adj)
+			self.d_dim = cuda.to_device(self.dim)
+
+		self.width[0] = self.box[0]/float(self.dim[0])
+		self.width[1] = self.box[1]/float(self.dim[1])
+		self.width[2] = self.box[2]/float(self.dim[2])
 	
-#--- device arrays		
-		self.d_dim = cuda.to_device(self.dim)
+		self.inv_width[0] = 1.0/self.width[0]
+		self.inv_width[1] = 1.0/self.width[1]
+		self.inv_width[2] = 1.0/self.width[2]
+		
+		self.box_low_boundary[0] = -self.box[0]/2.0
+		self.box_low_boundary[1] = -self.box[1]/2.0
+		self.box_low_boundary[2] = -self.box[2]/2.0	
+		#--- device arrays				
 		self.d_inv_width = cuda.to_device(self.inv_width)
 		self.d_box_low_boundary = cuda.to_device(self.box_low_boundary)
-		self.d_cell_list = cuda.to_device(self.cell_list)
-		self.d_cell_adj = cuda.to_device(self.cell_adj)		
 		
 	def calculate(self):
+		if self.info.box[0] != self.box[0] or self.info.box[1] != self.box[1] or self.info.box[2] != self.box[2]:
+			self.update_cell_data()
+
 		build_list = True
 		while build_list:
 			cu_zero[1, 32](3, self.d_situation)
